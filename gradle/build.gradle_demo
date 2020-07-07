@@ -1,0 +1,263 @@
+buildscript {
+    repositories {
+        google()
+        jcenter()
+        
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:3.2.0'
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        jcenter()
+        
+    }
+}
+
+apply plugin: 'com.android.application'
+
+android {
+    lintOptions {//SystemSetting的xml代码中有许多不规范的写法
+        checkReleaseBuilds false
+        abortOnError false
+    }
+    signingConfigs {
+        platform {
+            storeFile file('E:\\13项目文件\\CN202SR\\security\\platform.jks')
+            keyAlias 'androiddebugkey'
+            keyPassword 'android'
+            storePassword 'android'
+        }
+    }
+    compileSdkVersion 26
+    buildToolsVersion '26.0.3'
+    defaultConfig {
+        applicationId "com.hsae.cn202sr.systemsetting"
+        minSdkVersion 21
+        targetSdkVersion 26
+        versionCode 1
+        versionName "1.0"
+        multiDexEnabled true
+    }
+    gradle.projectsEvaluated {
+        tasks.withType(JavaCompile) {
+            options.compilerArgs.add('-Xbootclasspath/p:sdk/framework.jar')
+//            options.compilerArgs.add('-Xbootclasspath/p:sdk/services.jar')
+//            options.compilerArgs.add('-Xbootclasspath/p:sdk/core-all.jar')
+
+        }
+    }
+    buildTypes {
+        release {
+            buildConfigField "boolean", "LOG_DEBUG", "false"
+            debuggable false
+            //开启混淆
+            minifyEnabled true
+            //删除无用的资源
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.platform
+        }
+        debug {
+            buildConfigField "boolean", "LOG_DEBUG", "true"
+            debuggable true
+            signingConfig signingConfigs.platform
+        }
+
+        getApplicationVariants().all { variant ->
+            variant.outputs.all {
+                if (outputFileName != null && outputFileName.endsWith('.apk')) {
+                    //命名生成apk
+                    def oriName = outputFileName
+                    outputFileName = "SystemSetting.apk"
+                    println "Change outputFileName from " + oriName + " to " + outputFileName
+                    println "Now outputFile path is "+outputFile
+
+                    if(outputFile.toString().contains("debug")){//创建task:installSystemAppDebug
+                        tasks.create(name:"installSystemAppDebug",group:"install",
+                                dependsOn:"assembleDebug") {
+                            doLast {
+                                println "execute installSystemAppDebug"
+                                pushAndRun outputFile.toString(),true
+                            }
+                        }
+                    }else if(outputFile.toString().contains("release")){//创建task:installSystemAppRelease
+                        tasks.create(name:"installSystemAppRelease",group:"install",
+                                dependsOn:"assembleRelease"){
+                            doLast{
+                                println "execute installSystemAppRelease"
+                                pushAndRun outputFile.toString(),false
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    sourceSets {
+        main {
+            manifest.srcFile 'AndroidManifest.xml'
+            java.srcDirs = ['src']
+            resources.srcDirs = ['src']
+            aidl.srcDirs = ['src']
+            renderscript.srcDirs = ['src']
+            res.srcDirs = ['res']
+            assets.srcDirs = ['assets']
+            jniLibs.srcDirs = ['libs']
+        }
+
+        debug.setRoot('build-types/debug')
+        release.setRoot('build-types/release')
+    }
+    compileOptions {
+        sourceCompatibility = '1.8'
+        targetCompatibility = '1.8'
+    }
+
+    preBuild {
+        doLast { def imlFile = file(project.name + ".iml")
+            println 'Change ' + project.name + '.iml order'
+            try {
+                def parsedXml = (new XmlParser()).parse(imlFile)
+                def jdkNode = parsedXml.component[1].orderEntry.find { it.'@type' == 'jdk' }
+                parsedXml.component[1].remove(jdkNode)
+                def sdkString = "Android API " + android.compileSdkVersion.substring("android-".length()) + " Platform"
+                new Node(parsedXml.component[1], 'orderEntry', ['type': 'jdk', 'jdkName': sdkString, 'jdkType': 'Android SDK'])
+                groovy.xml.XmlUtil.serialize(parsedXml, new FileOutputStream(imlFile))
+            } catch (FileNotFoundException e) { // nop, iml not found
+            }
+        }
+    }
+
+}
+afterEvaluate{
+    assembleDebug.doLast {//task assembleDebug执行完后将生成的apk拷贝到指定目录
+        android.getApplicationVariants().all { variant ->
+            variant.outputs.all { output ->
+                if(outputFile.toString().contains("debug")){
+                    File destFile = new File("PKIService.apk")
+                    println destFile.getAbsoluteFile()
+                    FileUtils.copyFile(outputFile,destFile);
+                }
+            }
+        }
+    }
+}
+
+def pushAndRun(String outputFile,boolean isDebug){
+    //kill此进程
+    println "kill process 'com.hsae.cn202sr.systemsetting'.."
+    String killSystemSetting = "kill `ps -ef | grep systemsetting | grep -v grep |busybox awk '{print \$2}'`";
+    runInAdbShell([killSystemSetting] as String[])
+
+    File adbPath =  android.getAdbExe()//获取adb路径
+    String[][] commandArgs = null;
+    isDebug = false;
+    if(isDebug) {
+        commandArgs = [
+                ["remount"]
+                , ["push", outputFile, "/system/app/SystemSetting/SystemSetting.apk"]
+                , ["shell", "am", "force-stop", "com.hsae.cn202sr.systemsetting"]
+                , ["shell", "rm", "/data/dalvik-cache/arm/*SystemSetting.apk*|true"]//|true是让语句始终执行成功，否则后面的语句可能不执行
+                , ["shell", "am", "start", "-D", "-n", "com.hsae.cn202sr.systemsetting/.SystemSettingsActivity"]
+
+        ];
+    }else{
+        commandArgs = [
+                ["remount"]
+                , ["push", outputFile, "/system/app/SystemSetting/SystemSetting.apk"]
+                , ["shell", "am", "force-stop", "com.hsae.cn202sr.systemsetting"]
+//                , ["shell", "rm", "/data/dalvik-cache/arm/*SystemSetting.apk*|true"]
+                , ["shell", "am", "start", "-n", "com.hsae.cn202sr.systemsetting/.SystemSettingsActivity"]
+
+        ];
+    }
+
+    try {
+        commandArgs.each {
+            def adbCommand = adbPath.toString();
+            it.each {
+                adbCommand += " " + it;
+            }
+            println adbCommand
+
+            exec {
+                ExecSpec execSpec ->
+                    executable adbPath
+                    args it
+            }
+        }
+    } catch (Exception e) {
+        e.printStackTrace()
+        throw e
+    }
+
+}
+
+//打开adb shell，并批量执行脚本
+def runInAdbShell(String[] cmds) {
+    if(cmds == null || cmds.length == 0){
+        return
+    }
+    String adbPath = android.getAdbExe().toString()//获取adb路径
+    def adbShellProcess
+    OutputStream os
+    BufferedReader successResult
+    BufferedReader errorResult
+    try {
+        adbShellProcess = (adbPath + " shell").execute()
+        os = adbShellProcess.getOutputStream()
+        cmds.each {
+            os.write(it.getBytes())
+            os.write("\n".getBytes())
+        }
+        os.flush()
+        os.write("exit\n".getBytes())//退出adb shell
+        os.flush()
+        //打印输出
+        InputStreamReader isr = new InputStreamReader(adbShellProcess.getInputStream())
+        successResult = new BufferedReader(isr)
+        String line
+        while ((line = successResult.readLine()) != null) {
+            println(line)
+        }
+
+        InputStreamReader eisr = new InputStreamReader(adbShellProcess.getErrorStream())
+        errorResult = new BufferedReader(eisr)
+        while ((line = errorResult.readLine()) != null) {
+            println(line)
+        }
+        adbShellProcess.waitFor()
+    }finally{
+        safeClose(successResult);
+        safeClose(errorResult);
+        safeClose(os);
+
+        if (adbShellProcess != null) {
+            adbShellProcess.destroy()
+        }
+
+    }
+}
+static void safeClose(Closeable close){
+    if(close != null){
+        try {
+            close.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+dependencies {
+    api files('sdk/framework.jar')
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    compileOnly files('../sdk/tboxsdk.jar')
+    compileOnly files('../sdk/autosdk.jar')
+    implementation 'com.github.bumptech.glide:glide:3.7.0'
+    implementation 'com.android.support:support-v4:26.1.0'
+    implementation 'com.android.support:multidex:1.0.1'
+}

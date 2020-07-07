@@ -1,0 +1,1 @@
+1、 以后ubuntu虚拟机不要再安装VMware Tools，执行sudo apt install open-vm-tools-desktop fuse

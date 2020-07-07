@@ -1,0 +1,41 @@
+前两行始终为:
+LOCAL_PATH := $(call my-dir)
+include $(CLEAR_VARS)
+
+
+取消预优化：LOCAL_DEX_PREOPT := false
+
+
+libs中加入aar：
+LOCAL_STATIC_JAVA_AAR_LIBRARIES  := aaralias
+然后在include $(BUILD_PACKAGE)后面添加：
+ include $(CLEAR_VARS)
+ LOCAL_PREBUILT_STATIC_JAVA_LIBRARIES := aaralias:libs/library-xx.aar
+ include $(BUILD_MULTI_PREBUILT)
+
+
+libs中加入jar：
+include $(CLEAR_VARS)
+LOCAL_PREBUILT_STATIC_JAVA_LIBRARIES  := commons-net:libs/commons-net-3.6.jar \
+                                gson:libs/gson-2.8.5.jar
+include $(BUILD_MULTI_PREBUILT)
+include $(CLEAR_VARS)
+LOCAL_STATIC_JAVA_LIBRARIES:= \
+        commons-net \
+        gson
+
+添加java文件和aidl文件目录：
+LOCAL_SRC_FILES := $(call all-java-files-under, src/java)
+LOCAL_SRC_FILES += $(call all-Iaidl-files-under, src/aidl)
+LOCAL_AIDL_INCLUDES := $(LOCAL_PATH)/src/aidl
+
+
+引用安卓support包：
+LOCAL_STATIC_ANDROID_LIBRARIES := \
+    android-support-v4 \
+    android-support-v7-recyclerview \
+    android-support-v7-appcompat \
+
+
+关闭jack
+ANDROID_COMPILE_WITH_JACK := false

@@ -1,0 +1,15 @@
+安装deepin-wine:参考官方GitHub
+运行：deepin-wine xxx.exe(exe文件路径)
+配置界面:deepin-wine winecfg
+
+右键-选择程序里没有"使用wine打开"：新建Deepin-wine.desktop,文件内容：
+[Desktop Entry]
+Name=Deepin-wine
+Exec=deepin-wine %F
+StartupNotify=false
+Terminal=false
+Type=Application
+MimeType=text/plain;
+然后拷贝到/usr/share/applications。
+
+查看安装的程序:deepin-wine uninstaller --list
