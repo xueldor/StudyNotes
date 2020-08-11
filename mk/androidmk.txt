@@ -40,6 +40,14 @@ LOCAL_STATIC_ANDROID_LIBRARIES := \
 关闭jack
 ANDROID_COMPILE_WITH_JACK := false
 
+打印log，比如我想知道LOCAL_SRC_FILES的值是多少：
+$(info $(LOCAL_SRC_FILES))
+$(warning $(LOCAL_SRC_FILES))
+
+根据条件执行某些语句：
+ifeq (x86_64,$(TARGET_ARCH))
+...
+endif
 
 C++:
 取消编译过程中的一些warning提醒：LOCAL_CFLAGS += -Wunused-parameter -Wno-unused-variable 
@@ -67,7 +75,22 @@ $(APP_ABI)获得架构名，按照名称新建文件夹，将不同架构的so�
 LOCAL_SRC_FILES := ../jniLibs/$(APP_ABI)/libxml2.so
 $(TARGET_ARCH)值是arm、arm64、x86 或 x86_64
 $(APP_ABI)值是armeabi，armeabi-v7a，x86，mips，arm64- v8a，mips64，x86_64等
+$(TARGET_PLATFORM)输出android-23(或其他版本)
 参考https://developer.android.google.cn/ndk/guides/android_mk#target_information_variables
+
+arm平台和x86平台编译不同的源文件：
+ifeq (arm,$(TARGET_ARCH))
+LOCAL_SRC_FILES += arm/arm_init.c arm/filter_neon.S arm/filter_neon_intrinsics.c arm/palette_neon_intrinsics.c
+endif
+ifeq (arm64,$(TARGET_ARCH))
+LOCAL_SRC_FILES += arm/arm_init.c arm/filter_neon.S arm/filter_neon_intrinsics.c arm/palette_neon_intrinsics.c
+endif
+ifeq (x86,$(TARGET_ARCH))
+LOCAL_SRC_FILES += intel/intel_init.c intel/filter_sse2_intrinsics.c
+endif
+ifeq (x86_64,$(TARGET_ARCH))
+LOCAL_SRC_FILES += intel/intel_init.c intel/filter_sse2_intrinsics.c
+endif
 
 添加寻找头文件的路径：
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/include/  \
@@ -80,4 +103,8 @@ LOCAL_C_INCLUDES := $(LOCAL_PATH)/include/  \
 B模块编译生成静态库，A模块引用了它：
 LOCAL_STATIC_LIBRARIES := B_Name(库名称)
 同时在末尾添加$(call import-module,BPath)，BPath是路径,指示B模块的mk在哪个目录，比如$(call import-module,android/native_app_glue)
+然后，因为A模块中用到了B模块提供的头文件，所以在B的android.mk中需要export头文件：
+LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)
+否则A模块找不到.h文件
+类似的还有LOCAL_EXPORT_LDLIBS := -lz导出动态库路径
 
