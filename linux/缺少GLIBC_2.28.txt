@@ -1,3 +1,1 @@
-缂哄皯GLIBC_2.28鐨勯棶棰橈紝璇存槑鎮ㄦ湰鍦扮殑libc6鐗堟湰澶綆
- sudo apt update
-sudo apt upgrade libc6
+缺少GLIBC_2.28的问题，说明您本地的libc6版本太低 sudo apt updatesudo apt upgrade libc6如果依然报这个问题。strings /lib/x86_64-linux-gnu/libc.so.6 | grep GLIBC_ 看到本地的最高版本是GLIBC_2.27，并且sudo apt upgrade libc6时提示最新版本就是2.27。从官网下载http://ftp.gnu.org/gnu/glibc/glibc-2.28.tar.gzcd glibc-2.28/mkdir buildcd build/../configure --prefix=/usr/local/glibc-2.28make -j2sudo make install如果过程中提示缺gcc gawk bison,安装即可如何用编译的高版本替换原来的2.27版本尚不清楚。已知直接替换/lib/x86_64-linux-gnu/下的文件，会导致系统挂掉。添加环境变量也不行。

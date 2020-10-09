@@ -1,0 +1,17 @@
+/etc/alternatives/gdm3.css
+
+/*找到默认的这个部分*/
+#lockDialogGroup {
+  background: #2c001e url(resource:///org/gnome/shell/theme/noise-texture.png);
+  background-repeat: repeat; 
+}
+
+/*改为*/
+#lockDialogGroup {
+  background: #2c001e url(file:///usr/share/backgrounds/mypicture.jpg);         
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center; 
+}
+
+重启
