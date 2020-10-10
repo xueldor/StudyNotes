@@ -1,0 +1,4 @@
+sudo dd if=/dev/zero of=/zero.file bs=2M
+sudo rm -rf /zero.file
+
+vmware-vdiskmanager.exe -k /xxx/ubuntu1604lts.vmdk
