@@ -1,0 +1,35 @@
+在linux系统下，adb命令可能会报insufficient permissions错误,主要是adb要以root权限启动。
+解决方法：
+一： 临时解决
+先kill-server，然后sudo adb devices
+缺点：不方便，并且有时adb是IDE启动的
+
+二：利用setuid
+which adb命令找到adb的目录，切到目录，ls -l adb查看用户和权限，
+如果user不是root，则sudo chown root:root adb
+然后sudo chmod u+s adb
+然后ls -l adb就可以看到权限变成了-rwsr-xr-x（x变成了s）
+这样无论哪个用户启动adb使用的都是root权限了。
+缺点：adb pull下来的文件owner也是root:root，普通用户无法编辑
+
+三：针对ubuntu系统，网上有一种更加完美的方案，但是我在16.04上试了无效。如下：
+lsusb找到你的设备的信息，like this:
+work@ubuntu-cts:/usr/lib/android-sdk/platform-tools$ lsusb
+Bus 002 Device 001: ID 1d6b:0003 Linux Foundation 3.0 root hub
+Bus 001 Device 015: ID 0403:6001 Future Technology Devices International, Ltd FT232 USB-Serial (UART) IC
+Bus 001 Device 004: ID 1c4f:0034 SiGma Micro 
+Bus 001 Device 003: ID 046d:c31c Logitech, Inc. Keyboard K120
+Bus 001 Device 019: ID 18d1:4ee7 Google Inc. --------------->这是我的usb
+Bus 001 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
+
+记住18d1:4ee7这两个数字，在/etc/udev/rules.d/目录新建文件51-android.rules，添加一行：
+SUBSYSTEM=="usb", ATTR{idVendor}=="18d1", ATTR{idProduct}=="4ee7", MODE="0666", GROUP="plugdev"   -------》只针对你的设备
+或SUBSYSTEM=="usb", ATTR{idVendor}=="18d1", MODE="0666", GROUP="plugdev"          -------》只针对供应商是18d1的这种设备
+或
+SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", MODE="0666"         -------》针对所有USB设备
+
+然后重启udev
+sudo /etc/init.d/udev restart
+重新拔插下usb设备
+重启adb：adb kill-server;adb devices
+完毕！这是网上最普遍的方法，不知道为什么了对我没用。
