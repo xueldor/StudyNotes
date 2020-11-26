@@ -33,3 +33,8 @@ sudo /etc/init.d/udev restart
 重新拔插下usb设备
 重启adb：adb kill-server;adb devices
 完毕！这是网上最普遍的方法，不知道为什么了对我没用。
+另一方面，ubuntu里使用串口也遇到了同样问题，但是这个方法是有用的，
+登录用户不是root，而/dev/ttyUSB0（对应串口）只有root可以读写。
+通过编辑：sudo vim /etc/udev/rules.d/50-usb-serial.rules
+添加KERNEL=="ttyUSB0", GROUP="uucp",MODE="0666"
+完美解决。估计还是针对android的rules文件写的有问题。
