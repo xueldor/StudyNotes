@@ -1,40 +1,53 @@
-ÔÚlinuxÏµÍ³ÏÂ£¬adbÃüÁî¿ÉÄÜ»á±¨insufficient permissions´íÎó,Ö÷ÒªÊÇadbÒªÒÔrootÈ¨ÏŞÆô¶¯¡£
-½â¾ö·½·¨£º
-Ò»£º ÁÙÊ±½â¾ö
-ÏÈkill-server£¬È»ºósudo adb devices
-È±µã£º²»·½±ã£¬²¢ÇÒÓĞÊ±adbÊÇIDEÆô¶¯µÄ
+åœ¨linuxç³»ç»Ÿä¸‹ï¼Œadbå‘½ä»¤å¯èƒ½ä¼šæŠ¥insufficient permissionsé”™è¯¯,ä¸»è¦æ˜¯adbè¦ä»¥rootæƒé™å¯åŠ¨ã€‚
+è§£å†³æ–¹æ³•ï¼š
+ä¸€ï¼š ä¸´æ—¶è§£å†³
+å…ˆkill-serverï¼Œç„¶åsudo adb devices
+ç¼ºç‚¹ï¼šä¸æ–¹ä¾¿ï¼Œå¹¶ä¸”æœ‰æ—¶adbæ˜¯IDEå¯åŠ¨çš„
 
-¶ş£ºÀûÓÃsetuid
-which adbÃüÁîÕÒµ½adbµÄÄ¿Â¼£¬ÇĞµ½Ä¿Â¼£¬ls -l adb²é¿´ÓÃ»§ºÍÈ¨ÏŞ£¬
-Èç¹ûuser²»ÊÇroot£¬Ôòsudo chown root:root adb
-È»ºósudo chmod u+s adb
-È»ºóls -l adb¾Í¿ÉÒÔ¿´µ½È¨ÏŞ±ä³ÉÁË-rwsr-xr-x£¨x±ä³ÉÁËs£©
-ÕâÑùÎŞÂÛÄÄ¸öÓÃ»§Æô¶¯adbÊ¹ÓÃµÄ¶¼ÊÇrootÈ¨ÏŞÁË¡£
-È±µã£ºadb pullÏÂÀ´µÄÎÄ¼şownerÒ²ÊÇroot:root£¬ÆÕÍ¨ÓÃ»§ÎŞ·¨±à¼­
+äºŒï¼šåˆ©ç”¨setuid
+which adbå‘½ä»¤æ‰¾åˆ°adbçš„ç›®å½•ï¼Œåˆ‡åˆ°ç›®å½•ï¼Œls -l adbæŸ¥çœ‹ç”¨æˆ·å’Œæƒé™ï¼Œ
+å¦‚æœuserä¸æ˜¯rootï¼Œåˆ™sudo chown root:root adb
+ç„¶åsudo chmod u+s adb
+ç„¶åls -l adbå°±å¯ä»¥çœ‹åˆ°æƒé™å˜æˆäº†-rwsr-xr-xï¼ˆxå˜æˆäº†sï¼‰
+è¿™æ ·æ— è®ºå“ªä¸ªç”¨æˆ·å¯åŠ¨adbä½¿ç”¨çš„éƒ½æ˜¯rootæƒé™äº†ã€‚
+ç¼ºç‚¹ï¼šadb pullä¸‹æ¥çš„æ–‡ä»¶ownerä¹Ÿæ˜¯root:rootï¼Œæ™®é€šç”¨æˆ·æ— æ³•ç¼–è¾‘
 
-Èı£ºÕë¶ÔubuntuÏµÍ³£¬ÍøÉÏÓĞÒ»ÖÖ¸ü¼ÓÍêÃÀµÄ·½°¸£¬µ«ÊÇÎÒÔÚ16.04ÉÏÊÔÁËÎŞĞ§¡£ÈçÏÂ£º
-lsusbÕÒµ½ÄãµÄÉè±¸µÄĞÅÏ¢£¬like this:
+ä¸‰ï¼šé’ˆå¯¹ubuntuç³»ç»Ÿï¼Œç½‘ä¸Šæœ‰ä¸€ç§æ›´åŠ å®Œç¾çš„æ–¹æ¡ˆï¼Œä½†æ˜¯æˆ‘åœ¨16.04ä¸Šè¯•äº†æ— æ•ˆã€‚å¦‚ä¸‹ï¼š
+lsusbæ‰¾åˆ°ä½ çš„è®¾å¤‡çš„ä¿¡æ¯ï¼Œlike this:
 work@ubuntu-cts:/usr/lib/android-sdk/platform-tools$ lsusb
 Bus 002 Device 001: ID 1d6b:0003 Linux Foundation 3.0 root hub
 Bus 001 Device 015: ID 0403:6001 Future Technology Devices International, Ltd FT232 USB-Serial (UART) IC
 Bus 001 Device 004: ID 1c4f:0034 SiGma Micro 
 Bus 001 Device 003: ID 046d:c31c Logitech, Inc. Keyboard K120
-Bus 001 Device 019: ID 18d1:4ee7 Google Inc. --------------->ÕâÊÇÎÒµÄusb
+Bus 001 Device 019: ID 18d1:4ee7 Google Inc. --------------->è¿™æ˜¯æˆ‘çš„usb
 Bus 001 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
 
-¼Ç×¡18d1:4ee7ÕâÁ½¸öÊı×Ö£¬ÔÚ/etc/udev/rules.d/Ä¿Â¼ĞÂ½¨ÎÄ¼ş51-android.rules£¬Ìí¼ÓÒ»ĞĞ£º
-SUBSYSTEM=="usb", ATTR{idVendor}=="18d1", ATTR{idProduct}=="4ee7", MODE="0666", GROUP="plugdev"   -------¡·Ö»Õë¶ÔÄãµÄÉè±¸
-»òSUBSYSTEM=="usb", ATTR{idVendor}=="18d1", MODE="0666", GROUP="plugdev"          -------¡·Ö»Õë¶Ô¹©Ó¦ÉÌÊÇ18d1µÄÕâÖÖÉè±¸
-»ò
-SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", MODE="0666"         -------¡·Õë¶ÔËùÓĞUSBÉè±¸
+è®°ä½18d1:4ee7è¿™ä¸¤ä¸ªæ•°å­—ï¼Œåœ¨/etc/udev/rules.d/ç›®å½•æ–°å»ºæ–‡ä»¶51-android.rulesï¼Œæ·»åŠ ä¸€è¡Œï¼š
+SUBSYSTEM=="usb", ATTR{idVendor}=="18d1", ATTR{idProduct}=="4ee7", MODE="0666", GROUP="plugdev"   -------ã€‹åªé’ˆå¯¹ä½ çš„è®¾å¤‡
+æˆ–SUBSYSTEM=="usb", ATTR{idVendor}=="18d1", MODE="0666", GROUP="plugdev"          -------ã€‹åªé’ˆå¯¹ä¾›åº”å•†æ˜¯18d1çš„è¿™ç§è®¾å¤‡
+æˆ–
+SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", MODE="0666"         -------ã€‹é’ˆå¯¹æ‰€æœ‰USBè®¾å¤‡
 
-È»ºóÖØÆôudev
+ç„¶åé‡å¯udev
 sudo /etc/init.d/udev restart
-ÖØĞÂ°Î²åÏÂusbÉè±¸
-ÖØÆôadb£ºadb kill-server;adb devices
-Íê±Ï£¡ÕâÊÇÍøÉÏ×îÆÕ±éµÄ·½·¨£¬²»ÖªµÀÎªÊ²Ã´ÁË¶ÔÎÒÃ»ÓÃ¡£
-ÁíÒ»·½Ãæ£¬ubuntuÀïÊ¹ÓÃ´®¿ÚÒ²Óöµ½ÁËÍ¬ÑùÎÊÌâ£¬µ«ÊÇÕâ¸ö·½·¨ÊÇÓĞÓÃµÄ£¬
-µÇÂ¼ÓÃ»§²»ÊÇroot£¬¶ø/dev/ttyUSB0£¨¶ÔÓ¦´®¿Ú£©Ö»ÓĞroot¿ÉÒÔ¶ÁĞ´¡£
-Í¨¹ı±à¼­£ºsudo vim /etc/udev/rules.d/50-usb-serial.rules
-Ìí¼ÓKERNEL=="ttyUSB0", GROUP="uucp",MODE="0666"
-ÍêÃÀ½â¾ö¡£¹À¼Æ»¹ÊÇÕë¶ÔandroidµÄrulesÎÄ¼şĞ´µÄÓĞÎÊÌâ¡£
+é‡æ–°æ‹”æ’ä¸‹usbè®¾å¤‡
+é‡å¯adbï¼šadb kill-server;adb devices
+å®Œæ¯•ï¼è¿™æ˜¯ç½‘ä¸Šæœ€æ™®éçš„æ–¹æ³•ï¼Œä¸çŸ¥é“ä¸ºä»€ä¹ˆäº†å¯¹æˆ‘æ²¡ç”¨ã€‚
+å¦ä¸€æ–¹é¢ï¼Œubuntué‡Œä½¿ç”¨ä¸²å£ä¹Ÿé‡åˆ°äº†åŒæ ·é—®é¢˜ï¼Œä½†æ˜¯è¿™ä¸ªæ–¹æ³•æ˜¯æœ‰ç”¨çš„ï¼Œ
+ç™»å½•ç”¨æˆ·ä¸æ˜¯rootï¼Œè€Œ/dev/ttyUSB0ï¼ˆå¯¹åº”ä¸²å£ï¼‰åªæœ‰rootå¯ä»¥è¯»å†™ã€‚
+é€šè¿‡ç¼–è¾‘ï¼šsudo vim /etc/udev/rules.d/50-usb-serial.rules
+æ·»åŠ KERNEL=="ttyUSB0", GROUP="uucp",MODE="0666"
+å®Œç¾è§£å†³ã€‚ä¼°è®¡è¿˜æ˜¯é’ˆå¯¹androidçš„rulesæ–‡ä»¶å†™çš„æœ‰é—®é¢˜ã€‚
+
+
+---------->è¡¥å……ï¼š
+ubuntuç¯å¢ƒä½¿ç”¨adbé—®é¢˜ï¼Œè°·æ­Œå®˜ç½‘æœ‰è¯´æ˜ï¼šhttps://developer.android.google.cn/studio/run/deviceï¼Œæ‘˜å½•ç‰‡æ®µå¦‚ä¸‹ï¼š
+Ubuntu Linuxï¼šéœ€è¦æ­£ç¡®è¿›è¡Œä¸¤é¡¹è®¾ç½®ï¼šå¸Œæœ›ä½¿ç”¨ adb çš„æ¯ä¸ªç”¨æˆ·éƒ½éœ€è¦ä½äº plugdev ç»„ä¸­ï¼Œå¹¶ä¸”éœ€è¦ä¸ºç³»ç»Ÿæ·»åŠ æ¶µç›–è®¾å¤‡çš„ udev è§„åˆ™ã€‚
+plugdev ç»„ï¼šå¦‚æœæ‚¨çœ‹åˆ°ä¸€æ¡é”™è¯¯æ¶ˆæ¯ï¼ŒæŒ‡å‡ºæ‚¨ä¸åœ¨ plugdev ç»„ä¸­ï¼Œæ‚¨éœ€è¦å°†è‡ªå·±æ·»åŠ åˆ° plugdev ç»„ä¸­ï¼š
+sudo usermod -aG plugdev $LOGNAME
+è¯·æ³¨æ„ï¼Œç»„åªä¼šåœ¨æ‚¨ç™»å½•æ—¶æ›´æ–°ï¼Œå› æ­¤æ‚¨éœ€è¦é€€å‡ºåé‡æ–°ç™»å½•ï¼Œæ­¤æ›´æ”¹æ‰èƒ½ç”Ÿæ•ˆã€‚å½“æ‚¨é‡æ–°ç™»å½•åï¼Œå¯ä»¥ä½¿ç”¨ id æ£€æŸ¥è‡ªå·±ç°åœ¨æ˜¯å¦å·²åœ¨ plugdev ç»„ä¸­ã€‚
+
+udev è§„åˆ™ï¼šandroid-sdk-platform-tools-common è½¯ä»¶åŒ…ä¸­åŒ…å«ä¸€ç»„é€‚ç”¨äº Android è®¾å¤‡å¹¶ç”±ç¤¾åŒºç»´æŠ¤çš„é»˜è®¤ udev è§„åˆ™ã€‚è¯·ä½¿ç”¨ä»¥ä¸‹å‘½ä»¤æ·»åŠ è¿™äº›è§„åˆ™ï¼š
+sudo apt-get install android-sdk-platform-tools-common
+
+åœ¨/lib/udev/rules.d/ç›®å½•å¯ä»¥çœ‹åˆ°51-android.rulesæ–‡ä»¶ï¼Œç”¨lsusbæ‰¾åˆ°ä½ çš„idï¼Œç¡®ä¿åœ¨rulesæ–‡ä»¶é‡Œã€‚ç„¶å sudo udevadm control --reload-rules é‡è½½udevè§„åˆ™ã€‚
