@@ -1,0 +1,24 @@
+error: snap "xxxx" has "install-snap" change in progress
+
+解决方案
+
+运行如下命令
+
+you@ubuntu:~$ snap changes
+ID  Status  Spawn                  Ready                  Summary
+4    Error  yesterday at 21:20 CST  yesterday at 21:31 CST  Install "eclipse" snap
+5    Doing  yesterday at 22:36 CST  -                      Install "eclipse" snap
+
+可以看到ID=5  Doing
+现在我们终止它
+
+you@ubuntu:~$ sudo snap abort 5
+
+好了，可以重新安装了
+
+
+
+
+sudo snap install snap-store 
+sudo snap install snap-store-proxy 
+sudo snap install snap-store-proxy-client

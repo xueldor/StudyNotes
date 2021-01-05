@@ -12,7 +12,7 @@ which adb命令找到adb的目录，切到目录，ls -l adb查看用户和权�
 这样无论哪个用户启动adb使用的都是root权限了。
 缺点：adb pull下来的文件owner也是root:root，普通用户无法编辑
 
-三：针对ubuntu系统，网上有一种更加完美的方案，但是我在16.04上试了无效。如下：
+三：针对ubuntu系统，有一种更加完美的方案。如下：
 lsusb找到你的设备的信息，like this:
 work@ubuntu-cts:/usr/lib/android-sdk/platform-tools$ lsusb
 Bus 002 Device 001: ID 1d6b:0003 Linux Foundation 3.0 root hub
@@ -28,20 +28,14 @@ SUBSYSTEM=="usb", ATTR{idVendor}=="18d1", ATTR{idProduct}=="4ee7", MODE="0666", 
 或
 SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", MODE="0666"         -------》针对所有USB设备
 
-然后重启udev
+然后重启udev:
 sudo /etc/init.d/udev restart
 重新拔插下usb设备
 重启adb：adb kill-server;adb devices
-完毕！这是网上最普遍的方法，不知道为什么了对我没用。
-另一方面，ubuntu里使用串口也遇到了同样问题，但是这个方法是有用的，
-登录用户不是root，而/dev/ttyUSB0（对应串口）只有root可以读写。
-通过编辑：sudo vim /etc/udev/rules.d/50-usb-serial.rules
-添加KERNEL=="ttyUSB0", GROUP="uucp",MODE="0666"
-完美解决。估计还是针对android的rules文件写的有问题。
+>>> 实测重启udev这一步没有生效。需要重新电脑。
+完毕！这是网上最普遍的方法，一开始对我没用，后来发现是SUBSYSTEM前面少写了一个S。
 
-
----------->补充：
-ubuntu环境使用adb问题，谷歌官网有说明：https://developer.android.google.cn/studio/run/device，摘录片段如下：
+其实ubuntu环境使用adb问题，谷歌官网有说明：https://developer.android.google.cn/studio/run/device，摘录片段如下：
 Ubuntu Linux：需要正确进行两项设置：希望使用 adb 的每个用户都需要位于 plugdev 组中，并且需要为系统添加涵盖设备的 udev 规则。
 plugdev 组：如果您看到一条错误消息，指出您不在 plugdev 组中，您需要将自己添加到 plugdev 组中：
 sudo usermod -aG plugdev $LOGNAME
@@ -51,3 +45,12 @@ udev 规则：android-sdk-platform-tools-common 软件包中包含一组适用�
 sudo apt-get install android-sdk-platform-tools-common
 
 在/lib/udev/rules.d/目录可以看到51-android.rules文件，用lsusb找到你的id，确保在rules文件里。然后 sudo udevadm control --reload-rules 重载udev规则。
+
+
+四：
+另一方面，ubuntu里使用串口也遇到了同样问题，也可以用这个方法，原理一样。
+登录用户不是root，而/dev/ttyUSB0（对应串口）只有root可以读写。
+通过编辑：sudo vim /etc/udev/rules.d/50-usb-serial.rules
+添加KERNEL=="ttyUSB0", GROUP="uucp",MODE="0666"
+解决。
+
