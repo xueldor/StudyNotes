@@ -100,13 +100,17 @@ android {
     sourceSets {
         main {
             manifest.srcFile 'AndroidManifest.xml'
-            java.srcDirs = ['src']
-            resources.srcDirs = ['src']
-            aidl.srcDirs = ['src']
-            renderscript.srcDirs = ['src']
-            res.srcDirs = ['res']
-            assets.srcDirs = ['assets']
-            jniLibs.srcDirs = ['libs']
+            java.srcDirs = ['src']           //Java source
+            resources.srcDirs = ['src']      //Java resources
+            aidl.srcDirs = ['src']           //Android AIDL source directory
+            renderscript.srcDirs = ['src']   //Android RenderScript source directory
+            res.srcDirs = ['res']            //Android Resources directory
+            assets.srcDirs = ['assets']      //Android Assets directory
+            jniLibs.srcDirs = ['libs']       // Android JNI libs directory,注意是放so的地方，跟jar包无关
+			jni.srcDirs=['jni']              // Android JNI source directory
+			shaders.srcDirs=['shaders']      // Android shaders directory
+			
+			//jar包没有目录,因为对于 gradle android 项目来说，jar包和aar，属于android项目的外部支持，由dependencies {implementation}添加。
         }
 
         debug.setRoot('build-types/debug')
