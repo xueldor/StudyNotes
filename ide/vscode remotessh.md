@@ -104,3 +104,21 @@ Host 192.168.20.24
 
 5. 这里我用ssh-keygen生成秘钥对，只是为了演示。其实因为我的.ssh目录下已经有了 id_rsa和id_rsa.pub文件，我完全可以直接用这两个文件，没有必要生成一对新的秘钥。
 
+6. 报错提示“ERROR: @    WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!     @”。
+
+   ssh会把每个你访问过计算机的公钥(public key)都记录在本地~/.ssh/known_hosts。当下次访问相同计算机时，OpenSSH会核对公钥。如果公钥不同，OpenSSH会发出警告， 避免你受到DNS Hijack之类的攻击。
+
+   解决方案： （两个）
+
+   1. 手动删除修改known_hsots里面的内容；【建议这个】
+   2. 修改配置文件“~/.ssh/config”，加上这两行，重启服务器。
+           StrictHostKeyChecking no
+           UserKnownHostsFile /dev/null
+
+
+
+远程插件：
+
+当连接到远程时，你安装的插件是安装在远程的vs server,而不是本地。左边的插件栏显示上下两栏，并显示哪些是local的扩展，哪些是远程的扩展。
+
+![image-20210305102716071](vscode remotessh/image-20210305102716071.png)
