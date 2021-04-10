@@ -70,7 +70,9 @@ refs是一个引用。如果commit-id理解为地址的话，refs就是指向地
   为什么要强调这一点呢？因为理解这三个分支以及git的机制，你才能真正明白一些指令的含义。比如后面会讲到git fetch --prune，哪怕我没有提，你也应该能自行领悟到，这个命令只影响refs/remotes/…，它不会删除本地分支。
 4. git pull实际分为两步，第一步：真正的远端计算机-》本地的refs/remotes/origin/；第二步：refs/remotes/origin/branch ——》refs/heads/branch。
 第一步是实打实的数据拷贝，第二步其实只是操作一些指针罢了，因此git的性能非常高。
-但是git push 是直接从refs/heads/master推送到远程计算机上面的，而不是先同步给refs/remotes/origin。因为，推送不一定成功，远程那边可能拒绝你的提交。所以等远程服务器那边合入之后，本地要再pull一下。
+同理，虽然git push 的具体流程不清楚，但是显然只有push成功了并且远程仓库真正合进去了，本地的refs/remotes/origin才会更新。实际上我做了实验是这样的：
+1. push到GitHub，因为不需要代码审核，是直接提交到仓库的，所以push之后 origin/master 也跟着同步了。
+2. push到公司的仓库，因为需要经过Gerrit，所以push成功了，但是本地的origin/iov2.0仍然指向提交前的位置，git status会提示“Your branch is ahead of 'origin/iov2.0' by 1 commit”
 也就是说，数据流向是单向的，refs/remotes/origin/* -》refs/heads/* -> 远端 -》refs/remotes/origin/* -》refs/heads/* -》 。。。
 这很好理解，毕竟refs/remotes/*本来就是作为远端仓库内容的本地镜像存在的，只能远端改变了。本地的复制品才能跟着变。
 
@@ -131,6 +133,14 @@ git fetch origin branch1:branch2
 1.首先执行上面的fetch操作
 2.使用远程branch1分支在本地创建branch2(但不会切换到该分支), 如果本地不存在branch2分支, 则会自动创建一个新的branch2分支, 
 如果本地存在branch2分支, 并且是`fast forward', 则自动合并两个分支, 否则, 会阻止以上操作.
+
+一下指令是能通过的：
+git fetch origin refs/heads/*:refs/remotes/origin/*
+git fetch origin refs/heads/branch1:refs/remotes/origin/branch1
+git fetch origin branch1:refs/remotes/origin/branch1
+git fetch origin refs/heads/branch1:aaaa
+git fetch origin branch1:aaaa
+
 
 git pull 等价于以下两步:
 经命令中的pull换成fetch, 执行之...
