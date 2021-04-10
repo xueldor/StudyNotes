@@ -1,8 +1,10 @@
 buildscript {
     repositories {
-        google()
-        jcenter()
-        
+        //google()
+        //jcenter()
+        maven { url 'https://maven.aliyun.com/repository/google' }
+        maven { url 'https://maven.aliyun.com/repository/jcenter' }
+        maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.2.0'
@@ -11,9 +13,11 @@ buildscript {
 
 allprojects {
     repositories {
-        google()
-        jcenter()
-        
+        //google()
+        //jcenter()
+        maven { url 'https://maven.aliyun.com/repository/google' }
+        maven { url 'https://maven.aliyun.com/repository/jcenter' }
+        maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
     }
 }
 
@@ -257,11 +261,20 @@ static void safeClose(Closeable close){
 }
 
 dependencies {
-    api files('sdk/framework.jar')
+    compileOnly files('sdk/framework.jar')
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     compileOnly files('../sdk/tboxsdk.jar')
     compileOnly files('../sdk/autosdk.jar')
-    implementation 'com.github.bumptech.glide:glide:3.7.0'
+    api 'com.github.bumptech.glide:glide:3.7.0'
     implementation 'com.android.support:support-v4:26.1.0'
     implementation 'com.android.support:multidex:1.0.1'
+	
+	//implementation:参与编译和打包,不会传递
+	//api: 参与编译和打包,会传递。传递的意思是，A依赖B，B依赖C，那么A自动能引用到C。
+	//compileOnly: 只在编译时有效，不会参与打包
+	//runtimeOnly: 只在生成apk的时候参与打包，编译时不会参与，很少用。
+	
+	//testImplementation: 只在单元测试代码的编译以及最终打包测试apk时有效
+	//debugImplementation: 只在debug模式的编译和最终的debug apk打包时有效
+	//releaseImplementation: 仅仅针对Release 模式的编译和最终的Release apk打包。
 }
