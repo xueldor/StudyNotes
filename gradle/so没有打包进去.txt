@@ -1,0 +1,13 @@
+现象：
+    build->make或者buildApk，libs/armeabi-v7a目录下的so是打包进apk的，但是直接点击运行按钮，则生成的apk里面没有so。
+解决：
+    第一，sourceSets.main.jniLibs.srcDirs指定的目录要正确。
+	第二，添加配置：
+	buildTypes {
+		release{
+			ndk {
+                abiFilters "armeabi-v7a"
+            }
+		}
+	}
+	debug里面也同样配进去。
