@@ -46,14 +46,31 @@ android {
         versionName "1.0"
         multiDexEnabled true
     }
+	//以前的版本
     gradle.projectsEvaluated {
         tasks.withType(JavaCompile) {
             options.compilerArgs.add('-Xbootclasspath/p:sdk/framework.jar')
-//            options.compilerArgs.add('-Xbootclasspath/p:sdk/services.jar')
-//            options.compilerArgs.add('-Xbootclasspath/p:sdk/core-all.jar')
 
         }
     }
+	//新版本添加framework应该用如下代码
+	//添加到app外面的build.gradle
+	allprojects {
+		repositories {
+			google()
+			mavenCentral()
+			jcenter() // Warning: this repository is going to shut down soon
+		}
+		gradle.projectsEvaluated {
+			tasks.withType(JavaCompile) {
+				Set<File> fileSet=options.bootstrapClasspath.getFiles()
+				List<File> newFileList  =new ArrayList<>();
+				newFileList.add(new File("./app/libs/framework.jar"));
+				newFileList.addAll(fileSet)
+				options.bootstrapClasspath = files(newFileList.toArray())
+			}
+		}
+	}
     buildTypes {
         release {
             buildConfigField "boolean", "LOG_DEBUG", "false"

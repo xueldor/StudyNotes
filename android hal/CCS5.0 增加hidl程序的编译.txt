@@ -1,0 +1,117 @@
+一、代码生成
+
+使用hidl -gen命令自动生成.bp文件和.h、.cpp文件
+PKG=vendor.hsae.hardware.early_autocore.serial@1.0
+HAL_PACKAGE_ROOT=vendor.hsae.hardware.early_autocore.serial
+HAL_PATH_ROOT=vendor/hsae/hardware/interfaces/early_autocore/serial
+HAL_OUTPUT_CODE_PATH=vendor/hsae/hardware/interfaces/early_autocore/serial/1.0/default/
+
+hidl-gen -L androidbp -r $HAL_PACKAGE_ROOT:$HAL_PATH_ROOT -r android.hidl:system/libhidl/transport $PKG
+hidl-gen -o $HAL_OUTPUT_CODE_PATH -Lc++-impl -r $HAL_PACKAGE_ROOT:$HAL_PATH_ROOT -r android.hidl:system/libhidl/transport $PKG
+
+
+具体执行命令如下：		
+hidl-gen -L androidbp -r vendor.hsae.hardware.early_autocore.serial:vendor/hsae/hardware/interfaces/early_autocore/serial \
+       -r android.hidl:system/libhidl/transport vendor.hsae.hardware.early_autocore.serial@1.0
+
+hidl-gen -o vendor/hsae/hardware/interfaces/early_autocore/serial/1.0/default/ -Lc++-impl -r vendor.hsae.hardware.early_autocore.serial:vendor/hsae/hardware/interfaces/early_autocore/serial \
+        -r android.hidl:system/libhidl/transport vendor.hsae.hardware.interfaces.early_autocore.serial@1.0
+
+
+二、编译
+1、hal修改后,更新hash到current.txt
+hidl-gen -L hash -r vendor.hsae.hardware.interfaces.early_autocore:vendor/hsae/hardware/interfaces/early_autocore -r android.hidl:system/libhidl/transport vendor.hsae.hardware.interfaces.early_autocore.serial@1.0 >> vendor/qcom/proprietary/interfaces/current.txt
+
+增加的内容：
+a88dd6c54d38c61a9da4844ad858f27e22eb68ff6ab7e000e6bc0f1a5ab98ad5 vendor.hsae.hardware.early_autocore.serial@1.0::ISerial
+d144b8948cd2d830c817dcd8098804de3f6c62cf499940eaa67e7f62edd28f31 vendor.hsae.hardware.early_autocore.serial@1.0::ISerialCallback
+
+2、device/qcom/common/base.mk
+增加内容:
+# Add early_autocore
+PRODUCT_PACKAGES += vendor.hsae.hardware.early_autocore.serial@1.0 \
+                    vendor.hsae.hardware.early_autocore.serial@1.0-service \
+                    vendor.hsae.hardware.early_autocore.serial@1.0-adapter-helper \
+                    vendor.hsae.hardware.early_autocore.serial-V1.0-java
+					
+3、device/qcom/sepolicy/qva/private
+ file_contexts
+ 内容：
+ /vendor/bin/hw/vendor\.hsae\.hardware\.early_autocore\.serial@1\.0-service      u:object_r:hal_early_autocore_serial_exec:s0
+ hal_early_autocore_serial.te
+ 内容：
+ type hal_early_autocore_serial,domain;
+type hal_early_autocore_serial_exec,exec_type,vendor_file_type,file_type;
+init_daemon_domain(hal_early_autocore_serial)
+
+4、system/sepolicy
+			prebuilts/api/30.0/private/app_neverallows.te
+			prebuilts/api/30.0/private/coredomain.te
+			prebuilts/api/30.0/private/domain.te	
+			prebuilts/api/30.0/private/untrusted_app.te	
+			prebuilts/api/30.0/public/domain.te
+			prebuilts/api/30.0/public/netd.te
+			prebuilts/api/30.0/public/untrusted_app.te
+			private/app_neverallows.te
+			private/coredomain.te
+			private/domain.te
+			private/untrusted_app.te
+			public/domain.te
+			public/netd.te
+			public/untrusted_app.te
+
+
+
+5、device/qcom/msmnile_au/manifest.xml
+增加内容：
+    <hal format="hidl">
+        <name>vendor.hsae.hardware.early_autocore.serial</name>
+        <transport>hwbinder</transport>
+        <version>1.0</version>
+        <interface>
+            <name>ISerial</name>
+            <instance>default</instance>
+        </interface>
+        <fqname>@1.0::ISerial/default</fqname>
+    </hal>
+
+6、device/qcom/msmnile_au/framework_manifest.xml
+增加内容：
+	<hal format="hidl">
+        <name>vendor.hsae.hardware.early_autocore.serial</name>
+        <transport>hwbinder</transport>
+        <version>1.0</version>
+        <interface>
+            <name>ISerial</name>
+            <instance>default</instance>
+        </interface>
+        <fqname>@1.0::ISerial/default</fqname>
+    </hal>
+
+7、device/qcom/sm6150_au/manifest.xml
+增加内容：
+    <hal format="hidl">
+        <name>vendor.hsae.hardware.early_autocore.serial</name>
+        <transport>hwbinder</transport>
+        <version>1.0</version>
+        <interface>
+            <name>ISerial</name>
+            <instance>default</instance>
+        </interface>
+        <fqname>@1.0::ISerial/default</fqname>
+    </hal>
+
+8、hardware/interfaces/compatibility_matrices/compatibility_matrix.5.xml
+增加内容：（注意没有<transport>hwbinder</transport>）
+   <hal format="hidl">
+       <name>vendor.hsae.hardware.early_autocore.serial</name>
+       <version>1.0</version>
+       <interface>
+           <name>ISerial</name>
+           <instance>default</instance>
+       </interface>
+       <fqname>@1.0::ISerial/default</fqname>
+   </hal>
+   
+
+ 

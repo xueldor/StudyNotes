@@ -1,0 +1,16 @@
+git 默认中文文件名是 \xxx\xxx 等八进制形式。比如：
+> git status -u
+"Collections/List\346\246\202\350\246\201.md"
+
+只需要设置core.quotepath设为false，就不会对0x80以上的字符进行quote。中文显示正常
+
+git config --global core.quotepath false
+
+然后显示：
+Collections/List概要.md
+
+
+二
+随着GitHub升级，有时https协议提交代码失败，需要把url改成git协议的。
+git remote set-url origin git://sfasdfasdfa.git
+或者直接打开.git/config，改下url。

@@ -1,0 +1,2 @@
+整个repo回退到某日
+repo forall -c 'commitID=`git log --before "2022-06-01 23:00:00" -1 --pretty=format:"%H"`; git reset --hard $commitID'

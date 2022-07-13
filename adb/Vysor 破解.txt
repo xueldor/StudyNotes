@@ -1,0 +1,1 @@
+先运行Vysor-win32-ia32.exe，然后到C:\Users\xxxxx\AppData\Local\Vysor\app-2.1.2\resources\app\unpacked-crx目录下打开uglify.js，搜索Account Management，将上面的g = !1,    b = !1 改为g = 1,    b = 1。重新运行Vysor-win32-ia32.exe即可

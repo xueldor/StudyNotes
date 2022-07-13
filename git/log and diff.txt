@@ -1,1 +1,180 @@
-git loggit log --graph git log -- <file> //指定文件的历史记录git log -p -2 -- <file>  //每次提交的内容差异，-2 则表示显示最近的两次更新git log --word-diff -- <file>   //--word-diff 表示获取单词层面上的对比git log branch1 ^branch2  //branch1分支有，而branch2中没有的loggit log branch1..branch2  //branch2中比branch1中多出的记录git log branch1...branch2   //branch1和branch2的log差异部分git reflog  //本地的操作记录git diff  //比较工作区与暂存区git diff --cached  [<path>...]  //比较暂存区与最新本地版本库git diff HEAD [<path>...]   //比较工作区与最新本地版本库 same as: git diff <branch_name> [<path>...]git diff commit-id  [<path>...]   //比较工作区与指定commit-id的差异git diff --cached [<commit-id>] [<path>...]  //比较暂存区与指定commit-id的差异git diff [<commit-id>] [<commit-id>]   //比较两个commit-id之间的差异git diff branch1 branch2 --stat //显示出branch1和branch2中差异的部分比如： git diff iov2.0_plus_qm remotes/origin/iov2.0_plus --stat-- 用来分隔revision（id、branch name等）和文件名，比如git checkout -- file，如果不加--，git会把后面的当成分支名。所以上面的diff命令，后面可以加 -- file，表示只比对指定文件。(当然，有时--是可以省略的，前提是不会发生歧义)commit-id: 每次提交都会生成一个新的commit-id，commit-id很长，但是指令中的commit-id不需要写全，只需要写前几个字符。前提是前几个字符已经能唯一标识。使用git diff打补丁：1. git diff > a.patch //patch的命名是随意的2. git apply --check a.patch //检验一下补丁能否应用3. git apply patch //应用补丁   git apply --reject patch  //将能打的补丁先打上，有冲突的会生成.rej文件,找到这些文件进行手动打补丁            git reset命令用来将 HEAD 指向其它地方，--hard、--soft、--mixed的区别在于是否影响 工作区和暂存区git reset --hard HEAD^ //hard的意思是 硬的、冷酷无情的 、猛烈地。意思就是工作区、暂存区统统重置为HEAD的前一个版本。(未track的文件不受影响)git reset --soft HEAD^ //soft,软弱的。意思是，HEAD回退到上一个版本，但是不改变工作区。暂存区原来的不动，同时由于版本切换带来的新差异放入暂存区。git reset --mixed HEAD^ //默认。折中。同样不改变工作区，但是暂存区会清空。也就是说，所有工作区和版本仓库的差异，都是没有“git add”的状态。git checkout 用来切换分支、撤销没有commit的修改。下面几个命令具体区别参考“常用指令.txt”git checkout -b newBranchgit checkout branchgit checkout commit-id //检出指定的commit-id为detached HEADgit checkout origin/dev //检出远程dev分支为detached HEADcommit-id是一个SHA值，可以把它理解成一个地址或索引，即你的这一次提交的位置，所以可以通过commitid将代码撤退到过去的某次提交。每个commit-id有一个parent commit-id。类似链表，从而把所有提交组织成一颗树状的整体。可以打开.git/logs/refs/heads下的文件，观察这种组织方式，从而领悟git的本质。refs是一个引用。如果commit-id理解为地址的话，refs就是指向地址的指针。在.git目录下，引用表现为一个文件，文件名就是引用名称，里面的内容是commit-id，表示这个引用指向的位置。分支(branch), 远程跟踪分支(remote-tracking branch)以及标签(tag)都是对提交的引用. 你可以打开.git/refs/heads目录，看看有哪些本地分支，再打开分支文件，看看里面是不是一个commitID（或者另外一个refs，类似二级指针）。引用以"refs"开头, 以斜杠分割的路径。1) 本地分支的Reference格式：refs/heads/<local_branch_name> 如refs/heads/master，在保证唯一的情况下可以简写为master 2) 远程追踪分支的Reference格式：refs/remotes/<remote_repository>/<remote_branch_name> 如refs/remotes/origin/master，在保证唯一的情况下可以简写为origin/master3)tag的Reference格式：refs/tags/<tag_name> 如refs/tags/v1.0.1，在保证唯一的情况下可以简写为v1.0.1 这里解释一下refs/heads/master和refs/remotes/origin/master。refs/remotes/*相当于“远程仓库内容”在本地计算机的备份（或者叫做快照），虽然名字里带有一个remote，含义上也确实是用来代表和追踪远程的内容，但是毕竟是保持在本地，是一种“在本地忠实地记录远程仓库状态”的东西。当你从远程计算机同步代码到本地计算机时，并不是直接下载到你的本地分支，而是下载到refs/remotes/origin。然后你需要在本地新建分支，把remote的内容同步到本地分支。所以1. 本地分支和远程分支其实没有关系，只是为了方便通常起一样的分支名，并关联起来“git branch --set-upstream-to=origin/dev”。2. 我们commit代码，修改的都是本地分支，通过push命令，同步给相关联的远程分支。3. 当你下载一个远程分支时，实际存在三个分支，    1) 远程电脑上的存储库上的实际分支	2) 实际分支的本地快照(在refs/remotes/...)	3) 相关联的本地分支  为什么要强调这一点呢？因为理解这三个分支以及git的机制，你才能真正明白一些指令的含义。比如后面会讲到git fetch --prune，哪怕我没有提，你也应该能自行领悟到，这个命令只影响refs/remotes/…，它不会删除本地分支。4. git pull实际分为两步，第一步：真正的远端计算机-》本地的refs/remotes/origin/；第二步：refs/remotes/origin/branch ——》refs/heads/branch。第一步是实打实的数据拷贝，第二步其实只是操作一些指针罢了，因此git的性能非常高。同理，虽然git push 的具体流程不清楚，但是显然只有push成功了并且远程仓库真正合进去了，本地的refs/remotes/origin才会更新。实际上我做了实验是这样的：1. push到GitHub，因为不需要代码审核，是直接提交到仓库的，所以push之后 origin/master 也跟着同步了。2. push到公司的仓库，因为需要经过Gerrit，所以push成功了，但是本地的origin/iov2.0仍然指向提交前的位置，git status会提示“Your branch is ahead of 'origin/iov2.0' by 1 commit”也就是说，数据流向是单向的，refs/remotes/origin/* -》refs/heads/* -> 远端 -》refs/remotes/origin/* -》refs/heads/* -》 。。。这很好理解，毕竟refs/remotes/*本来就是作为远端仓库内容的本地镜像存在的，只能远端改变了。本地的复制品才能跟着变。.git目录有一个config文件，这个文件里面配置了远程仓库的别名，默认就是origin。并且保存了本地分支（refs/heads/*）与远程分支（refs/remotes/*）之间的关联关系。比如：[remote "origin"]	url = ssh://xuexiangyu@192.168.20.49:29418/Android/imx8x_p/platform/packages/apps/Hsae_Apps/SecondaryRender	fetch = +refs/heads/*:refs/remotes/origin/*[branch "P9"]	remote = origin	merge = refs/heads/P9于是，当执行git pull origin时，git才知道到哪个ip地址的哪个仓库，用什么协议拉取，数据从哪个分支过来，合到哪个本地分支。引用的名字存放在.git/refs目录中. 也可能被打包到一个文件中, 参见git pack-refs命令。pack-refs文件在.git目录下。引用名称的简写版本- 分支"test"是"refs/heads/test"的简写.- 标签"v2.6.18"是"refs/tags/v2.6.18"的简写.- "origin/master"是"refs/remotes/origin/master"的简写我们经常使用简称。但是如果你的标签和分支重名了, 你应该用全名去区分它们4) 一些Git保留使用的特殊refs:HEAD，指向当前本地分支的当前commit状态FETCH_HEAD，指向当前本地分支在最近一次fetch操作时得到的commit状态。.git/FETCH_HEAD 文件中,保存了一个列表，远程服务器的每个分支的最新地址。ORIG_HEAD，指向任何merge或rebase之前的刚刚检出时的commit状态你可以在.git目录看到这三个refs。仓库的名字可以代表该仓库的HEAD. 例如, "origin"是访问"origin"中的HEAD分支的一个捷径git show-ref列出仓库中所有refsReference Specification简称refspec在执行push或fetch操作时，refspec用以给出本地Ref和远程Ref之间的映射关系，通常是本地分支或本地tag与远程库中的分支或tag之间的映射关系。 refspec格式： +<src_ref>:<dst_refs> 其中的+是可选的，表示强制更新 典型的push refspec为HEAD:refs/heads/master 典型的fetch refspec为+refs/heads/*:refs/remotes/origin/*常用命令有：git push origin HEAD:refs/heads/master 。打开.git/HEAD文件，里面内容是一行“ref: refs/heads/master” 。所以相当于git push origin refs/heads/master:refs/heads/master。不过没人这么写罢了。git fetch origin 。更新所有remote分支，当我们使用了Gerrit管理后，管理员可以设置权限禁止我们使用HEAD:refs/heads/master。取代的是HEAD:refs/for/master，然后Gerrit系统里面先审核再合入。常见的git fetch 使用方式包含以下四种:git fetch这一步其实是执行了两个关键操作:- 创建并更新所有远程分支的本地远程分支.- 设定当前分支的FETCH_HEAD为远程服务器的master分支 (上面说的第一种情况)需要注意的是: 和push不同, fetch会自动获取远程`新加入'的分支.git fetch origin同git fetch, 只不过手动指定了remote.git fetch origin branch1  设定当前分支的 FETCH_HEAD' 为远程服务器的branch1分支`.一个附加效果是:这个命令可以用来测试远程主机的远程分支branch1是否存在, 如果存在, 返回0, 如果不存在, 返回128, 抛出一个异常.git fetch origin branch1:branch21.首先执行上面的fetch操作2.使用远程branch1分支在本地创建branch2(但不会切换到该分支), 如果本地不存在branch2分支, 则会自动创建一个新的branch2分支, 如果本地存在branch2分支, 并且是`fast forward', 则自动合并两个分支, 否则, 会阻止以上操作.一下指令是能通过的：git fetch origin refs/heads/*:refs/remotes/origin/*git fetch origin refs/heads/branch1:refs/remotes/origin/branch1git fetch origin branch1:refs/remotes/origin/branch1git fetch origin refs/heads/branch1:aaaagit fetch origin branch1:aaaagit pull 等价于以下两步:经命令中的pull换成fetch, 执行之...git merge FETCH_HEAD清理命令git gc: 收集松散对象存入packfile，将不被任何commit引用并已经存在很久（数月）的对象删除。不过这个命令一般什么都不干，只有松散对象很多时才会真正执行。git prune  ：清理不可达到的松散对象。unreachable objects 指的是.git\objects中没有被使用的hash文件git remote prune origin   清理掉远程库已被删除的远程分支git fetch --prune   fetching之前，移除远程已经不存在的引用。git branch -d/D dev 删除本地的dev分支。钩子hook钩子脚本放在.git/hooks目录,在一些git命令的执行过程中, 允许开发人员调用特别的脚本来添加功能或检查。Typically，钩子允许对一个命令做pre-verified并且可以中止此命令的运行；同时也可在这个命令执行完后做后继的通知工作。当git init命令被调用后, 一些非常有用的示例钩子脚本被拷到新仓库的hooks目录中; 但是在默认情况下它们是不生效的。 把这些钩子文件的".sample"文件名后缀去掉就可以使它们生效。打开.git/hooks目录，看看有哪些文件。从文件名可以判断每个脚本会在什么时候触发。比如commit-msg这个脚本，就是commit的时候触发的。Change-idChange-Id 是 gerrit (代码审核平台)的概念，是gerrit 用以追踪具体提交的机制 与 git (版本管理) 是没有关系的当我们使用Gerrit下载代码时，git clone命令后面要加一段 scp -p -P 29418 your@192.168.20.45:hooks/commit-msg OnlineVideo/.git/hooks/。然后通过git hook机制，commit做出修改后，会将commit-msg触发，change-id就会被生成出来已经用 git push 将代码提交 gerrit 审核了,这时你发现代码中有疏漏,修改了一下,执行 git commit --amend, 再次推送还可以成功. 这就是因为 gerrit 检查到两次 push 的 commit 有同一个 change-id, 就认为是同一个提交,因此可以 amendgit push 将代码提交到 gerrit 审核,到 gerrit 网站一看,大红字标着 Can Not Merge 字样. 之前的做法是, git reset 后,更新代码,再重新提交. 直接 git commit --amend, 删掉 commit log 中的 change-id 那行,然后wq保存退出.这时 gerrit 的那个钩子脚本会再生成一个不同的 change-id ,这时再更新代码,重新提交即可成功.另:通过总结历次缺失 Change-Id 的例子,发现基本我们自己通过 git commit 生成的提交都会很顺利的生成 Change-Id.通过 git merge, git revert 等命令由 git 自己生成的 commit 则有较高概率会缺失 Change-Id.因此提倡尽量用 git rebase 代替 git merge 来更新代码.事实上, git rebase 更新代码 相较 git merge 更新代码,有诸多优势,只是略复杂些.强烈建议用 git rebase 方式更新代码.
+git log
+git log --graph 
+git log -- <file> //指定文件的历史记录
+git log -p -2 -- <file>  //每次提交的内容差异，-2 则表示显示最近的两次更新
+git log --word-diff -- <file>   //--word-diff 表示获取单词层面上的对比
+git log branch1 ^branch2  //branch1分支有，而branch2中没有的log
+git log branch1..branch2  //branch2中比branch1中多出的记录
+git log branch1...branch2   //branch1和branch2的log差异部分
+
+git reflog  //本地的操作记录
+
+git diff  //比较工作区与暂存区
+git diff --cached  [<path>...]  //比较暂存区与最新本地版本库
+git diff HEAD [<path>...]   //比较工作区与最新本地版本库 same as: git diff <branch_name> [<path>...]
+git diff commit-id  [<path>...]   //比较工作区与指定commit-id的差异
+git diff --cached [<commit-id>] [<path>...]  //比较暂存区与指定commit-id的差异
+git diff [<commit-id>] [<commit-id>]   //比较两个commit-id之间的差异,第一个id为old，第二个为new
+git diff HEAD^ HEAD最新版本相比上次有有些更新。HEAD^在前，HEAD在后
+总结一下：
+工作区与暂存区   git diff 
+工作区与版本库   git diff HEAD （或者是FETCH_HEAD 或具体id）
+暂存区与版本库   git diff --cached (相当于git diff --cached HEAD，可以把HEAD换成以前的某次提交id)
+
+
+git diff branch1 branch2 --stat //显示出branch1和branch2中差异的部分
+比如： git diff iov2.0_plus_qm remotes/origin/iov2.0_plus --stat
+
+-- 用来分隔revision（id、branch name等）和文件名，比如git checkout -- file，如果不加--，git会把后面的当成分支名。所以上面的diff命令，后面可以加 -- file，表示只比对指定文件。
+(当然，有时--是可以省略的，前提是不会发生歧义)
+
+commit-id: 每次提交都会生成一个新的commit-id，commit-id很长，但是指令中的commit-id不需要写全，只需要写前几个字符。前提是前几个字符已经能唯一标识。
+
+使用git diff打补丁：
+1. git diff > a.patch //patch的命名是随意的
+2. git apply --check a.patch //检验一下补丁能否应用
+3. git apply patch //应用补丁
+   git apply --reject patch  //将能打的补丁先打上，有冲突的会生成.rej文件,找到这些文件进行手动打补丁
+   
+   
+   
+   
+git reset命令用来将 HEAD 指向其它地方，--hard、--soft、--mixed的区别在于是否影响 工作区和暂存区
+git reset --hard HEAD^ //hard的意思是 硬的、冷酷无情的 、猛烈地。意思就是工作区、暂存区统统重置为HEAD的前一个版本。(未track的文件不受影响)
+git reset --soft HEAD^ //soft,软弱的。意思是，HEAD回退到上一个版本，但是不改变工作区。暂存区原来的不动，同时由于版本切换带来的新差异放入暂存区。
+git reset --mixed HEAD^ //默认。折中。同样不改变工作区，但是暂存区会清空。也就是说，所有工作区和版本仓库的差异，都是没有“git add”的状态。
+
+git checkout 用来切换分支、撤销没有commit的修改。下面几个命令具体区别参考“常用指令.txt”
+git checkout -b newBranch
+git checkout branch
+git checkout commit-id //检出指定的commit-id为detached HEAD
+git checkout origin/dev //检出远程dev分支为detached HEAD
+
+
+commit-id是一个SHA值，可以把它理解成一个地址或索引，即你的这一次提交的位置，所以可以通过commitid将代码撤退到过去的某次提交。
+每个commit-id有一个parent commit-id。类似链表，从而把所有提交组织成一颗树状的整体。可以打开.git/logs/refs/heads下的文件，观察这种组织方式，从而领悟git的本质。
+
+refs是一个引用。如果commit-id理解为地址的话，refs就是指向地址的指针。
+在.git目录下，引用表现为一个文件，文件名就是引用名称，里面的内容是commit-id，表示这个引用指向的位置。
+分支(branch), 远程跟踪分支(remote-tracking branch)以及标签(tag)都是对提交的引用. 你可以打开.git/refs/heads目录，看看有哪些本地分支，再打开分支文件，看看里面是不是一个commitID（或者另外一个refs，类似二级指针）。
+引用以"refs"开头, 以斜杠分割的路径。
+1) 本地分支的Reference格式：refs/heads/<local_branch_name> 
+如refs/heads/master，在保证唯一的情况下可以简写为master 
+2) 远程追踪分支的Reference格式：refs/remotes/<remote_repository>/<remote_branch_name> 
+如refs/remotes/origin/master，在保证唯一的情况下可以简写为origin/master
+3)tag的Reference格式：refs/tags/<tag_name> 
+如refs/tags/v1.0.1，在保证唯一的情况下可以简写为v1.0.1 
+
+这里解释一下refs/heads/master和refs/remotes/origin/master。refs/remotes/*相当于“远程仓库内容”在本地计算机的备份（或者叫做快照），虽然名字里带有一个remote，含义上也确实是用来代表和追踪远程的内容，但是毕竟是保持在本地，是一种“在本地忠实地记录远程仓库状态”的东西。当你从远程计算机同步代码到本地计算机时，并不是直接下载到你的本地分支，而是下载到refs/remotes/origin。然后你需要在本地新建分支，把remote的内容同步到本地分支。所以
+1. 本地分支和远程分支其实没有关系，只是为了方便通常起一样的分支名，并关联起来“git branch --set-upstream-to=origin/dev”。
+2. 我们commit代码，修改的都是本地分支，通过push命令，同步给相关联的远程分支。
+3. 当你下载一个远程分支时，实际存在三个分支，
+    1) 远程电脑上的存储库上的实际分支
+	2) 实际分支的本地快照(在refs/remotes/...)
+	3) 相关联的本地分支
+  为什么要强调这一点呢？因为理解这三个分支以及git的机制，你才能真正明白一些指令的含义。比如后面会讲到git fetch --prune，哪怕我没有提，你也应该能自行领悟到，这个命令只影响refs/remotes/…，它不会删除本地分支。
+4. git pull实际分为两步，第一步：真正的远端计算机-》本地的refs/remotes/origin/；第二步：refs/remotes/origin/branch ——》refs/heads/branch。
+第一步是实打实的数据拷贝，第二步其实只是操作一些指针罢了，因此git的性能非常高。
+同理，虽然git push 的具体流程不清楚，但是显然只有push成功了并且远程仓库真正合进去了，本地的refs/remotes/origin才会更新。实际上我做了实验是这样的：
+1. push到GitHub，因为不需要代码审核，是直接提交到仓库的，所以push之后 origin/master 也跟着同步了。
+2. push到公司的仓库，因为需要经过Gerrit，所以push成功了，但是本地的origin/iov2.0仍然指向提交前的位置，git status会提示“Your branch is ahead of 'origin/iov2.0' by 1 commit”
+也就是说，数据流向是单向的，refs/remotes/origin/* -》refs/heads/* -> 远端 -》refs/remotes/origin/* -》refs/heads/* -》 。。。
+这很好理解，毕竟refs/remotes/*本来就是作为远端仓库内容的本地镜像存在的，只能远端改变了。本地的复制品才能跟着变。
+
+
+.git目录有一个config文件，这个文件里面配置了远程仓库的别名，默认就是origin。并且保存了本地分支（refs/heads/*）与远程分支（refs/remotes/*）之间的关联关系。比如：
+[remote "origin"]
+	url = ssh://xuexiangyu@192.168.20.49:29418/Android/imx8x_p/platform/packages/apps/Hsae_Apps/SecondaryRender
+	fetch = +refs/heads/*:refs/remotes/origin/*
+[branch "P9"]
+	remote = origin
+	merge = refs/heads/P9
+于是，当执行git pull origin时，git才知道到哪个ip地址的哪个仓库，用什么协议拉取，数据从哪个分支过来，合到哪个本地分支。
+
+引用的名字存放在.git/refs目录中. 也可能被打包到一个文件中, 参见git pack-refs命令。pack-refs文件在.git目录下。
+
+引用名称的简写版本
+- 分支"test"是"refs/heads/test"的简写.
+- 标签"v2.6.18"是"refs/tags/v2.6.18"的简写.
+- "origin/master"是"refs/remotes/origin/master"的简写
+我们经常使用简称。但是如果你的标签和分支重名了, 你应该用全名去区分它们
+
+4) 一些Git保留使用的特殊refs:
+HEAD，指向当前本地分支的当前commit状态
+FETCH_HEAD，指向当前本地分支在最近一次fetch操作时得到的commit状态。.git/FETCH_HEAD 文件中,保存了一个列表，远程服务器的每个分支的最新地址。
+ORIG_HEAD，指向任何merge或rebase之前的刚刚检出时的commit状态
+你可以在.git目录看到这三个refs。
+
+仓库的名字可以代表该仓库的HEAD. 例如, "origin"是访问"origin"中的HEAD分支的一个捷径
+
+git show-ref列出仓库中所有refs
+
+Reference Specification简称refspec
+在执行push或fetch操作时，refspec用以给出本地Ref和远程Ref之间的映射关系，通常是本地分支或本地tag与远程库中的分支或tag之间的映射关系。 
+refspec格式： 
++<src_ref>:<dst_refs> 
+其中的+是可选的，表示强制更新 
+典型的push refspec为HEAD:refs/heads/master 
+典型的fetch refspec为+refs/heads/*:refs/remotes/origin/*
+常用命令有：
+git push origin HEAD:refs/heads/master 。打开.git/HEAD文件，里面内容是一行“ref: refs/heads/master” 。所以相当于git push origin refs/heads/master:refs/heads/master。不过没人这么写罢了。
+git fetch origin 。更新所有remote分支，
+当我们使用了Gerrit管理后，管理员可以设置权限禁止我们使用HEAD:refs/heads/master。取代的是HEAD:refs/for/master，然后Gerrit系统里面先审核再合入。
+
+常见的git fetch 使用方式包含以下四种:
+git fetch
+这一步其实是执行了两个关键操作:
+- 创建并更新所有远程分支的本地远程分支.
+- 设定当前分支的FETCH_HEAD为远程服务器的master分支 (上面说的第一种情况)
+需要注意的是: 和push不同, fetch会自动获取远程`新加入'的分支.
+
+git fetch origin
+同git fetch, 只不过手动指定了remote.
+
+git fetch origin branch1  设定当前分支的 FETCH_HEAD' 为远程服务器的branch1分支`.一个附加效果是:
+这个命令可以用来测试远程主机的远程分支branch1是否存在, 如果存在, 返回0, 如果不存在, 返回128, 抛出一个异常.
+
+git fetch origin branch1:branch2
+1.首先执行上面的fetch操作
+2.使用远程branch1分支在本地创建branch2(但不会切换到该分支), 如果本地不存在branch2分支, 则会自动创建一个新的branch2分支, 
+如果本地存在branch2分支, 并且是`fast forward', 则自动合并两个分支, 否则, 会阻止以上操作.
+
+一下指令是能通过的：
+git fetch origin refs/heads/*:refs/remotes/origin/*
+git fetch origin refs/heads/branch1:refs/remotes/origin/branch1
+git fetch origin branch1:refs/remotes/origin/branch1
+git fetch origin refs/heads/branch1:aaaa
+git fetch origin branch1:aaaa
+
+
+git pull 等价于以下两步:
+经命令中的pull换成fetch, 执行之...
+git merge FETCH_HEAD
+
+清理命令
+git gc: 收集松散对象存入packfile，将不被任何commit引用并已经存在很久（数月）的对象删除。不过这个命令一般什么都不干，只有松散对象很多时才会真正执行。
+git prune  ：清理不可达到的松散对象。unreachable objects 指的是.git\objects中没有被使用的hash文件
+git remote prune origin   清理掉远程库已被删除的远程分支
+git fetch --prune   fetching之前，移除远程已经不存在的引用。
+git branch -d/D dev 删除本地的dev分支。
+
+
+钩子hook
+钩子脚本放在.git/hooks目录,在一些git命令的执行过程中, 允许开发人员调用特别的脚本来添加功能或检查。
+Typically，钩子允许对一个命令做pre-verified并且可以中止此命令的运行；同时也可在这个命令执行完后做后继的通知工作。
+当git init命令被调用后, 一些非常有用的示例钩子脚本被拷到新仓库的hooks目录中; 但是在默认情况下它们是不生效的。 把这些钩子文件的".sample"文件名后缀去掉就可以使它们生效。
+打开.git/hooks目录，看看有哪些文件。从文件名可以判断每个脚本会在什么时候触发。
+比如commit-msg这个脚本，就是commit的时候触发的。
+
+Change-id
+Change-Id 是 gerrit (代码审核平台)的概念，是gerrit 用以追踪具体提交的机制 与 git (版本管理) 是没有关系的
+当我们使用Gerrit下载代码时，git clone命令后面要加一段 scp -p -P 29418 your@192.168.20.45:hooks/commit-msg OnlineVideo/.git/hooks/。然后通过git hook机制，
+commit做出修改后，会将commit-msg触发，change-id就会被生成出来
+已经用 git push 将代码提交 gerrit 审核了,这时你发现代码中有疏漏,修改了一下,执行 git commit --amend, 再次推送还可以成功. 这就是因为 gerrit 检查到两次 push 的 commit 有同一个 change-id, 就认为是同一个提交,因此可以 amend
+git push 将代码提交到 gerrit 审核,到 gerrit 网站一看,大红字标着 Can Not Merge 字样. 之前的做法是, git reset 后,更新代码,再重新提交. 直接 git commit --amend, 删掉 commit log 中的 change-id 那行,然后wq保存退出.这时 gerrit 的那个钩子脚本会再生成一个不同的 change-id ,这时再更新代码,重新提交即可成功.
+
+另:
+通过总结历次缺失 Change-Id 的例子,发现基本我们自己通过 git commit 生成的提交都会很顺利的生成 Change-Id.
+通过 git merge, git revert 等命令由 git 自己生成的 commit 则有较高概率会缺失 Change-Id.
+因此提倡尽量用 git rebase 代替 git merge 来更新代码.
+事实上, git rebase 更新代码 相较 git merge 更新代码,有诸多优势,只是略复杂些.强烈建议用 git rebase 方式更新代码.
