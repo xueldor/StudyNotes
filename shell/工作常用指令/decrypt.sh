@@ -54,7 +54,7 @@ function decrypt_file(){
 }
 
 if [ $# == 0 ];then 
-    echo "将目标文件或目录拖到decrypt.sh上面..."
+    echo "将目标文件或目录拖到decrypt.sh上面,用gitbash执行..."
 	exit 1
 elif (( $#>1 ));then
     echo "暂时只支持单个文件或目录"

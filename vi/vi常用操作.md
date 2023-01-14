@@ -40,6 +40,7 @@
 
 Page Up 或 ctrl-b: 上翻一页（back,往回，就是向上）  
 Page Down 或 ctrl-f：下翻一页（forward ,往回，就是向上）   
+Page Up/Down更好记，但是有时在shell里用vi打开文档，PageUp是shell窗口的滚动条翻页，这时就只能用ctrl+b/f了。
 
 G: 移动到文档最后一行  
 gg: 移动到文档第一行  

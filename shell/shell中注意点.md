@@ -33,7 +33,53 @@ Hello World !
 >
 > mksh应该是兼容Bourne shell的，本文大部分知识都应该同样适用android。
 
-* 声明变量**不需要**像高级语言那样声明变量
+* 查看用户默认shell
+
+  ```shell
+  cat /etc/passwd
+  
+  中间有一段：
+  root:x:0:0:root:/root:/bin/bash
+  work:x:1000:1000:work,,,:/home/work:/bin/bash
+  表明root账号和work账号默认都是使用bash。
+  ```
+```
+  
+查看用户当前使用shell类型:
+  
+​```shell
+  work@ubuntu-cts:~/makefile$ echo $SHELL
+/bin/bash
+```
+
+  查看系统支持shell类型:
+
+  ```shell
+  work@ubuntu-cts:~/makefile$ cat /etc/shells 
+  # /etc/shells: valid login shells
+/bin/sh
+  /bin/bash
+/usr/bin/bash
+  /bin/rbash
+  /usr/bin/rbash
+  /bin/dash
+  /usr/bin/dash
+  /usr/bin/tmux
+  /usr/bin/screen
+  ```
+
+  
+
+* 内建命令 和 外部命令
+
+  内建命令就是内建在 shell 自身中的命令 ，只要用了特定 shell 的某个版本，这个shell的这个版本支持的内建命令一定是可用的。
+  
+  外部命令是由shell 运行的外部文件，可以是二进制文件或shell 脚本  。外部命令可能会被系统裁剪掉。你也可以自己写一个程序放到$PATH目录下，得到一个外部命令。
+  
+  内建命令总是会优先执行，可以用 enable 命令来关闭或启用内建命令，不过强烈建议
+  不要这么做。
+  
+* 声明变量**不需要**像高级语言那样声明变量的类型
 
   ```shell
   your_name="zhangsan"
@@ -46,6 +92,8 @@ Hello World !
   不同于高级语言，shell对空格敏感。不能加空格`your_name   =   "zhangsan"` <------报错。
 
   包括后面介绍if语句时，if后面有没有空格，执行情况完全不一样。
+
+  实际上，`your_name   =   "zhangsan"`，shell会理解成一个叫your_name   的命令，给它传了两个参数：“=”和“zhangsan”。
 
   使用变量用美元符：
 
@@ -69,6 +117,24 @@ Hello World !
   work@S111-CCS2plus:~/xue$ 
   
   ```
+
+  local用于局部变量声明，多在在函数内部使用。
+
+  （1）shell脚本中定义的变量是global的，其作用域从被定义的地方开始，到shell结束或被显示删除的地方为止。
+
+  （2）shell函数定义的变量默认是global的，其作用域从“函数被调用时执行变量定义的地方”开始，到shell结束或被显示删除处为止。函数定义的变量可以被显示定义成local的，其作用域局限于函数内。但请注意，函数的参数是local的。
+
+  （3）如果同名，Shell函数定义的local变量会屏蔽脚本定义的global变量。
+
+  ```shell
+  function Hello()
+  {
+          local text="Hello World!!!" #局部变量
+          echo $text
+  }
+  ```
+
+  
 
 * 字符串分单引号和双引号
 

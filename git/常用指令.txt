@@ -4,6 +4,10 @@
 git checkout -- .
 丢弃工作区的修改，用暂存区的内容覆盖工作区。如果test.txt的修改还没add到暂存区，那么效果是回到和版本库一模一样的状态。
 
+--的意思是将后面的强制解释为文件路径。比如：
+git checkout master：检出master分支
+git checkout -- master ： 从当前索引检出名为“master”的文件
+
 2、git reset HEAD readme.txt
 丢弃暂存区的修改
 
