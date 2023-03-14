@@ -1,0 +1,23 @@
+Q: 为什么不要GUI？
+A: v2ray在ubuntu上的GUI工具不好找。比较多的有两个：Qv2ray、v2rayL。实际是试了一下，在ubuntu18和22上面都跑不起来。18上面提示升级glibc,然而glibc这个东西很底层，极其容易把系统搞坏，总的来说，折腾GUI工具并不比命令行简单。
+
+步骤：
+1. 从https://github.com/v2fly/v2ray-core/releases/tag/v4.45.2下载v2ray-core，选择v2ray-linux-64.zip
+
+2. 从https://github.com/v2fly/fhs-install-v2ray/blob/master/install-release.sh，将安装脚本保存到本地。
+
+3. 执行安装脚本
+chmod 755 install-releash.sh 
+sudo bash install-releash.sh -l v2ray-linux-64.zip
+
+4. 启动v2ray系统服务。后面我们从命令行执行v2ray命令，这里应该不需要执行了。
+sudo systemctl enable v2ray
+sudo systemctl start v2ray
+
+5. config.json内容语法比较复杂，我们先在windows上面使用v2ray的图形工具，配置好后把config.json拷贝到ubuntu上面来。
+
+6. 启动
+v2ray -config config.json > log.txt &
+
+7. 还要到设置里面进网络->网络代理->手动，配置下 HTTP代理 和 Socks主机。端口号从config.json里查到。
+

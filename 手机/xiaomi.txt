@@ -1,0 +1,26 @@
+普通国际版的MIUI虽然没有国内的MIUI广告多，但是仍有AnalyticsCore、MSA-Global等广告后台。
+
+真正纯净的国际版MIUI是得到欧盟官方分销商ABC Data认可的MIUI by xiaomi.eu。因为欧洲的法律要求（GDPR，通用数据保护条例），系统里没有跟踪、采集、分析的后台程序。
+
+无限接近于原生 Android，只有基础的Google服务框架，没有谷歌全家桶
+系统高度纯净，没有第三方软件，音乐和视频软件仅支持本地播放
+很多米系生态APP都没有了，比如：小米公交、运动健康等app
+适合对米系生态没有特别依赖的人。
+
+欧版rom及工具地址
+https://xiaomi.eu/community/threads/21-2-3-4.59832/  （官网，需科学上网,有教程及twrp资源）
+     -》官网的rom指向： https://sourceforge.net/projects/xiaomi-eu-multilang-miui-roms/files/xiaomi.eu/
+https://xiaomifirmwareupdater.com/miui/lmi/
+
+https://xiaomirom.com/rom/redmi-k30-pro-poco-f2-pro-lmi-europe-fastboot-recovery-rom/#
+https://xiaomirom.com/download-xiaomi-flash-tool-miflash/
+https://xiaomirom.com/miui-125/lmi/
+
+其他rom
+https://forum.xda-developers.com/c/xiaomi-poco-f2-pro-redmi-k30-pro.10675/
+https://files.sebaubuntu.dev/ROMs/lmi/LineageOS/11/
+
+
+https://www.52pojie.cn/thread-1266402-1-1.html
+
+https://github.com/xiaomi-sm8250-devs/android_device_xiaomi_lmi-kernel
