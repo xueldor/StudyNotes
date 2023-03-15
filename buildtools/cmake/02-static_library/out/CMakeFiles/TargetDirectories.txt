@@ -1,0 +1,4 @@
+/media/xue/D/cmake/02-static_library/out/CMakeFiles/rebuild_cache.dir
+/media/xue/D/cmake/02-static_library/out/CMakeFiles/edit_cache.dir
+/media/xue/D/cmake/02-static_library/out/CMakeFiles/hello_library.dir
+/media/xue/D/cmake/02-static_library/out/CMakeFiles/hello_binary.dir

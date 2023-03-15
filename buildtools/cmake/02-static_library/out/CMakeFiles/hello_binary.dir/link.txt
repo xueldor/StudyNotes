@@ -1,0 +1,1 @@
+/usr/bin/c++     CMakeFiles/hello_binary.dir/src/main.cpp.o  -o hello_binary libhello_library.a 

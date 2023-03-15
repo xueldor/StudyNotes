@@ -1,0 +1,1 @@
+/usr/bin/c++     CMakeFiles/module.dir/main.cpp.o  -o module -Wl,-rpath,/media/xue/D/cmake/05-link_library/out/sub1 sub1/libhello_library.so sub2/libwelcome_library.a 

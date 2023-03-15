@@ -1,0 +1,2 @@
+/usr/bin/ar qc libwelcome_library.a  CMakeFiles/welcome_library.dir/welcome.cpp.o
+/usr/bin/ranlib libwelcome_library.a

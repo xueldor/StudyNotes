@@ -1,0 +1,3 @@
+/media/xue/D/cmake/04/out/CMakeFiles/rebuild_cache.dir
+/media/xue/D/cmake/04/out/CMakeFiles/test_condition.dir
+/media/xue/D/cmake/04/out/CMakeFiles/edit_cache.dir
