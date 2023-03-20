@@ -1,0 +1,18 @@
+https://jingyan.baidu.com/article/3aed632ec4b9257010809183.html
+https://blog.csdn.net/zxj0904010228/article/details/86151403
+
+第一步：打开注册表编辑器  win+R 输入 regedit
+
+第二步：找到“计算机\HKEY_CLASSES_ROOT\Directory\Background\shell”
+
+第三步：找到cmd，右键权限，管理员权限设置为“完全控制”
+如果修改权限时提示“拒绝访问”，按照以下操作：
+        1. 点“高级”，进入“cmd的高级安全设置”弹窗，点“所有者 TrustedInstaller”后面的更改
+        2. 在选择用户或组的界面中，打开左下角的高级，并进行立即查找，然后选中Administrators这个组，确定。
+
+第四步：“HideBasedOnVelocityId”重命名“ShowBasedOnVelocityId”，即显示在shift右键菜单中
+
+同理：如果shift右键时，想隐藏Powershell，找到Powershell，右键权限，管理员权限设置为“完全控制”，
+然后“ShowBasedOnVelocityId”重命名“HideBasedOnVelocityId”，即隐藏在shift右键菜单中。
+
+

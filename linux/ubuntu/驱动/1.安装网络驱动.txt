@@ -1,0 +1,69 @@
+安装完ubuntu18.04后，无线和有线网络都不识别
+第一，先升级内核，否则后面无线网络，无论如何也搞不定
+uname -r 查看内核版本是5.4，按以下步骤升级
+1. 手机热点-usb网络共享，用这种方法先临时上网
+2.使用 mainline 这个工具来更新内核（需要先将PPA仓库添加到列表中）
+sudo add-apt-repository ppa:cappelikan/ppa
+sudo apt update
+sudo apt install mainline
+3. 安装完成后进行查看
+sudo mainline --check
+看到最新内核是5.17（我操作时是5.17，以后当然还会更新）
+4. su
+# mainline --install-latest
+之所以切换到root账户而不直接使用sudo命令，是因为内核下载可能非常慢，远远超过Ubuntu默认的15分钟切换时间，会导致安装过程由于权限不够而失败。我没有切到su，用sudo也成功了，可能是运气好。
+5. 安装完重启后，用uname -a确认下内核
+
+
+搞定wifi。升级内核是必须的。
+sudo dmesg | grep iwl
+看到一堆异常信息。不升级内核什么信息都没有，完全不识别，后面的步骤做了也没用。
+虽然Intel AX201这个网卡，官网写的linux内核>5.2,但我是5.4也没用，升级到5.17才好。
+1. sudo apt install linux-firmware
+2. 从https://git.kernel.org/pub/scm/linux/kernel/git/iwlwifi/linux-firmware.git下载linux-firmware, 执行sudo cp -r * /lib/firmware,原来的/lib/firmware目录里面缺许多东西。
+重启。
+
+
+接着搞定有线网络。这个不需要升级内核。如果内核升级完后已经能识别有线，那就不要继续了。
+1. lspci -v 查看pci设备信息。发现原因是，安装的ubuntu系统集成的是老硬件的驱动。驱动不匹配，但是系统也硬是安装了。需卸载自带驱动，安装正确的驱动。
+2. 到realtek官网下载8125网卡的驱动。下载"2.5G Ethernet LINUX driver r8125 for kernel up to 5.6"。
+
+下载的是源码，需要用gcc、make等工具编译安装。因此先离线安装gcc。我们用了usb网络共享，所以其实不需要启动盘，直接sudo apt install即可。
+
+1. 利用自己当初的启动U盘，找到需要的依赖直接进行安装！所有的基本依赖文件都在pool/main下！
+以下的安装顺序可能会有偏差，可根据实际情况作出调整！
+
+/g/gcc-8中所有的lib文件：
+sudo dpkg -i lib*.deb
+
+pool/main/l/linux/下的deb文件：
+sudo dpkg -i linux-libc-dev_4.15.0-76.86_amd64.deb
+你的安装盘里这个文件的版本可能不一样。
+
+/g/glibc中所有的lib文件：
+sudo dpkg -i lib*.deb
+
+/g/gcc-7文件夹中的文件：
+sudo dpkg -i lib*.deb
+sudo dpkg -i g*.deb
+
+
+/g/gcc-8文件夹中的文件：
+sudo dpkg -i lib*.deb
+
+make离线安装
+cd pool/main/m/make-dfsg
+sudo dpkg -i make_4.1-9.1ubuntu1_amd64.deb
+
+
+安装完成后，使用命令 gcc  or g++ or make --version ，提示报错，此时进入/usr/bin目录下，会发现工具名称都会带有版本号，我们创建软链接：
+cd /usr/bin
+sudo ln -s gcc-7 gcc
+sudo ln -s g++-7 g++
+
+
+然后回到r8125驱动的目录，执行sudo ./autorun.sh。执行完后，有线网络识别出来了。
+
+更新：
+执行sudo apt upgrade 一升级又升没了。所以没事别乱升级。
+

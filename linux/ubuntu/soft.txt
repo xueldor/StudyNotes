@@ -1,0 +1,11 @@
+persepolis
+aria
+motrix
+typora
+vscode
+gparted
+fcitx
+gnome-tweak-tool
+synaptic
+铜豌豆
+
