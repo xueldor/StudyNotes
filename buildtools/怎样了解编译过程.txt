@@ -1,0 +1,8 @@
+1. 整编完后，所有makefile和bp都转成ninja，到out目录找到ninja文件，搜索定位到某个模块，通过阅读ninja语句了解。
+
+2.  编译前，打开开关
+export SOONG_GEN_CMAKEFILES=1
+export SOONG_GEN_CMAKEFILES_DEBUG=1
+
+mm或make编译后会生成CMakeLists.txt，然后 cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=1 导出compile_commands.json
+也可以直接cmake生成makefile或cmake -G Ninja生成ninja。
