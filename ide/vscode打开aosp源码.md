@@ -1,5 +1,13 @@
 https://github.com/amezin/aosp-vscode
 
+（说明：首先vscode安装微软的c++插件，见下图：
+
+![image-20230802112128419](_img/image-20230802112128419.png)
+
+如果安装的不是微软插件，而是clangd，则不适用此方法。关于clangd，另见《vscode cpp环境搭建》）
+
+
+
 1. 整编AOSP源码，make成功
 
 2. 将c_cpp_properties.json、generate_compdb.py、settings.json三个文件拷贝到`<AOSP>/.vscode/`
