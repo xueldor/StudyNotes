@@ -47,3 +47,7 @@ cpio -idmv < ../ramdisk
 ```
 
 ramdisk_dir目录下得到ramdisk里的文件。
+
+## 问题
+
+有的时候ramdisk不一定是gzip文件，用file命令查看文件的压缩格式，然后用对应的解压命令即可。比如，ATC提供的平台，ramdisk是lz4格式，需要先安装lz4工具，然后`lz4 -d ramdisk outputfile`

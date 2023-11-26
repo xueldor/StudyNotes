@@ -1,1 +1,23 @@
-需求：以 briefblog 这个仓库为例，需要删除以前的所以操作记录，就好像当前是第一次提交。不仅仅是清除git reflog的日志，而是希望抹除一切历史痕迹，让.git目录trim到最小。操作步骤：1. 备份整个文件夹，以备不虞2. 删除.git目录3. git init -> git add . -> git commit4. 关联到远程仓库： git remote add origin https://github.com/xueldor/briefblog.git5. 用--force参数推送：git push --force origin master:main因为只有一个分支，并且本地分支是master，希望推送到github上面的main分支，所以push时加上master:main如果有许多分支，试一下git push --all origin, 该命令不管是否存在对应的远程分支，将本地的所有分支都推送到远程主机验证： git clone https://github.com/xueldor/briefblog.git 下载下来看一下.git目录的大小，确定已经变小了很多，git log 和git reflog看到提交记录只剩一个了。
+需求：
+以 briefblog 这个仓库为例，需要删除以前的所以操作记录，就好像当前是第一次提交。不仅仅是清除git reflog的日志，而是希望抹除一切历史痕迹，让.git目录trim到最小。
+
+操作步骤：
+1. 备份整个文件夹，以备不虞
+2. 删除.git目录
+3. git init -> git add . -> git commit
+4. 关联到远程仓库： git remote add origin https://github.com/xueldor/briefblog.git
+5. 用--force参数推送：git push --force origin master:main
+因为只有一个分支，并且本地分支是master，希望推送到github上面的main分支，所以push时加上master:main
+
+如果有许多分支，试一下git push --all origin, 该命令不管是否存在对应的远程分支，将本地的所有分支都推送到远程主机
+
+验证：
+ git clone https://github.com/xueldor/briefblog.git 下载下来
+看一下.git目录的大小，确定已经变小了很多，git log 和git reflog看到提交记录只剩一个了。
+
+
+PS:
+代码下载下来，创建自己的分支。通过：git branch -vv查看本地分支和远程分支的关联情况。
+如果没有关联，pull和push的时候需要写全：git push origin HEAD:remoteBranch。
+创建分支的关联：git branch --set-upstream-to=origin/remotebranch mybranch
+用repo命令下载下来是游离分支，有时需要这个命令。

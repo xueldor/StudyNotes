@@ -26,6 +26,29 @@
 执行： 先cd到out目录，再执行`cmake ..`,这样生成的文件都在out目录下面。也可以在外面`cmake . -Bout`同样效果。  
 默认会生成makefile。再执行make即可生成目标。
 
+在add_executable后面追加源文件：
+
+```
+if(TEST_THREAD)
+    message("target_sources test_thread.c")
+    target_sources(c99c11new  PRIVATE test_thread.c)
+endif()
+```
+
+要执行CMakeLists.txt, 到所在目录，执行cmake命令即可。
+
+或者指定路径。
+
+指定使用ninja构建：`cmake -G Ninja`.
+
+生成compile_commands.json：  `cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=1`。
+
+`-D`选项可以定义一个变量并为其赋值
+
+导出系统变量：`cmake --system-information info.txt`,`CMAKE_EXPORT_COMPILE_COMMANDS`、`CMAKE_CXX_COMPILER`等都在里面。
+
+
+
 
 ## 01-includeheader：
 ```cmake
@@ -78,7 +101,40 @@ target_link_libraries(hello_binary
 2. if-else- else-endif语句
 3. C/C++ 里的条件编译`#ifdef`，在cmake里定义条件变量，传递给代码里。
 
+示例一：add_definitions
+
+格式为：` add_definitions(-D${宏名字})`
+
+```
+set(TEST_THREAD true) #change to true or false
+# add_definitions: 用于全局添加编译定义，作用范围是整个项目, 前面加-D
+if(TEST_THREAD)
+    message("include pthread")
+    add_definitions(-DTEST_THREAD)
+endif()
+```
+
+示例二：target_compile_definitions
+
+```
+# target_compile_definitions用于为特定的目标（例如可执行文件或库）设置编译定义
+if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+    target_compile_definitions(c99c11new PUBLIC MY_NAME="gcc")
+elseif (CMAKE_CXX_COMPILER_ID MATCHES "NVIDIA")
+    target_compile_definitions(c99c11new PUBLIC MY_NAME="nvcc")
+elseif (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    target_compile_definitions(c99c11new PUBLIC MY_NAME="clang")
+elseif (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+    target_compile_definitions(c99c11new PUBLIC MY_NAME="msvc")
+else()
+    target_compile_definitions(c99c11new PUBLIC MY_NAME="not defined")
+endif()
+```
+
+然后可以在代码里使用MY_NAME和TEST_THREAD这两个宏，就好像代码里的“#define MY_NAME”
+
 ## 05-link_library
+
 1. add_subdirectory(sub1)添加子模块。sub1可以是绝对路径，也可以是相对路径。
 2. sub1和sub2目录下必须存在CMakeLists.txt文件
 3. target_link_libraries链接到so文件和.a文件。
