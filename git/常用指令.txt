@@ -56,7 +56,8 @@ git pull 相当于 git fetch + git merge FETCH_HEAD
   4)不符合上面几条，直接报错
   5)如果执行git checkout origin/dev,注意在git中，远程分支是无法检出的，这句实际上会检出为detached head
 4、或者git clone时加上-b参数
-5、关联本地分支和远程分支git branch --set-upstream-to=origin/dev dev,末尾的dev可省
+5. git remote add origin 地址（设置远程remote地址）；
+6、关联本地分支和远程分支git branch --set-upstream-to=origin/dev dev,末尾的dev可省
 
 五、merge时出现冲突(状态为(master|MERGING))
 git diff --check:检查冲突标志
@@ -93,7 +94,7 @@ git ls-files -v | grep '^h\ '   //查看忽略列表
 repo sync得到的就是detached HEAD
 
 九、
-git branch -vv
+git branch -avv
 cat .git/config
 git remote show origin,如果remote不叫origin，改成对应的名字。从.git/config文件中可以看到[remote "origi"]
 查看本地和远程的关联

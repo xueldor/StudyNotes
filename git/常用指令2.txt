@@ -1,0 +1,11 @@
+查看某个文件从836到840行是什么时候提交的：
+git blame -L 836,840 com/android/server/am/ProcessList.java
+得到如下输出：
+635a6d5a0b92 services/java/com/android/server/am/ProcessList.java (Dianne Hackborn 2013-07-29 17:15:38 -0700 836)         if (false) {
+635a6d5a0b92 services/java/com/android/server/am/ProcessList.java (Dianne Hackborn 2013-07-29 17:15:38 -0700 837)             Slog.i("XXXXXX", "scaleMem=" + scaleMem);
+635a6d5a0b92 services/java/com/android/server/am/ProcessList.java (Dianne Hackborn 2013-07-29 17:15:38 -0700 838)             Slog.i("XXXXXX", "scaleDisp=" + scaleDisp + " dw=" + displayWidth
+635a6d5a0b92 services/java/com/android/server/am/ProcessList.java (Dianne Hackborn 2013-07-29 17:15:38 -0700 839)                     + " dh=" + displayHeight);
+635a6d5a0b92 services/java/com/android/server/am/ProcessList.java (Dianne Hackborn 2013-07-29 17:15:38 -0700 840)         }
+
+即知道是在635a6d5a0b92 这笔提交里。然后git show 635a6d5a0b92查看详情。
+或git diff 635a6d5a0b92^ 635a6d5a0b92查阅这次提交与上次的差异。或git log 635a6d5a0b92。
