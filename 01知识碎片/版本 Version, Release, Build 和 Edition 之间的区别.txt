@@ -1,0 +1,9 @@
+Version -- 软件的公开发行版本，强调功能性。通常在功能方面有一定的/重大改变、改进或增加，包括对一些重大bug的修复。例如：V1.0, V1.01, V2.0, V2.3...，Windows 2000, XP, Vista, 7 等。
+
+Release -- 软件的公开发行版本，强调软件由调试/内测阶段转为正式发布/发行阶段。
+
+Build -- 对程序源代码做任何修改并重新编译后生成的版本，可能发生在软件公开发行前的调试、优化、测试阶段，也可能发生在软件正式发布后。同release相比，其发生较为频繁，每编译一次，即会产生一个 build。例如：SDL Trados 8.3.0.863 (Build 863)
+
+Edition -- 通常表示按特定对象、特定群体进行分类的软件版本，强调软件的目标受众。例如： Trados 6.5 Freelance Edition, LSP Edition; Windows XP Home Edition, BussIness Edition。
+
+【示例】Official Release of PocketWeather Ver. 2.0.7 Enterprise Edition (Build 326)

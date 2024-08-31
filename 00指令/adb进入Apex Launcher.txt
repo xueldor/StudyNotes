@@ -1,0 +1,2 @@
+adb shell am start -n com.anddoes.launcher/com.anddoes.launcher.Launcher
+adb shell am start -W com.anddoes.launcher 显示启动时间

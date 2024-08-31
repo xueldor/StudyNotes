@@ -1,0 +1,12 @@
+adb shell dumpsys activity
+
+adb shell dumpsys activity broadcasts
+
+adb shell dumpsys activity providers
+
+adb shell dumpsys activity services
+
+adb shell dumpsys activity activities
+
+adb shell dumpsys activity processes
+

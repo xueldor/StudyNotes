@@ -1,0 +1,7 @@
+mount -r -w -o remount /system
+mount -o rw,remount /system 
+adb shell mount -o remount rw / 
+
+Ä£ÄâÆ÷root£º
+adb root
+adb remount

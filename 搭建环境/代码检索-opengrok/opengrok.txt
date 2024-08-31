@@ -1,0 +1,118 @@
+下载：
+1. jdk
+2. tomcat
+3. opengrok
+
+export JAVA_HOME=/xxx/jdk
+export PATH=${JAVA_HOME}/bin:$PATH
+
+安装ctags：
+1. 卸载掉已经不维护的exuberant ctags, 改用universal-ctags
+sudo apt purge exuberant-ctags
+sudo apt install universal-ctags
+如果没有universal-ctags软件包，就得自己下载编译安装：
+2.   sudo apt install gcc make pkg-config autoconf automake python3-docutils \
+   libseccomp-dev libjansson-dev libyaml-dev libxml2-dev
+尤其是autoconf一定要装，否则下一步无法编译
+3. https://github.com/universal-ctags/ctags下载最新，执行
+./autogen.sh
+./configure
+make
+sudo make install
+
+部署：
+opengrok解压后将/lib/source.war放在tomcat文件夹的webapp的目录下。
+然后打开webapps/source/WEB-INF/web.xml，修改param-value：
+    <context-param>
+        <description>Full path to the configuration file where OpenGrok can read its configuration</description>
+        <param-name>CONFIGURATION</param-name>
+        <param-value>/home/work/opengrok_data/data/configuration.xml</param-value>
+    </context-param>
+主要是指定configuration.xml的位置。
+
+生成configuration.xml：
+1. 新建data文件夹，用于放置opengrok生成的索引数据。
+2. 命令生成
+java -Xmx524m \
+    -jar "/home/work/soft/opengrok-1.13.7/lib/opengrok.jar" \
+    -W "/home/work/opengrok_config/data/configuration.xml" \
+    -c "/usr/local/bin/ctags" \
+    -P -S -v \
+    -s "/home/work/opengrok_config/source" \
+    -d "/home/work/opengrok_config/data"
+如果不使用ctags：
+java -Xmx524m -jar "/home/work/soft/opengrok-1.13.7/lib/opengrok.jar" \
+       -W "/home/work/opengrok_config/data/configuration.xml" \
+       -P -S -v \
+       -s "/home/work/opengrok_config/source"
+       -d "/home/work/opengrok_config/data"
+
+/home/work/opengrok_config/source目录下放需要索引的源码，或者创建软链接指过去：
+ ln -s  /home/work/xue/CSA   CSA_master
+
+限制索引内容：
+1. 
+   --include "*.java"  \
+   --include "*.c" 
+只会索引java和c文件
+2. 
+ --ignore "d:tools" \
+ --ignore "d:test" 
+"d:" 表示目录。意思是排除tools和test目录。所有的tools和test目录，而不仅仅是根路径下第一层的test目录。
+组合 --ignore "d:test"和--include "*.java"后，test目录下的java不会扫描到。
+假设有个src目录，因为src不在ignore里，src里的java会扫描。src里假设一个后缀.jar文件，因为不在include里，故jar不会扫描到。
+
+以AOSP为例
+java -Xmx2096m \
+    -jar "/home/work/soft/opengrok-1.13.7/lib/opengrok.jar" \
+    -W "/home/work/opengrok_config/data/configuration.xml" \
+    -c "/usr/local/bin/ctags" \
+    -P -S -v \
+    -s "/home/work/opengrok_config/source" \
+    -d "/home/work/opengrok_config/data" \
+   --include "*.java"  \
+   --include "*.c"  \
+   --include "*.cpp"  \
+   --include "*.cc"  \
+   --include "*.h"  \
+   --include "*.hpp"  \
+   --include "*.mk"  \
+   --include "*.bp"  \
+   --include "*.aidl"  \
+   --include "*.hidl"  \
+   --include "*.xml"  \
+   --ignore "d:out"  \
+   --ignore "d:build"  \
+   --ignore "d:cts"  \
+   --ignore "d:dalvik"  \
+   --ignore "d:developers"  \
+   --ignore "d:development"  \
+   --ignore "d:device"  \
+   --ignore "d:pdk"  \
+   --ignore "d:platform_testing"  \
+   --ignore "d:sdk"  \
+   --ignore "d:test"  \
+   --ignore "d:testing"  \
+   --ignore "d:tests"  \
+   --ignore "d:toolchain"  \
+   --ignore "d:tools"  \
+   --ignore "d:.git"  \
+   --ignore "d:.repo"
+
+help:
+java -jar lib/opengrok.jar --help
+
+部署多个AOSP，不同版本：
+如果一咕隆放到source目录，opengrok会把每个AOSP识别成一个Project，不是我们想要的。
+需要创建一个首页，从首页点进特定AOSP版本。
+tomcat webapps里，需要给每个AOSP创建一份。
+1. 
+https://github.com/aospapp  下载网址代码，放到tomcat webapps目录下的ROOT，原来的ROOT改名，这样打开网址http://192.168.xxx.xxx:8080/ 默认首页就是aospxref而不是tomcat管理了。
+编辑index.html, 列表改成你部署的。
+假设我有AndroidR_LA1.3.4_CCS5.0和CSA_master两个大项目。
+2. unzip source.war -d CSA_master
+unzip source.war -d AndroidR_LA1.3.4_CCS5.0
+3. 修改AndroidR_LA1.3.4_CCS5.0和CSA_master的web.xml
+4. 存放索引的目录，AndroidR_LA1.3.4_CCS5.0和CSA_master也分开
+5. 执行脚本restartAndIndex.sh
+

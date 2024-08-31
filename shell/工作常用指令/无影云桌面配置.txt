@@ -7,6 +7,7 @@ ubuntu18, 阿里无影云
 3. 自己新建的用户不能启动GUI程序。只有域账号和root账号可以执行gedit、vscode等程序。解决：
 在域账号的.bashrc文件添加一行: 
 xhost +
+不过这样每次打开新的shell都会执行一遍。所以加到.profile文件里更好
 
 4. 然后我们希望在桌面启动vscode时，就以新建的用户启动。用户名： xue
 我们先安装gosu：

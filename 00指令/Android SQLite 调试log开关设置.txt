@@ -1,0 +1,18 @@
+1.临时
+adb shell setprop log.tag.SQLiteStatements VERBOSE
+adb shell setprop log.tag.SQLiteTime VERBOSE
+adb shell stop
+adb shell start
+2.永久
+/system/build.prop末尾添加
+log.tag.SQLiteStatements=VERBOSE
+log.tag.SQLiteTime=VERBOSE
+
+初始化的配置文件包括/init.rc,/default.prop,/system/build.prop
+
+
+通过adb logcat 抓取log:
+logcat | grep SQLiteStatements
+logcat | grep SQLiteTime
+
+

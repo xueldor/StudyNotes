@@ -115,6 +115,22 @@ Host 192.168.20.24
            StrictHostKeyChecking no
            UserKnownHostsFile /dev/null
 
+常见问题：
+
+经常会遇到公钥已经添加到authorized_keys文件里，还是无法免密登录的情况。一般是权限问题。原因在于ssh服务会检查文件权限码，如777这种，会被认为不安全，于是让你输密码。执行以下命令：
+
+```
+chmod g-w /home/your_user
+chmod o-w /home/your_user
+# 或
+chmod 0755 /home/your_user
+
+chmod 700 /home/your_user/.ssh
+chmod 600 /home/your_user/.ssh/authorized_keys
+```
+
+或者找一台有效的机器对比一下，把authorized_keys文件的权限、用户及用户组，authorized_keys文件的父目录、祖父目录权限和所有者全改成一样的。一定会有效的。
+
 
 
 远程插件：

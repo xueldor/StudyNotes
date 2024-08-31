@@ -1,0 +1,1 @@
+repo forall -c 'commitID=`git log --before "2023-12-10 00:00:00" -1 --pretty=format:"%H"`; git reset --hard $commitID'

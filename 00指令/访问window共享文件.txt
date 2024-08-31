@@ -1,0 +1,4 @@
+1.window上将文件夹共享（假设文件名为UbuntuFile）
+2.Ubuntu里ping 宿主机计算机名，得到宿主机的IP
+3.新建文件夹：mkdir win
+4.挂载 sudo mount //ip/UbuntuFile  ./win -o username=宿主机用户名,password=宿主机登陆密码

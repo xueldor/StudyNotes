@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<!-- saved from url=(0050)http://www.cnblogs.com/shenliang123/p/3231312.html -->
+<html lang="zh-cn"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><script type="text/javascript" src="./几种任务调度的 Java 实现方法与比较 - 发表是最好的记忆 - 博客园_files/encoder.js"></script><script async="" src="http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?_=1477100897687"></script>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>几种任务调度的 Java 实现方法与比较 - 发表是最好的记忆 - 博客园</title>
+<link type="text/css" rel="stylesheet" href="./几种任务调度的 Java 实现方法与比较 - 发表是最好的记忆 - 博客园_files/blog-common.css">
+<link id="MainCss" type="text/css" rel="stylesheet" href="./几种任务调度的 Java 实现方法与比较 - 发表是最好的记忆 - 博客园_files/bundle-sea.css">
+<link id="mobile-style" media="only screen and (max-device-width: 980px)" type="text/css" rel="stylesheet" href="./几种任务调度的 Java 实现方法与比较 - 发表是最好的记忆 - 博客园_files/bundle-sea-mobile.css">
+<link title="RSS" type="application/rss+xml" rel="alternate" href="http://www.cnblogs.com/shenliang123/rss">
+<link title="RSD" type="application/rsd+xml" rel="EditURI" href="http://www.cnblogs.com/shenliang123/rsd.xml">
+<link type="application/wlwmanifest+xml" rel="wlwmanifest" href="http://www.cnblogs.com/shenliang123/wlwmanifest.xml">
+<script src="./几种任务调度的 Java 实现方法与比较 - 发表是最好的记忆 - 博客园_files/jquery.js" type="text/javascript"></script><style type="text/css"></style>  
+<script type="text/javascript">var currentBlogApp = 'shenliang123', cb_enable_mathjax=false;var isLogined=false;</script>
+<script src="./几种任务调度的 Java 实现方法与比较 - 发表是最好的记忆 - 博客园_files/blog-common.js" type="text/javascript"></script>
+</head>
+<body>
+<a name="top"></a>
+
+<!--done-->
+<div id="header">
+	
+<!--done-->
+<div class="header">
+	<div class="headerText">
+		<a id="Header1_HeaderTitle" class="headermaintitle" href="http://www.cnblogs.com/shenliang123/">亮仔的博客</a><br>
+		java EE
+	</div>
+</div>
+
+</div>
+
+<div id="mytopmenu">
+	
+		<div id="mylinks"><a id="blog_nav_sitehome" class="menu" href="http://www.cnblogs.com/">博客园</a> &nbsp;
+<a id="blog_nav_myhome" class="menu" href="http://www.cnblogs.com/shenliang123/">首页</a> &nbsp;
+<a id="blog_nav_newpost" class="menu" rel="nofollow" href="https://i.cnblogs.com/EditPosts.aspx?opt=1">新随笔</a> &nbsp;
+<a id="blog_nav_contact" class="menu" rel="nofollow" href="https://msg.cnblogs.com/send/%E5%8F%91%E8%A1%A8%E6%98%AF%E6%9C%80%E5%A5%BD%E7%9A%84%E8%AE%B0%E5%BF%86">联系</a> &nbsp;
+<a id="blog_nav_rss" class="menu" href="http://www.cnblogs.com/shenliang123/rss">订阅</a><a id="blog_nav_rss_image" href="http://www.cnblogs.com/shenliang123/rss"><img src="./几种任务调度的 Java 实现方法与比较 - 发表是最好的记忆 - 博客园_files/xml.gif" alt="订阅"></a>&nbsp;
+<a id="blog_nav_admin" class="menu" rel="nofollow" href="https://i.cnblogs.com/">管理</a>
+</div>
+		<div id="mystats"><div id="blog_stats">
+随笔-189&nbsp;
+评论-246&nbsp;
+文章-1&nbsp;
+<!--trackbacks-0-->
+</div></div>
+	
+</div>
+<div id="centercontent">
+	
+<div id="post_detail">
+<div class="post">
+	<h1 class="postTitle"><a id="cb_post_title_url" class="postTitle2" href="http://www.cnblogs.com/shenliang123/p/3231312.html">几种任务调度的 Java 实现方法与比较</a></h1>
+	<div id="cnblogs_post_body"><p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">综观目前的 Web 应用，多数应用都具备任务调度的功能。本文由浅入深介绍了几种任务调度的 Java 实现方法，包括 Timer，Scheduler, Quartz 以及 JCron Tab，并对其优缺点进行比较，目的在于给需要开发任务调度的程序员提供有价值的参考。</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">&nbsp;</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">任务调度是指基于给定时间点，给定时间间隔或者给定执行次数自动执行任务。本文由浅入深介绍四种任务调度的 Java 实现：</p>
+<ul style="list-style-position: inside; text-align: left; text-transform: none; background-color: #ffffff; list-style-type: disc; text-indent: 0px; margin: 10px 0px 20px 20px; font: 14px/20px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">
+<li style="margin: 0px; padding: 0px;">Timer</li>
+<li style="margin: 0px; padding: 0px;">ScheduledExecutor</li>
+<li style="margin: 0px; padding: 0px;">开源工具包 Quartz</li>
+<li style="margin: 0px; padding: 0px;">开源工具包 JCronTab</li>
+</ul>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">此外，为结合实现复杂的任务调度，本文还将介绍 Calendar 的一些使用方法。</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;"><span style="margin: 0px; padding: 0px;">Timer</span></p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">相信大家都已经非常熟悉 java.util.Timer 了，它是最简单的一种实现任务调度的方法，下面给出一个具体的例子：</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./几种任务调度的 Java 实现方法与比较 - 发表是最好的记忆 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre> <span style="color: #0000ff;">package</span><span style="color: #000000;"> com.ibm.scheduler; 
+ </span><span style="color: #0000ff;">import</span><span style="color: #000000;"> java.util.Timer; 
+ </span><span style="color: #0000ff;">import</span><span style="color: #000000;"> java.util.TimerTask; 
+
+ </span><span style="color: #0000ff;">public</span> <span style="color: #0000ff;">class</span> TimerTest <span style="color: #0000ff;">extends</span><span style="color: #000000;"> TimerTask { 
+
+ </span><span style="color: #0000ff;">private</span> String jobName = ""<span style="color: #000000;">; 
+
+ </span><span style="color: #0000ff;">public</span><span style="color: #000000;"> TimerTest(String jobName) { 
+ </span><span style="color: #0000ff;">super</span><span style="color: #000000;">(); 
+ </span><span style="color: #0000ff;">this</span>.jobName =<span style="color: #000000;"> jobName; 
+ } 
+
+ @Override 
+ </span><span style="color: #0000ff;">public</span> <span style="color: #0000ff;">void</span><span style="color: #000000;"> run() { 
+ System.out.println(</span>"execute " +<span style="color: #000000;"> jobName); 
+ } 
+
+ </span><span style="color: #0000ff;">public</span> <span style="color: #0000ff;">static</span> <span style="color: #0000ff;">void</span><span style="color: #000000;"> main(String[] args) { 
+ Timer timer </span>= <span style="color: #0000ff;">new</span><span style="color: #000000;"> Timer(); 
+ </span><span style="color: #0000ff;">long</span> delay1 = 1 * 1000<span style="color: #000000;">; 
+ </span><span style="color: #0000ff;">long</span> period1 = 1000<span style="color: #000000;">; 
+ </span><span style="color: #008000;">//</span><span style="color: #008000;"> 从现在开始 1 秒钟之后，每隔 1 秒钟执行一次 job1 </span>
+ timer.schedule(<span style="color: #0000ff;">new</span> TimerTest("job1"<span style="color: #000000;">), delay1, period1); 
+ </span><span style="color: #0000ff;">long</span> delay2 = 2 * 1000<span style="color: #000000;">; 
+ </span><span style="color: #0000ff;">long</span> period2 = 2000<span style="color: #000000;">; 
+ </span><span style="color: #008000;">//</span><span style="color: #008000;"> 从现在开始 2 秒钟之后，每隔 2 秒钟执行一次 job2 </span>
+ timer.schedule(<span style="color: #0000ff;">new</span> TimerTest("job2"<span style="color: #000000;">), delay2, period2); 
+ } 
+ } </span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./几种任务调度的 Java 实现方法与比较 - 发表是最好的记忆 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>/**<br>输出结果: <br>execute job1 <br>execute job1 <br>execute job2 <br>execute job1 <br>execute job1 <br>execute job2 <br>*/</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">&nbsp;</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">使用 Timer 实现任务调度的核心类是 Timer 和 TimerTask。其中 Timer 负责设定 TimerTask 的起始与间隔执行时间。使用者只需要创建一个 TimerTask 的继承类，实现自己的 run 方法，然后将其丢给 Timer 去执行即可。</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">Timer 的设计核心是一个 TaskList 和一个 TaskThread。Timer 将接收到的任务丢到自己的 TaskList 中，TaskList 按照 Task 的最初执行时间进行排序。TimerThread 在创建 Timer 时会启动成为一个守护线程。这个线程会轮询所有任务，找到一个最近要执行的任务，然后休眠，当到达最近要执行任务的开始时间点，TimerThread 被唤醒并执行该任务。之后 TimerThread 更新最近一个要执行的任务，继续休眠。</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">Timer 的优点在于简单易用，但由于所有任务都是由同一个线程来调度，因此所有任务都是串行执行的，同一时间只能有一个任务在执行，前一个任务的延迟或异常都将会影响到之后的任务。</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">&nbsp;</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">&nbsp;</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;"><span style="margin: 0px; padding: 0px;">ScheduledExecutor</span></p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">鉴于 Timer 的上述缺陷，Java 5 推出了基于线程池设计的 ScheduledExecutor。其设计思想是，每一个被调度的任务都会由线程池中一个线程去执行，因此任务是并发执行的，相互之间不会受到干扰。需 要注意的是，只有当任务的执行时间到来时，ScheduedExecutor 才会真正启动一个线程，其余时间 ScheduledExecutor 都是在轮询任务的状态。</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./几种任务调度的 Java 实现方法与比较 - 发表是最好的记忆 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: #0000ff;">package</span><span style="color: #000000;"> com.ibm.scheduler;
+</span><span style="color: #0000ff;">import</span><span style="color: #000000;"> java.util.concurrent.Executors;
+</span><span style="color: #0000ff;">import</span><span style="color: #000000;"> java.util.concurrent.ScheduledExecutorService;
+</span><span style="color: #0000ff;">import</span><span style="color: #000000;"> java.util.concurrent.TimeUnit;
+
+</span><span style="color: #0000ff;">public</span> <span style="color: #0000ff;">class</span> ScheduledExecutorTest <span style="color: #0000ff;">implements</span><span style="color: #000000;"> Runnable {
+    </span><span style="color: #0000ff;">private</span> String jobName = ""<span style="color: #000000;">;
+
+    </span><span style="color: #0000ff;">public</span><span style="color: #000000;"> ScheduledExecutorTest(String jobName) {
+        </span><span style="color: #0000ff;">super</span><span style="color: #000000;">();
+        </span><span style="color: #0000ff;">this</span>.jobName =<span style="color: #000000;"> jobName;
+    }
+
+    @Override
+    </span><span style="color: #0000ff;">public</span> <span style="color: #0000ff;">void</span><span style="color: #000000;"> run() {
+        System.out.println(</span>"execute " +<span style="color: #000000;"> jobName);
+    }
+
+    </span><span style="color: #0000ff;">public</span> <span style="color: #0000ff;">static</span> <span style="color: #0000ff;">void</span><span style="color: #000000;"> main(String[] args) {
+        ScheduledExecutorService service </span>= Executors.newScheduledThreadPool(10<span style="color: #000000;">);
+
+        </span><span style="color: #0000ff;">long</span> initialDelay1 = 1<span style="color: #000000;">;
+        </span><span style="color: #0000ff;">long</span> period1 = 1<span style="color: #000000;">;
+        </span><span style="color: #008000;">//</span><span style="color: #008000;"> 从现在开始1秒钟之后，每隔1秒钟执行一次job1</span>
+<span style="color: #000000;">        service.scheduleAtFixedRate(
+                </span><span style="color: #0000ff;">new</span> ScheduledExecutorTest("job1"<span style="color: #000000;">), initialDelay1,
+                period1, TimeUnit.SECONDS);
+
+        </span><span style="color: #0000ff;">long</span> initialDelay2 = 1<span style="color: #000000;">;
+        </span><span style="color: #0000ff;">long</span> delay2 = 1<span style="color: #000000;">;
+        </span><span style="color: #008000;">//</span><span style="color: #008000;"> 从现在开始2秒钟之后，每隔2秒钟执行一次job2</span>
+<span style="color: #000000;">        service.scheduleWithFixedDelay(
+                </span><span style="color: #0000ff;">new</span> ScheduledExecutorTest("job2"<span style="color: #000000;">), initialDelay2,
+                delay2, TimeUnit.SECONDS);
+    }
+}</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./几种任务调度的 Java 实现方法与比较 - 发表是最好的记忆 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>/**<br>输出结果:<br>execute job1<br>execute job1<br>execute job2<br>execute job1<br>execute job1<br>execute job2<br>*/</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">&nbsp;</p>
+<p><span style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; display: inline !important; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; float: none; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px;">上面代码展示了 ScheduledExecutorService 中两种最常用的调度方法 ScheduleAtFixedRate 和 ScheduleWithFixedDelay。ScheduleAtFixedRate 每次执行时间为上一次任务开始起向后推一个时间间隔，即每次执行时间为 :initialDelay, initialDelay+period, initialDelay+2*period, …；ScheduleWithFixedDelay 每次执行时间为上一次任务结束起向后推一个时间间隔，即每次执行时间为：initialDelay, initialDelay+executeTime+delay, initialDelay+2*executeTime+2*delay。由此可见，ScheduleAtFixedRate 是基于固定时间间隔进行任务调度，ScheduleWithFixedDelay 取决于每次任务执行的时间长短，是基于不固定时间间隔进行任务调度。 &nbsp;</span></p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">&nbsp;</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;"><span style="margin: 0px; padding: 0px;"><strong style="margin: 0px; padding: 0px;">用 ScheduledExecutor 和 Calendar 实现复杂任务调度</strong></span></p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">Timer 和 ScheduledExecutor 都仅能提供基于开始时间与重复间隔的任务调度，不能胜任更加复杂的调度需求。比如，设置每星期二的 16:38:10 执行任务。该功能使用 Timer 和 ScheduledExecutor 都不能直接实现，但我们可以借助 Calendar 间接实现该功能。</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./几种任务调度的 Java 实现方法与比较 - 发表是最好的记忆 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: #0000ff;">package</span><span style="color: #000000;"> com.ibm.scheduler;
+
+</span><span style="color: #0000ff;">import</span><span style="color: #000000;"> java.util.Calendar;
+</span><span style="color: #0000ff;">import</span><span style="color: #000000;"> java.util.Date;
+</span><span style="color: #0000ff;">import</span><span style="color: #000000;"> java.util.TimerTask;
+</span><span style="color: #0000ff;">import</span><span style="color: #000000;"> java.util.concurrent.Executors;
+</span><span style="color: #0000ff;">import</span><span style="color: #000000;"> java.util.concurrent.ScheduledExecutorService;
+</span><span style="color: #0000ff;">import</span><span style="color: #000000;"> java.util.concurrent.TimeUnit;
+
+</span><span style="color: #0000ff;">public</span> <span style="color: #0000ff;">class</span> ScheduledExceutorTest2 <span style="color: #0000ff;">extends</span><span style="color: #000000;"> TimerTask {
+
+    </span><span style="color: #0000ff;">private</span> String jobName = ""<span style="color: #000000;">;
+
+    </span><span style="color: #0000ff;">public</span><span style="color: #000000;"> ScheduledExceutorTest2(String jobName) {
+        </span><span style="color: #0000ff;">super</span><span style="color: #000000;">();
+        </span><span style="color: #0000ff;">this</span>.jobName =<span style="color: #000000;"> jobName;
+    }
+
+    @Override
+    </span><span style="color: #0000ff;">public</span> <span style="color: #0000ff;">void</span><span style="color: #000000;"> run() {
+        System.out.println(</span>"Date = "+<span style="color: #0000ff;">new</span> Date()+", execute " +<span style="color: #000000;"> jobName);
+    }
+
+    </span><span style="color: #008000;">/**</span><span style="color: #008000;">
+     * 计算从当前时间currentDate开始，满足条件dayOfWeek, hourOfDay, 
+     * minuteOfHour, secondOfMinite的最近时间
+     * </span><span style="color: #808080;">@return</span>
+     <span style="color: #008000;">*/</span>
+    <span style="color: #0000ff;">public</span> Calendar getEarliestDate(Calendar currentDate, <span style="color: #0000ff;">int</span><span style="color: #000000;"> dayOfWeek,
+            </span><span style="color: #0000ff;">int</span> hourOfDay, <span style="color: #0000ff;">int</span> minuteOfHour, <span style="color: #0000ff;">int</span><span style="color: #000000;"> secondOfMinite) {
+        </span><span style="color: #008000;">//</span><span style="color: #008000;">计算当前时间的WEEK_OF_YEAR,DAY_OF_WEEK, HOUR_OF_DAY, MINUTE,SECOND等各个字段值</span>
+        <span style="color: #0000ff;">int</span> currentWeekOfYear =<span style="color: #000000;"> currentDate.get(Calendar.WEEK_OF_YEAR);
+        </span><span style="color: #0000ff;">int</span> currentDayOfWeek =<span style="color: #000000;"> currentDate.get(Calendar.DAY_OF_WEEK);
+        </span><span style="color: #0000ff;">int</span> currentHour =<span style="color: #000000;"> currentDate.get(Calendar.HOUR_OF_DAY);
+        </span><span style="color: #0000ff;">int</span> currentMinute =<span style="color: #000000;"> currentDate.get(Calendar.MINUTE);
+        </span><span style="color: #0000ff;">int</span> currentSecond =<span style="color: #000000;"> currentDate.get(Calendar.SECOND);
+
+        </span><span style="color: #008000;">//</span><span style="color: #008000;">如果输入条件中的dayOfWeek小于当前日期的dayOfWeek,则WEEK_OF_YEAR需要推迟一周</span>
+        <span style="color: #0000ff;">boolean</span> weekLater = <span style="color: #0000ff;">false</span><span style="color: #000000;">;
+        </span><span style="color: #0000ff;">if</span> (dayOfWeek &lt;<span style="color: #000000;"> currentDayOfWeek) {
+            weekLater </span>= <span style="color: #0000ff;">true</span><span style="color: #000000;">;
+        } </span><span style="color: #0000ff;">else</span> <span style="color: #0000ff;">if</span> (dayOfWeek ==<span style="color: #000000;"> currentDayOfWeek) {
+            </span><span style="color: #008000;">//</span><span style="color: #008000;">当输入条件与当前日期的dayOfWeek相等时，如果输入条件中的
+            </span><span style="color: #008000;">//</span><span style="color: #008000;">hourOfDay小于当前日期的
+            </span><span style="color: #008000;">//</span><span style="color: #008000;">currentHour，则WEEK_OF_YEAR需要推迟一周    </span>
+            <span style="color: #0000ff;">if</span> (hourOfDay &lt;<span style="color: #000000;"> currentHour) {
+                weekLater </span>= <span style="color: #0000ff;">true</span><span style="color: #000000;">;
+            } </span><span style="color: #0000ff;">else</span> <span style="color: #0000ff;">if</span> (hourOfDay ==<span style="color: #000000;"> currentHour) {
+                 </span><span style="color: #008000;">//</span><span style="color: #008000;">当输入条件与当前日期的dayOfWeek, hourOfDay相等时，
+                 </span><span style="color: #008000;">//</span><span style="color: #008000;">如果输入条件中的minuteOfHour小于当前日期的
+                </span><span style="color: #008000;">//</span><span style="color: #008000;">currentMinute，则WEEK_OF_YEAR需要推迟一周</span>
+                <span style="color: #0000ff;">if</span> (minuteOfHour &lt;<span style="color: #000000;"> currentMinute) {
+                    weekLater </span>= <span style="color: #0000ff;">true</span><span style="color: #000000;">;
+                } </span><span style="color: #0000ff;">else</span> <span style="color: #0000ff;">if</span> (minuteOfHour ==<span style="color: #000000;"> currentSecond) {
+                     </span><span style="color: #008000;">//</span><span style="color: #008000;">当输入条件与当前日期的dayOfWeek, hourOfDay， 
+                     </span><span style="color: #008000;">//</span><span style="color: #008000;">minuteOfHour相等时，如果输入条件中的
+                    </span><span style="color: #008000;">//</span><span style="color: #008000;">secondOfMinite小于当前日期的currentSecond，
+                    </span><span style="color: #008000;">//</span><span style="color: #008000;">则WEEK_OF_YEAR需要推迟一周</span>
+                    <span style="color: #0000ff;">if</span> (secondOfMinite &lt;<span style="color: #000000;"> currentSecond) {
+                        weekLater </span>= <span style="color: #0000ff;">true</span><span style="color: #000000;">;
+                    }
+                }
+            }
+        }
+        </span><span style="color: #0000ff;">if</span><span style="color: #000000;"> (weekLater) {
+            </span><span style="color: #008000;">//</span><span style="color: #008000;">设置当前日期中的WEEK_OF_YEAR为当前周推迟一周</span>
+            currentDate.set(Calendar.WEEK_OF_YEAR, currentWeekOfYear + 1<span style="color: #000000;">);
+        }
+        </span><span style="color: #008000;">//</span><span style="color: #008000;"> 设置当前日期中的DAY_OF_WEEK,HOUR_OF_DAY,MINUTE,SECOND为输入条件中的值。</span>
+<span style="color: #000000;">        currentDate.set(Calendar.DAY_OF_WEEK, dayOfWeek);
+        currentDate.set(Calendar.HOUR_OF_DAY, hourOfDay);
+        currentDate.set(Calendar.MINUTE, minuteOfHour);
+        currentDate.set(Calendar.SECOND, secondOfMinite);
+        </span><span style="color: #0000ff;">return</span><span style="color: #000000;"> currentDate;
+
+    }
+
+    </span><span style="color: #0000ff;">public</span> <span style="color: #0000ff;">static</span> <span style="color: #0000ff;">void</span> main(String[] args) <span style="color: #0000ff;">throws</span><span style="color: #000000;"> Exception {
+
+        ScheduledExceutorTest2 test </span>= <span style="color: #0000ff;">new</span> ScheduledExceutorTest2("job1"<span style="color: #000000;">);
+        </span><span style="color: #008000;">//</span><span style="color: #008000;">获取当前时间</span>
+        Calendar currentDate =<span style="color: #000000;"> Calendar.getInstance();
+        </span><span style="color: #0000ff;">long</span> currentDateLong =<span style="color: #000000;"> currentDate.getTime().getTime();
+        System.out.println(</span>"Current Date = " +<span style="color: #000000;"> currentDate.getTime().toString());
+        </span><span style="color: #008000;">//</span><span style="color: #008000;">计算满足条件的最近一次执行时间</span>
+        Calendar earliestDate =<span style="color: #000000;"> test
+                .getEarliestDate(currentDate, </span>3, 16, 38, 10<span style="color: #000000;">);
+        </span><span style="color: #0000ff;">long</span> earliestDateLong =<span style="color: #000000;"> earliestDate.getTime().getTime();
+        System.out.println(</span>"Earliest Date = "
+                +<span style="color: #000000;"> earliestDate.getTime().toString());
+        </span><span style="color: #008000;">//</span><span style="color: #008000;">计算从当前时间到最近一次执行时间的时间间隔</span>
+        <span style="color: #0000ff;">long</span> delay = earliestDateLong -<span style="color: #000000;"> currentDateLong;
+        </span><span style="color: #008000;">//</span><span style="color: #008000;">计算执行周期为一星期</span>
+        <span style="color: #0000ff;">long</span> period = 7 * 24 * 60 * 60 * 1000<span style="color: #000000;">;
+        ScheduledExecutorService service </span>= Executors.newScheduledThreadPool(10<span style="color: #000000;">);
+        </span><span style="color: #008000;">//</span><span style="color: #008000;">从现在开始delay毫秒之后，每隔一星期执行一次job1</span>
+<span style="color: #000000;">        service.scheduleAtFixedRate(test, delay, period,
+                TimeUnit.MILLISECONDS);
+
+    }
+} </span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./几种任务调度的 Java 实现方法与比较 - 发表是最好的记忆 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>&nbsp;</p>
+<div><div id="highlighter_71471" class="syntaxhighlighter  java"><div class="toolbar"><span><a href="http://www.cnblogs.com/shenliang123/p/3231312.html#" class="toolbar_item command_help help">?</a></span></div><table border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="gutter"><div class="line number1 index0 alt2">1</div><div class="line number2 index1 alt1">2</div><div class="line number3 index2 alt2">3</div><div class="line number4 index3 alt1">4</div><div class="line number5 index4 alt2">5</div><div class="line number6 index5 alt1">6</div><div class="line number7 index6 alt2">7</div></td><td class="code"><div class="container"><div class="line number1 index0 alt2"><code class="java preprocessor">/**</code></div><div class="line number2 index1 alt1"><code class="java preprocessor">输出结果:</code></div><div class="line number3 index2 alt2"><code class="java preprocessor">Current Date = Wed Feb 02 17:32:01 CST 2011</code></div><div class="line number4 index3 alt1"><code class="java preprocessor">Earliest Date = Tue Feb 8 16:38:10 CST 2011</code></div><div class="line number5 index4 alt2"><code class="java preprocessor">Date = Tue Feb 8 16:38:10 CST 2011, execute job1</code></div><div class="line number6 index5 alt1"><code class="java preprocessor">Date = Tue Feb 15 16:38:10 CST 2011, execute job1</code></div><div class="line number7 index6 alt2"><code class="java preprocessor">*/</code></div></div></td></tr></tbody></table></div></div>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">&nbsp;</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">清单 3 实现了每星期二 16:38:10 调度任务的功能。其核心在于根据当前时间推算出最近一个星期二 16:38:10 的绝对时间，然后计算与当前时间的时间差，作为调用 ScheduledExceutor 函数的参数。计算最近时间要用到 java.util.calendar 的功能。首先需要解释 calendar 的一些设计思想。Calendar 有以下几种唯一标识一个日期的组合方式：</p>
+<table style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;" border="0" cellspacing="0" cellpadding="0">
+<tbody style="margin: 0px; padding: 0px;">
+<tr style="margin: 0px; padding: 0px;">
+<td style="margin: 0px; padding: 0px;">
+<pre class="displaycode"> YEAR + MONTH + DAY_OF_MONTH 
+ YEAR + MONTH + WEEK_OF_MONTH + DAY_OF_WEEK 
+ YEAR + MONTH + DAY_OF_WEEK_IN_MONTH + DAY_OF_WEEK 
+ YEAR + DAY_OF_YEAR 
+ YEAR + DAY_OF_WEEK + WEEK_OF_YEAR </pre>
+</td>
+</tr>
+</tbody>
+</table>
+<p>&nbsp;</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">上述组合分别加上 HOUR_OF_DAY + MINUTE + SECOND 即为一个完整的时间标识。本例采用了最后一种组合方式。输入为 DAY_OF_WEEK, HOUR_OF_DAY, MINUTE, SECOND 以及当前日期 , 输出为一个满足 DAY_OF_WEEK, HOUR_OF_DAY, MINUTE, SECOND 并且距离当前日期最近的未来日期。计算的原则是从输入的 DAY_OF_WEEK 开始比较，如果小于当前日期的 DAY_OF_WEEK，则需要向 WEEK_OF_YEAR 进一， 即将当前日期中的 WEEK_OF_YEAR 加一并覆盖旧值；如果等于当前的 DAY_OF_WEEK, 则继续比较 HOUR_OF_DAY；如果大于当前的 DAY_OF_WEEK，则直接调用 java.util.calenda 的 calendar.set(field, value) 函数将当前日期的 DAY_OF_WEEK, HOUR_OF_DAY, MINUTE, SECOND 赋值为输入值，依次类推，直到比较至 SECOND。读者可以根据输入需求选择不同的组合方式来计算最近执行时间。</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">可以看出，用上述方法实现该任务调度比较麻烦，这就需要一个更加完善的任务调度框架来解决这些复杂的调度问题。幸运的是，开源工具包 Quartz 与 JCronTab 提供了这方面强大的支持。</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">&nbsp;</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">&nbsp;</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;"><span style="margin: 0px; padding: 0px;"><strong style="margin: 0px; padding: 0px;">Quartz</strong></span></p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">Quartz 可以满足更多更复杂的调度需求，首先让我们看看如何用 Quartz 实现每星期二 16:38 的调度安排：</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./几种任务调度的 Java 实现方法与比较 - 发表是最好的记忆 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: #0000ff;">package</span><span style="color: #000000;"> com.ibm.scheduler;
+</span><span style="color: #0000ff;">import</span><span style="color: #000000;"> java.util.Date;
+
+</span><span style="color: #0000ff;">import</span><span style="color: #000000;"> org.quartz.Job;
+</span><span style="color: #0000ff;">import</span><span style="color: #000000;"> org.quartz.JobDetail;
+</span><span style="color: #0000ff;">import</span><span style="color: #000000;"> org.quartz.JobExecutionContext;
+</span><span style="color: #0000ff;">import</span><span style="color: #000000;"> org.quartz.JobExecutionException;
+</span><span style="color: #0000ff;">import</span><span style="color: #000000;"> org.quartz.Scheduler;
+</span><span style="color: #0000ff;">import</span><span style="color: #000000;"> org.quartz.SchedulerFactory;
+</span><span style="color: #0000ff;">import</span><span style="color: #000000;"> org.quartz.Trigger;
+</span><span style="color: #0000ff;">import</span><span style="color: #000000;"> org.quartz.helpers.TriggerUtils;
+
+</span><span style="color: #0000ff;">public</span> <span style="color: #0000ff;">class</span> QuartzTest <span style="color: #0000ff;">implements</span><span style="color: #000000;"> Job {
+
+    @Override
+    </span><span style="color: #008000;">//</span><span style="color: #008000;">该方法实现需要执行的任务</span>
+    <span style="color: #0000ff;">public</span> <span style="color: #0000ff;">void</span> execute(JobExecutionContext arg0) <span style="color: #0000ff;">throws</span><span style="color: #000000;"> JobExecutionException {
+        System.out.println(</span>"Generating report - "
+                + arg0.getJobDetail().getFullName() + ", type ="
+                + arg0.getJobDetail().getJobDataMap().get("type"<span style="color: #000000;">));
+        System.out.println(</span><span style="color: #0000ff;">new</span><span style="color: #000000;"> Date().toString());
+    }
+    </span><span style="color: #0000ff;">public</span> <span style="color: #0000ff;">static</span> <span style="color: #0000ff;">void</span><span style="color: #000000;"> main(String[] args) {
+        </span><span style="color: #0000ff;">try</span><span style="color: #000000;"> {
+            </span><span style="color: #008000;">//</span><span style="color: #008000;"> 创建一个Scheduler</span>
+            SchedulerFactory schedFact = 
+            <span style="color: #0000ff;">new</span><span style="color: #000000;"> org.quartz.impl.StdSchedulerFactory();
+            Scheduler sched </span>=<span style="color: #000000;"> schedFact.getScheduler();
+            sched.start();
+            </span><span style="color: #008000;">//</span><span style="color: #008000;"> 创建一个JobDetail，指明name，groupname，以及具体的Job类名，
+            </span><span style="color: #008000;">//</span><span style="color: #008000;">该Job负责定义需要执行任务</span>
+            JobDetail jobDetail = <span style="color: #0000ff;">new</span> JobDetail("myJob", "myJobGroup"<span style="color: #000000;">,
+                    QuartzTest.</span><span style="color: #0000ff;">class</span><span style="color: #000000;">);
+            jobDetail.getJobDataMap().put(</span>"type", "FULL"<span style="color: #000000;">);
+            </span><span style="color: #008000;">//</span><span style="color: #008000;"> 创建一个每周触发的Trigger，指明星期几几点几分执行</span>
+            Trigger trigger = TriggerUtils.makeWeeklyTrigger(3, 16, 38<span style="color: #000000;">);
+            trigger.setGroup(</span>"myTriggerGroup"<span style="color: #000000;">);
+            </span><span style="color: #008000;">//</span><span style="color: #008000;"> 从当前时间的下一秒开始执行</span>
+            trigger.setStartTime(TriggerUtils.getEvenSecondDate(<span style="color: #0000ff;">new</span><span style="color: #000000;"> Date()));
+            </span><span style="color: #008000;">//</span><span style="color: #008000;"> 指明trigger的name</span>
+            trigger.setName("myTrigger"<span style="color: #000000;">);
+            </span><span style="color: #008000;">//</span><span style="color: #008000;"> 用scheduler将JobDetail与Trigger关联在一起，开始调度任务</span>
+<span style="color: #000000;">            sched.scheduleJob(jobDetail, trigger);
+
+        } </span><span style="color: #0000ff;">catch</span><span style="color: #000000;"> (Exception e) {
+            e.printStackTrace();
+        }
+    }
+} </span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./几种任务调度的 Java 实现方法与比较 - 发表是最好的记忆 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>/**<br>输出结果:<br>Generating report - myJobGroup.myJob, type =FULL<br>Tue Feb 8 16:38:00 CST 2011<br>Generating report - myJobGroup.myJob, type =FUL<br>Tue Feb 15 16:38:00 CST 2011<br>*/</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">&nbsp;</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">清单 4 非常简洁地实现了一个上述复杂的任务调度。Quartz 设计的核心类包括 Scheduler, Job 以及 Trigger。其中，Job 负责定义需要执行的任务，Trigger 负责设置调度策略，Scheduler 将二者组装在一起，并触发任务开始执行。</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;"><span style="margin: 0px; padding: 0px;">Job</span></p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">使用者只需要创建一个 Job 的继承类，实现 execute 方法。JobDetail 负责封装 Job 以及 Job 的属性，并将其提供给 Scheduler 作为参数。每次 Scheduler 执行任务时，首先会创建一个 Job 的实例，然后再调用 execute 方法执行。Quartz 没有为 Job 设计带参数的构造函数，因此需要通过额外的 JobDataMap 来存储 Job 的属性。JobDataMap 可以存储任意数量的 Key，Value 对，例如：</p>
+<div class="cnblogs_code">
+<pre>jobDetail.getJobDataMap().put("myDescription", "my job description"<span style="color: #000000;">); 
+jobDetail.getJobDataMap().put(</span>"myValue", 1998<span style="color: #000000;">); 
+ArrayList</span>&lt;String&gt; list = <span style="color: #0000ff;">new</span> ArrayList&lt;String&gt;<span style="color: #000000;">(); 
+list.add(</span>"item1"<span style="color: #000000;">); 
+jobDetail.getJobDataMap().put(</span>"myArray", list); </pre>
+</div>
+<p>&nbsp;</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">&nbsp;<span style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; display: inline !important; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; float: none; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px;">JobDataMap 中的数据可以通过下面的方式获取：</span></p>
+<p>&nbsp;</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./几种任务调度的 Java 实现方法与比较 - 发表是最好的记忆 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: #0000ff;">public</span> <span style="color: #0000ff;">class</span> JobDataMapTest <span style="color: #0000ff;">implements</span><span style="color: #000000;"> Job {
+
+    @Override
+    </span><span style="color: #0000ff;">public</span> <span style="color: #0000ff;">void</span><span style="color: #000000;"> execute(JobExecutionContext context)
+            </span><span style="color: #0000ff;">throws</span><span style="color: #000000;"> JobExecutionException {
+        </span><span style="color: #008000;">//</span><span style="color: #008000;">从context中获取instName，groupName以及dataMap</span>
+        String instName =<span style="color: #000000;"> context.getJobDetail().getName();
+        String groupName </span>=<span style="color: #000000;"> context.getJobDetail().getGroup();
+        JobDataMap dataMap </span>=<span style="color: #000000;"> context.getJobDetail().getJobDataMap();
+        </span><span style="color: #008000;">//</span><span style="color: #008000;">从dataMap中获取myDescription，myValue以及myArray</span>
+        String myDescription = dataMap.getString("myDescription"<span style="color: #000000;">);
+        </span><span style="color: #0000ff;">int</span> myValue = dataMap.getInt("myValue"<span style="color: #000000;">);
+        ArrayList</span>&lt;String&gt; myArray = (ArrayListlt;Strin&gt;) dataMap.get("myArray"<span style="color: #000000;">);
+        System.out.println(</span><span style="color: #000000;">"
+</span>                Instance =" + instName + ", group = " + groupName
+                + ", description = " + myDescription + ", value =" +<span style="color: #000000;"> myValue
+                </span>+ ", array item0 = " + myArray.get(0<span style="color: #000000;">));
+
+    }
+}</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./几种任务调度的 Java 实现方法与比较 - 发表是最好的记忆 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<div><div id="highlighter_116812" class="syntaxhighlighter  java"><div class="toolbar"><span><a href="http://www.cnblogs.com/shenliang123/p/3231312.html#" class="toolbar_item command_help help">?</a></span></div><table border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="gutter"><div class="line number1 index0 alt2">1</div><div class="line number2 index1 alt1">2</div><div class="line number3 index2 alt2">3</div><div class="line number4 index3 alt1">4</div><div class="line number5 index4 alt2">5</div><div class="line number6 index5 alt1">6</div></td><td class="code"><div class="container"><div class="line number1 index0 alt2"><code class="java preprocessor">/**</code></div><div class="line number2 index1 alt1"><code class="java preprocessor">输出结果：</code></div><div class="line number3 index2 alt2"><code class="java preprocessor">Instance = myJob, group = myJobGroup, </code></div><div class="line number4 index3 alt1"><code class="java preprocessor">description = my job description, </code></div><div class="line number5 index4 alt2"><code class="java preprocessor">value =1998, array item0 = item1</code></div><div class="line number6 index5 alt1"><code class="java preprocessor">*/</code></div></div></td></tr></tbody></table></div></div>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">&nbsp;</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;"><span style="margin: 0px; padding: 0px;">Trigger</span></p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">Trigger 的作用是设置调度策略。Quartz 设计了多种类型的 Trigger，其中最常用的是 SimpleTrigger 和 CronTrigger。</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">SimpleTrigger 适用于在某一特定的时间执行一次，或者在某一特定的时间以某一特定时间间隔执行多次。上述功能决定了 SimpleTrigger 的参数包括 start-time, end-time, repeat count, 以及 repeat interval。</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">Repeat count 取值为大于或等于零的整数，或者常量 SimpleTrigger.REPEAT_INDEFINITELY。</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">Repeat interval 取值为大于或等于零的长整型。当 Repeat interval 取值为零并且 Repeat count 取值大于零时，将会触发任务的并发执行。</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">Start-time 与 dnd-time 取值为 java.util.Date。当同时指定 end-time 与 repeat count 时，优先考虑 end-time。一般地，可以指定 end-time，并设定 repeat count 为 REPEAT_INDEFINITELY。</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">以下是 SimpleTrigger 的构造方法：</p>
+<table style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;" border="0" cellspacing="0" cellpadding="0">
+<tbody style="margin: 0px; padding: 0px;">
+<tr style="margin: 0px; padding: 0px;">
+<td style="margin: 0px; padding: 0px;">
+<pre class="displaycode"> public SimpleTrigger(String name, 
+                       String group, 
+                       Date startTime, 
+                       Date endTime, 
+                       int repeatCount, 
+                       long repeatInterval) </pre>
+</td>
+</tr>
+</tbody>
+</table>
+<p>&nbsp;</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">举例如下：</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">创建一个立即执行且仅执行一次的 SimpleTrigger：</p>
+<div><div id="highlighter_367059" class="syntaxhighlighter  java"><div class="toolbar"><span><a href="http://www.cnblogs.com/shenliang123/p/3231312.html#" class="toolbar_item command_help help">?</a></span></div><table border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="gutter"><div class="line number1 index0 alt2">1</div><div class="line number2 index1 alt1">2</div></td><td class="code"><div class="container"><div class="line number1 index0 alt2"><code class="java plain">SimpleTrigger trigger=</code></div><div class="line number2 index1 alt1"><code class="java spaces">&nbsp;</code><code class="java keyword">new</code> <code class="java plain">SimpleTrigger(</code><code class="java string">"myTrigger"</code><code class="java plain">, </code><code class="java string">"myGroup"</code><code class="java plain">, </code><code class="java keyword">new</code> <code class="java plain">Date(), </code><code class="java keyword">null</code><code class="java plain">, </code><code class="java value">0</code><code class="java plain">, 0L);</code></div></div></td></tr></tbody></table></div></div>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">创建一个半分钟后开始执行，且每隔一分钟重复执行一次的 SimpleTrigger：</p>
+<div><div id="highlighter_407948" class="syntaxhighlighter  java"><div class="toolbar"><span><a href="http://www.cnblogs.com/shenliang123/p/3231312.html#" class="toolbar_item command_help help">?</a></span></div><table border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="gutter"><div class="line number1 index0 alt2">1</div><div class="line number2 index1 alt1">2</div><div class="line number3 index2 alt2">3</div></td><td class="code"><div class="container"><div class="line number1 index0 alt2"><code class="java plain">SimpleTrigger trigger=</code></div><div class="line number2 index1 alt1"><code class="java spaces">&nbsp;</code><code class="java keyword">new</code> <code class="java plain">SimpleTrigger(</code><code class="java string">"myTrigger"</code><code class="java plain">, </code><code class="java string">"myGroup"</code><code class="java plain">, </code></div><div class="line number3 index2 alt2"><code class="java spaces">&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="java keyword">new</code> <code class="java plain">Date(System.currentTimeMillis()+</code><code class="java value">30</code><code class="java plain">*</code><code class="java value">1000</code><code class="java plain">), </code><code class="java keyword">null</code><code class="java plain">, </code><code class="java value">0</code><code class="java plain">, </code><code class="java value">60</code><code class="java plain">*</code><code class="java value">1000</code><code class="java plain">);</code></div></div></td></tr></tbody></table></div></div>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">创建一个 2011 年 6 月 1 日 8:30 开始执行，每隔一小时执行一次，一共执行一百次，一天之后截止的 SimpleTrigger：</p>
+<div><div id="highlighter_801797" class="syntaxhighlighter  java"><div class="toolbar"><span><a href="http://www.cnblogs.com/shenliang123/p/3231312.html#" class="toolbar_item command_help help">?</a></span></div><table border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="gutter"><div class="line number1 index0 alt2">1</div><div class="line number2 index1 alt1">2</div><div class="line number3 index2 alt2">3</div><div class="line number4 index3 alt1">4</div><div class="line number5 index4 alt2">5</div><div class="line number6 index5 alt1">6</div><div class="line number7 index6 alt2">7</div><div class="line number8 index7 alt1">8</div><div class="line number9 index8 alt2">9</div><div class="line number10 index9 alt1">10</div><div class="line number11 index10 alt2">11</div><div class="line number12 index11 alt1">12</div></td><td class="code"><div class="container"><div class="line number1 index0 alt2"><code class="java plain">Calendar calendar = Calendar.getInstance(); </code></div><div class="line number2 index1 alt1"><code class="java plain">calendar.set(Calendar.YEAR, </code><code class="java value">2011</code><code class="java plain">); </code></div><div class="line number3 index2 alt2"><code class="java plain">calendar.set(Calendar.MONTH, Calendar.JUNE); </code></div><div class="line number4 index3 alt1"><code class="java plain">calendar.set(Calendar.DAY_OF_MONTH, </code><code class="java value">1</code><code class="java plain">); </code></div><div class="line number5 index4 alt2"><code class="java plain">calendar.set(Calendar.HOUR, </code><code class="java value">8</code><code class="java plain">); </code></div><div class="line number6 index5 alt1"><code class="java plain">calendar.set(Calendar.MINUTE, </code><code class="java value">30</code><code class="java plain">); </code></div><div class="line number7 index6 alt2"><code class="java plain">calendar.set(Calendar.SECOND, </code><code class="java value">0</code><code class="java plain">); </code></div><div class="line number8 index7 alt1"><code class="java plain">calendar.set(Calendar.MILLISECOND, </code><code class="java value">0</code><code class="java plain">); </code></div><div class="line number9 index8 alt2"><code class="java plain">Date startTime = calendar.getTime(); </code></div><div class="line number10 index9 alt1"><code class="java plain">Date endTime = </code><code class="java keyword">new</code> <code class="java plain">Date (calendar.getTimeInMillis() +</code><code class="java value">24</code><code class="java plain">*</code><code class="java value">60</code><code class="java plain">*</code><code class="java value">60</code><code class="java plain">*</code><code class="java value">1000</code><code class="java plain">); </code></div><div class="line number11 index10 alt2"><code class="java plain">SimpleTrigger trigger=</code><code class="java keyword">new</code> <code class="java plain">SimpleTrigger(</code><code class="java string">"myTrigger"</code><code class="java plain">, </code></div><div class="line number12 index11 alt1"><code class="java spaces">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="java string">"myGroup"</code><code class="java plain">, startTime, endTime, </code><code class="java value">100</code><code class="java plain">, </code><code class="java value">60</code><code class="java plain">*</code><code class="java value">60</code><code class="java plain">*</code><code class="java value">1000</code><code class="java plain">);</code></div></div></td></tr></tbody></table></div></div>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">上述最后一个例子中，同时设置了 end-time 与 repeat count，则优先考虑 end-time，总共可以执行二十四次。</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">CronTrigger 的用途更广，相比基于特定时间间隔进行调度安排的 SimpleTrigger，CronTrigger 主要适用于基于日历的调度安排。例如：每星期二的 16:38:10 执行，每月一号执行，以及更复杂的调度安排等。</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">CronTrigger 同样需要指定 start-time 和 end-time，其核心在于 Cron 表达式，由七个字段组成：</p>
+<table style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;" border="0" cellspacing="0" cellpadding="0">
+<tbody style="margin: 0px; padding: 0px;">
+<tr style="margin: 0px; padding: 0px;">
+<td style="margin: 0px; padding: 0px;">
+<pre class="displaycode"> Seconds 
+ Minutes 
+ Hours 
+ Day-of-Month 
+ Month 
+ Day-of-Week 
+ Year (Optional field) </pre>
+</td>
+</tr>
+</tbody>
+</table>
+<p>&nbsp;</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">举例如下：</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">创建一个每三小时执行的 CronTrigger，且从每小时的整点开始执行：</p>
+<table style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;" border="0" cellspacing="0" cellpadding="0">
+<tbody style="margin: 0px; padding: 0px;">
+<tr style="margin: 0px; padding: 0px;">
+<td style="margin: 0px; padding: 0px;">
+<pre class="displaycode"> 0 0 0/3  * * ? </pre>
+</td>
+</tr>
+</tbody>
+</table>
+<p>&nbsp;</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">创建一个每十分钟执行的 CronTrigger，且从每小时的第三分钟开始执行：</p>
+<table style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;" border="0" cellspacing="0" cellpadding="0">
+<tbody style="margin: 0px; padding: 0px;">
+<tr style="margin: 0px; padding: 0px;">
+<td style="margin: 0px; padding: 0px;">
+<pre class="displaycode"> 0 3/10 * * * ? </pre>
+</td>
+</tr>
+</tbody>
+</table>
+<p>&nbsp;</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">创建一个每周一，周二，周三，周六的晚上 20:00 到 23:00，每半小时执行一次的 CronTrigger：</p>
+<table style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;" border="0" cellspacing="0" cellpadding="0">
+<tbody style="margin: 0px; padding: 0px;">
+<tr style="margin: 0px; padding: 0px;">
+<td style="margin: 0px; padding: 0px;">
+<pre class="displaycode"> 0 0/30 20-23 ? * MON-WED,SAT </pre>
+</td>
+</tr>
+</tbody>
+</table>
+<p>&nbsp;</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">创建一个每月最后一个周四，中午 11:30-14:30，每小时执行一次的 trigger：</p>
+<table style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;" border="0" cellspacing="0" cellpadding="0">
+<tbody style="margin: 0px; padding: 0px;">
+<tr style="margin: 0px; padding: 0px;">
+<td style="margin: 0px; padding: 0px;">
+<pre class="displaycode"> 0 30 11-14/1 ? * 5L </pre>
+</td>
+</tr>
+</tbody>
+</table>
+<p>&nbsp;</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">解释一下上述例子中各符号的含义：</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">首先所有字段都有自己特定的取值，例如，Seconds 和 Minutes 取值为 0 到 59，Hours 取值为 0 到 23，Day-of-Month 取值为 0-31, Month 取值为 0-11，或者 JAN，FEB, MAR, APR, MAY, JUN, JUL, AUG, SEP, OCT, NOV, DEC，Days-of-Week 取值为 1-7 或者 SUN, MON, TUE, WED, THU, FRI, SAT。每个字段可以取单个值，多个值，或一个范围，例如 Day-of-Week 可取值为“MON，TUE，SAT”,“MON-FRI”或者“TUE-THU，SUN”。</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">通配符 * 表示该字段可接受任何可能取值。例如 Month 字段赋值 * 表示每个月，Day-of-Week 字段赋值 * 表示一周的每天。</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">/ 表示开始时刻与间隔时段。例如 Minutes 字段赋值 2/10 表示在一个小时内每 20 分钟执行一次，从第 2 分钟开始。</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">? 仅适用于 Day-of-Month 和 Day-of-Week。? 表示对该字段不指定特定值。适用于需要对这两个字段中的其中一个指定值，而对另一个不指定值的情况。一般情况下，这两个字段只需对一个赋值。</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">L 仅适用于 Day-of-Month 和 Day-of-Week。L 用于 Day-of-Month 表示该月最后一天。L 单独用于 Day-of-Week 表示周六，否则表示一个月最后一个星期几，例如 5L 或者 THUL 表示该月最后一个星期四。</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">W 仅适用于 Day-of-Month，表示离指定日期最近的一个工作日，例如 Day-of-Month 赋值为 10W 表示该月离 10 号最近的一个工作日。</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;"># 仅适用于 Day-of-Week，表示该月第 XXX 个星期几。例如 Day-of-Week 赋值为 5#2 或者 THU#2，表示该月第二个星期四。</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">CronTrigger 的使用如下：</p>
+<table style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;" border="0" cellspacing="0" cellpadding="0">
+<tbody style="margin: 0px; padding: 0px;">
+<tr style="margin: 0px; padding: 0px;">
+<td style="margin: 0px; padding: 0px;">
+<pre class="displaycode"> CronTrigger cronTrigger = new CronTrigger("myTrigger", "myGroup"); 
+ try { 
+     cronTrigger.setCronExpression("0 0/30 20-13 ? * MON-WED,SAT"); 
+ } catch (Exception e) { 
+     e.printStackTrace(); 
+ } </pre>
+</td>
+</tr>
+</tbody>
+</table>
+<p>&nbsp;</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">Job 与 Trigger 的松耦合设计是 Quartz 的一大特点，其优点在于同一个 Job 可以绑定多个不同的 Trigger，同一个 Trigger 也可以调度多个 Job，灵活性很强。</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;"><a style="margin: 0px; outline-style: none; outline-color: invert; outline-width: 0px; color: #3e62a6; padding: 0px;" name="minor5.3" rel="nofollow"></a><span style="margin: 0px; padding: 0px;">Listener</span></p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">除了上述基本的调度功能，Quartz 还提供了 listener 的功能。主要包含三种 listener：JobListener，TriggerListener 以及 SchedulerListener。当系统发生故障，相关人员需要被通知时，Listener 便能发挥它的作用。最常见的情况是，当任务被执行时，系统发生故障，Listener 监听到错误，立即发送邮件给管理员。下面给出 JobListener 的实例：</p>
+<p><br style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;"><a style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px; outline-style: none; outline-color: invert; outline-width: 0px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #3e62a6; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;" name="listing7" rel="nofollow"></a><strong style="margin: 0px; padding: 0px;">清单 7. JobListener 的实现</strong><span style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; display: inline !important; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; float: none; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px;"><span class="Apple-converted-space">&nbsp;</span></span></p>
+<table style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;" border="0" cellspacing="0" cellpadding="0">
+<tbody style="margin: 0px; padding: 0px;">
+<tr style="margin: 0px; padding: 0px;">
+<td style="margin: 0px; padding: 0px;">
+<pre class="displaycode">				 
+ import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
+import org.quartz.JobListener;
+import org.quartz.SchedulerException;
+
+
+public class MyListener implements JobListener{
+
+	@Override
+	public String getName() {
+		return "My Listener";
+	}
+	@Override
+	public void jobWasExecuted(JobExecutionContext context,
+			JobExecutionException jobException) {
+		if(jobException != null){
+			try {
+				//停止Scheduler
+				context.getScheduler().shutdown();
+				System.out.println("
+                Error occurs when executing jobs, shut down the scheduler ");
+                // 给管理员发送邮件…
+			} catch (SchedulerException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+}</pre>
+</td>
+</tr>
+</tbody>
+</table>
+<p>&nbsp;</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">从清单 7 可以看出，使用者只需要创建一个 JobListener 的继承类，重载需要触发的方法即可。当然，需要将 listener 的实现类注册到 Scheduler 和 JobDetail 中：</p>
+<table style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;" border="0" cellspacing="0" cellpadding="0">
+<tbody style="margin: 0px; padding: 0px;">
+<tr style="margin: 0px; padding: 0px;">
+<td style="margin: 0px; padding: 0px;">
+<pre class="displaycode"> sched.addJobListener(new MyListener()); 
+ jobDetail.addJobListener("My Listener"); // listener 的名字</pre>
+</td>
+</tr>
+</tbody>
+</table>
+<p>&nbsp;</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">使用者也可以将 listener 注册为全局 listener，这样便可以监听 scheduler 中注册的所有任务 :</p>
+<table style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;" border="0" cellspacing="0" cellpadding="0">
+<tbody style="margin: 0px; padding: 0px;">
+<tr style="margin: 0px; padding: 0px;">
+<td style="margin: 0px; padding: 0px;">
+<pre class="displaycode"> sched.addGlobalJobListener(new MyListener()); </pre>
+</td>
+</tr>
+</tbody>
+</table>
+<p>&nbsp;</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">为了测试 listener 的功能，可以在 job 的 execute 方法中强制抛出异常。清单 7 中，listener 接收到异常，将 job 所在的 scheduler 停掉，阻止后续的 job 继续执行。scheduler、jobDetail 等信息都可以从 listener 的参数 context 中检索到。</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">清单 7 的输出结果为：</p>
+<table style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;" border="0" cellspacing="0" cellpadding="0">
+<tbody style="margin: 0px; padding: 0px;">
+<tr style="margin: 0px; padding: 0px;">
+<td style="margin: 0px; padding: 0px;">
+<pre class="displaycode"> Generating report - myJob.myJob, type =FULL 
+ Tue Feb 15 18:57:35 CST 2011 
+ 2011-2-15 18:57:35 org.quartz.core.JobRunShell run 
+信息 : Job myJob.myJob threw a JobExecutionException: 
+ org.quartz.JobExecutionException 
+ at com.ibm.scheduler.QuartzListenerTest.execute(QuartzListenerTest.java:22) 
+ at org.quartz.core.JobRunShell.run(JobRunShell.java:191) 
+ at org.quartz.simpl.SimpleThreadPool$WorkerThread.run(SimpleThreadPool.java:516) 
+ 2011-2-15 18:57:35 org.quartz.core.QuartzScheduler shutdown 
+信息 : Scheduler DefaultQuartzScheduler_$_NON_CLUSTERED shutting down. 
+ Error occurs when executing jobs, shut down the scheduler </pre>
+</td>
+</tr>
+</tbody>
+</table>
+<p>&nbsp;</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">TriggerListener、SchedulerListener 与 JobListener 有类似的功能，只是各自触发的事件不同，如 JobListener 触发的事件为：</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">Job to be executed, Job has completed execution 等</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">TriggerListener 触发的事件为：</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">Trigger firings, trigger mis-firings, trigger completions 等</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">SchedulerListener 触发的事件为：</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">add a job/trigger, remove a job/trigger, shutdown a scheduler 等</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">读者可以根据自己的需求重载相应的事件。</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;"><span style="margin: 0px; padding: 0px;">JobStores</span></p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">Quartz 的另一显著优点在于持久化，即将任务调度的相关数据保存下来。这样，当系统重启后，任务被调度的状态依然存在于系统中，不会丢失。默认情况 下，Quartz 采用的是 org.quartz.simpl.RAMJobStore，在这种情况下，数据仅能保存在内存中，系统重启后会全部丢失。若想持久化数据，需要采用 org.quartz.simpl.JDBCJobStoreTX。</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">实现持久化的第一步，是要创建 Quartz 持久化所需要的表格。在 Quartz 的发布包 docs/dbTables 中可以找到相应的表格创建脚本。Quartz 支持目前大部分流行的数据库。本文以 DB2 为例，所需要的脚本为 tables_db2.sql。首先需要对脚本做一点小的修改，即在开头指明 Schema：</p>
+<table style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;" border="0" cellspacing="0" cellpadding="0">
+<tbody style="margin: 0px; padding: 0px;">
+<tr style="margin: 0px; padding: 0px;">
+<td style="margin: 0px; padding: 0px;">
+<pre class="displaycode"> SET CURRENT SCHEMA quartz; </pre>
+</td>
+</tr>
+</tbody>
+</table>
+<p>&nbsp;</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">为了方便重复使用 , 创建表格前首先删除之前的表格：<br style="margin: 0px; padding: 0px;"><code style="padding-bottom: 0px; background-color: #f6f6f6; margin: 0px 2px; padding-left: 5px; padding-right: 5px; padding-top: 0px; border-top-left-radius: 3px; border-top-right-radius: 3px; border-bottom-right-radius: 3px; border-bottom-left-radius: 3px; border: #dddddd 1px solid;">drop table qrtz_job_details;</code></p>
+<table style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;" border="0" cellspacing="0" cellpadding="0">
+<tbody style="margin: 0px; padding: 0px;">
+<tr style="margin: 0px; padding: 0px;">
+<td style="margin: 0px; padding: 0px;">
+<pre class="displaycode"> drop table qrtz_job_listeners; </pre>
+</td>
+</tr>
+</tbody>
+</table>
+<p>&nbsp;</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">…</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">然后创建数据库 sched，执行 tables_db2.sql 创建持久化所需要的表格。</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">第二步，配置数据源。数据源与其它所有配置，例如 ThreadPool，均放在 quartz.properties 里：</p>
+<p><br style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;"><strong style="margin: 0px; padding: 0px;">清单 8. Quartz 配置文件</strong><span style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; display: inline !important; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; float: none; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px;"><span class="Apple-converted-space">&nbsp;</span></span></p>
+<table style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;" border="0" cellspacing="0" cellpadding="0">
+<tbody style="margin: 0px; padding: 0px;">
+<tr style="margin: 0px; padding: 0px;">
+<td style="margin: 0px; padding: 0px;">
+<pre class="displaycode">				 
+ # Configure ThreadPool 
+ org.quartz.threadPool.class = org.quartz.simpl.SimpleThreadPool 
+ org.quartz.threadPool.threadCount =  5 
+ org.quartz.threadPool.threadPriority = 4 
+
+ # Configure Datasources 
+ org.quartz.jobStore.class = org.quartz.impl.jdbcjobstore.JobStoreTX 
+ org.quartz.jobStore.driverDelegateClass = org.quartz.impl.jdbcjobstore.StdJDBCDelegate 
+ org.quartz.jobStore.dataSource = db2DS 
+ org.quartz.jobStore.tablePrefix = QRTZ_ 
+
+ org.quartz.dataSource.db2DS.driver = com.ibm.db2.jcc.DB2Driver 
+ org.quartz.dataSource.db2DS.URL = jdbc:db2://localhost:50001/sched 
+ org.quartz.dataSource.db2DS.user = quartz 
+ org.quartz.dataSource.db2DS.password = passw0rd 
+ org.quartz.dataSource.db2DS.maxConnections = 5 </pre>
+</td>
+</tr>
+</tbody>
+</table>
+<p>&nbsp;</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">使用时只需要将 quatz.properties 放在 classpath 下面，不用更改一行代码，再次运行之前的任务调度实例，trigger、job 等信息便会被记录在数据库中。</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">将清单 4 中的 makeWeeklyTrigger 改成 makeSecondlyTrigger，重新运行 main 函数，在 sched 数据库中查询表 qrtz_simple_triggers 中的数据。其查询语句为“db2 ‘ select repeat_interval, times_triggered from qrtz_simple_triggers ’”。结果 repeat_interval 为 1000，与程序中设置的 makeSecondlyTrigger 相吻合，times_triggered 值为 21。</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">停掉程序，将数据库中记录的任务调度数据重新导入程序运行：</p>
+<div><div id="highlighter_663355" class="syntaxhighlighter  java"><div class="toolbar"><span><a href="http://www.cnblogs.com/shenliang123/p/3231312.html#" class="toolbar_item command_help help">?</a></span></div><table border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="gutter"><div class="line number1 index0 alt2">1</div><div class="line number2 index1 alt1">2</div><div class="line number3 index2 alt2">3</div><div class="line number4 index3 alt1">4</div><div class="line number5 index4 alt2">5</div><div class="line number6 index5 alt1">6</div><div class="line number7 index6 alt2">7</div><div class="line number8 index7 alt1">8</div><div class="line number9 index8 alt2">9</div><div class="line number10 index9 alt1">10</div><div class="line number11 index10 alt2">11</div><div class="line number12 index11 alt1">12</div><div class="line number13 index12 alt2">13</div><div class="line number14 index13 alt1">14</div><div class="line number15 index14 alt2">15</div><div class="line number16 index15 alt1">16</div><div class="line number17 index16 alt2">17</div><div class="line number18 index17 alt1">18</div><div class="line number19 index18 alt2">19</div><div class="line number20 index19 alt1">20</div></td><td class="code"><div class="container"><div class="line number1 index0 alt2"><code class="java keyword">package</code> <code class="java plain">com.ibm.scheduler; </code></div><div class="line number2 index1 alt1"><code class="java keyword">import</code> <code class="java plain">org.quartz.Scheduler; </code></div><div class="line number3 index2 alt2"><code class="java keyword">import</code> <code class="java plain">org.quartz.SchedulerException; </code></div><div class="line number4 index3 alt1"><code class="java keyword">import</code> <code class="java plain">org.quartz.SchedulerFactory; </code></div><div class="line number5 index4 alt2"><code class="java keyword">import</code> <code class="java plain">org.quartz.Trigger; </code></div><div class="line number6 index5 alt1"><code class="java keyword">import</code> <code class="java plain">org.quartz.impl.StdSchedulerFactory; </code></div><div class="line number7 index6 alt2">&nbsp;</div><div class="line number8 index7 alt1"><code class="java keyword">public</code> <code class="java keyword">class</code> <code class="java plain">QuartzReschedulerTest { </code></div><div class="line number9 index8 alt2"><code class="java keyword">public</code> <code class="java keyword">static</code> <code class="java keyword">void</code> <code class="java plain">main(String[] args) </code><code class="java keyword">throws</code> <code class="java plain">SchedulerException { </code></div><div class="line number10 index9 alt1"><code class="java comments">// 初始化一个 Schedule Factory </code></div><div class="line number11 index10 alt2"><code class="java plain">SchedulerFactory schedulerFactory = </code><code class="java keyword">new</code> <code class="java plain">StdSchedulerFactory(); </code></div><div class="line number12 index11 alt1"><code class="java comments">// 从 schedule factory 中获取 scheduler </code></div><div class="line number13 index12 alt2"><code class="java plain">Scheduler scheduler = schedulerFactory.getScheduler(); </code></div><div class="line number14 index13 alt1"><code class="java comments">// 从 schedule factory 中获取 trigger </code></div><div class="line number15 index14 alt2"><code class="java plain">Trigger trigger = scheduler.getTrigger(</code><code class="java string">"myTrigger"</code><code class="java plain">, </code><code class="java string">"myTriggerGroup"</code><code class="java plain">); </code></div><div class="line number16 index15 alt1"><code class="java comments">// 重新开启调度任务</code></div><div class="line number17 index16 alt2"><code class="java plain">scheduler.rescheduleJob(</code><code class="java string">"myTrigger"</code><code class="java plain">, </code><code class="java string">"myTriggerGroup"</code><code class="java plain">, trigger); </code></div><div class="line number18 index17 alt1"><code class="java plain">scheduler.start(); </code></div><div class="line number19 index18 alt2"><code class="java plain">} </code></div><div class="line number20 index19 alt1"><code class="java plain">}</code></div></div></td></tr></tbody></table></div></div>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">&nbsp;</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">&nbsp;</p>
+<table style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;" border="0" cellspacing="0" cellpadding="0">
+<tbody style="margin: 0px; padding: 0px;">
+<tr style="margin: 0px; padding: 0px;">
+<td style="margin: 0px; padding: 0px;">上面代码中，schedulerFactory.getScheduler() 将 quartz.properties 的内容加载到内存，然后根据数据源的属性初始化数据库的链接，并将数据库中存储的数据加载到内存。之后，便可以在内存中查询某一具体的 trigger，并将其重新启动。这时候重新查询 qrtz_simple_triggers 中的数据，发现 times_triggered 值比原来增长了。</td>
+</tr>
+</tbody>
+</table>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">&nbsp;</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">&nbsp;</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;"><span style="margin: 0px; padding: 0px;">JCronTab</span></p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">习惯使用 unix/linux 的开发人员应该对 crontab 都不陌生。Crontab 是一个非常方便的用于 unix/linux 系统的任务调度命令。JCronTab 则是一款完全按照 crontab 语法编写的 java 任务调度工具。</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">首先简单介绍一下 crontab 的语法，与上面介绍的 Quartz 非常相似，但更加简洁 , 集中了最常用的语法。主要由六个字段组成（括弧中标识了每个字段的取值范围）：</p>
+<table style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;" border="0" cellspacing="0" cellpadding="0">
+<tbody style="margin: 0px; padding: 0px;">
+<tr style="margin: 0px; padding: 0px;">
+<td style="margin: 0px; padding: 0px;">
+<pre class="displaycode"> Minutes （0-59）
+ Hours   （0-23） 
+ Day-of-Month （1-31）
+ Month    （1-12/JAN-DEC） 
+ Day-of-Week  （0-6/SUN-SAT）
+ Command </pre>
+</td>
+</tr>
+</tbody>
+</table>
+<p>&nbsp;</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">与 Quartz 相比，省略了 Seconds 与 Year，多了一个 command 字段，即为将要被调度的命令。JCronTab 中也包含符号“*”与“/”, 其含义与 Quartz 相同。</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">举例如下：</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">每天 12 点到 15 点 , 每隔 1 小时执行一次 Date 命令：</p>
+<table style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;" border="0" cellspacing="0" cellpadding="0">
+<tbody style="margin: 0px; padding: 0px;">
+<tr style="margin: 0px; padding: 0px;">
+<td style="margin: 0px; padding: 0px;">
+<pre class="displaycode"> 0 12-15/1 * * * Date </pre>
+</td>
+</tr>
+</tbody>
+</table>
+<p>&nbsp;</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">每月 2 号凌晨 1 点发一封信给 zhjingbj@cn.ibm.com：</p>
+<table style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;" border="0" cellspacing="0" cellpadding="0">
+<tbody style="margin: 0px; padding: 0px;">
+<tr style="margin: 0px; padding: 0px;">
+<td style="margin: 0px; padding: 0px;">
+<pre class="displaycode"> 0 1 2 * * mail -s “good” zhjingbj@cn.ibm.com </pre>
+</td>
+</tr>
+</tbody>
+</table>
+<p>&nbsp;</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">每周一，周二，周三，周六的晚上 20:00 到 23:00，每半小时打印“normal”：</p>
+<table style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;" border="0" cellspacing="0" cellpadding="0">
+<tbody style="margin: 0px; padding: 0px;">
+<tr style="margin: 0px; padding: 0px;">
+<td style="margin: 0px; padding: 0px;">
+<pre class="displaycode"> 0/30 20-23 * * MON-WED,SAT echo “normal”</pre>
+</td>
+</tr>
+</tbody>
+</table>
+<p>&nbsp;</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">JCronTab 借鉴了 crontab 的语法，其区别在于 command 不再是 unix/linux 的命令，而是一个 Java 类。如果该类带参数，例如“com.ibm.scheduler.JCronTask2#run”，则定期执行 run 方法；如果该类不带参数，则默认执行 main 方法。此外，还可以传参数给 main 方法或者构造函数，例如“com.ibm.scheduler.JCronTask2#run Hello World“表示传两个参数 Hello 和 World 给构造函数。</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">JCronTab 与 Quartz 相比，其优点在于，第一，支持多种任务调度的持久化方法，包括普通文件、数据库以及 XML 文件进行持久化；第二，JCronTab 能够非常方便地与 Web 应用服务器相结合，任务调度可以随 Web 应用服务器的启动自动启动；第三，JCronTab 还内置了发邮件功能，可以将任务执行结果方便地发送给需要被通知的人。</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">JCronTab 与 Web 应用服务器的结合非常简单，只需要在 Web 应用程序的 web.xml 中添加如下行：</p>
+<div><div id="highlighter_536959" class="syntaxhighlighter  xml"><div class="toolbar"><span><a href="http://www.cnblogs.com/shenliang123/p/3231312.html#" class="toolbar_item command_help help">?</a></span></div><table border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="gutter"><div class="line number1 index0 alt2">1</div><div class="line number2 index1 alt1">2</div><div class="line number3 index2 alt2">3</div><div class="line number4 index3 alt1">4</div><div class="line number5 index4 alt2">5</div><div class="line number6 index5 alt1">6</div><div class="line number7 index6 alt2">7</div><div class="line number8 index7 alt1">8</div><div class="line number9 index8 alt2">9</div><div class="line number10 index9 alt1">10</div><div class="line number11 index10 alt2">11</div><div class="line number12 index11 alt1">12</div><div class="line number13 index12 alt2">13</div><div class="line number14 index13 alt1">14</div></td><td class="code"><div class="container"><div class="line number1 index0 alt2"><code class="xml plain">&lt;</code><code class="xml keyword">servlet</code><code class="xml plain">&gt; </code></div><div class="line number2 index1 alt1"><code class="xml spaces">&nbsp;&nbsp;&nbsp;</code><code class="xml plain">&lt;</code><code class="xml keyword">servlet-name</code><code class="xml plain">&gt;LoadOnStartupServlet&lt;/</code><code class="xml keyword">servlet-name</code><code class="xml plain">&gt; </code></div><div class="line number3 index2 alt2"><code class="xml spaces">&nbsp;&nbsp;&nbsp;</code><code class="xml plain">&lt;</code><code class="xml keyword">servlet-class</code><code class="xml plain">&gt;org.jcrontab.web.loadCrontabServlet&lt;/</code><code class="xml keyword">servlet-class</code><code class="xml plain">&gt; </code></div><div class="line number4 index3 alt1"><code class="xml spaces">&nbsp;&nbsp;&nbsp;</code><code class="xml plain">&lt;</code><code class="xml keyword">init-param</code><code class="xml plain">&gt; </code></div><div class="line number5 index4 alt2"><code class="xml spaces">&nbsp;</code><code class="xml plain">&lt;</code><code class="xml keyword">param-name</code><code class="xml plain">&gt;PROPERTIES_FILE&lt;/</code><code class="xml keyword">param-name</code><code class="xml plain">&gt; </code></div><div class="line number6 index5 alt1"><code class="xml spaces">&nbsp;</code><code class="xml plain">&lt;</code><code class="xml keyword">param-value</code><code class="xml plain">&gt;D:/Scheduler/src/jcrontab.properties&lt;/</code><code class="xml keyword">param-value</code><code class="xml plain">&gt; </code></div><div class="line number7 index6 alt2"><code class="xml spaces">&nbsp;&nbsp;&nbsp;</code><code class="xml plain">&lt;/</code><code class="xml keyword">init-param</code><code class="xml plain">&gt; </code></div><div class="line number8 index7 alt1"><code class="xml spaces">&nbsp;&nbsp;&nbsp;</code><code class="xml plain">&lt;</code><code class="xml keyword">load-on-startup</code><code class="xml plain">&gt;1&lt;/</code><code class="xml keyword">load-on-startup</code><code class="xml plain">&gt; </code></div><div class="line number9 index8 alt2"><code class="xml spaces">&nbsp;</code><code class="xml plain">&lt;/</code><code class="xml keyword">servlet</code><code class="xml plain">&gt; </code></div><div class="line number10 index9 alt1"><code class="xml spaces">&nbsp;</code><code class="xml comments">&lt;!-- Mapping of the StartUp Servlet --&gt;</code></div><div class="line number11 index10 alt2"><code class="xml spaces">&nbsp;</code><code class="xml plain">&lt;</code><code class="xml keyword">servlet-mapping</code><code class="xml plain">&gt; </code></div><div class="line number12 index11 alt1"><code class="xml spaces">&nbsp;&nbsp;&nbsp;</code><code class="xml plain">&lt;</code><code class="xml keyword">servlet-name</code><code class="xml plain">&gt;LoadOnStartupServlet&lt;/</code><code class="xml keyword">servlet-name</code><code class="xml plain">&gt; </code></div><div class="line number13 index12 alt2"><code class="xml spaces">&nbsp;</code><code class="xml plain">&lt;</code><code class="xml keyword">url-pattern</code><code class="xml plain">&gt;/Startup&lt;/</code><code class="xml keyword">url-pattern</code><code class="xml plain">&gt; </code></div><div class="line number14 index13 alt1"><code class="xml spaces">&nbsp;</code><code class="xml plain">&lt;/</code><code class="xml keyword">servlet-mapping</code><code class="xml plain">&gt;</code></div></div></td></tr></tbody></table></div></div>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">&nbsp;</p>
+<table style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;" border="0" cellspacing="0" cellpadding="0">
+<tbody style="margin: 0px; padding: 0px;">
+<tr style="margin: 0px; padding: 0px;">
+<td style="margin: 0px; padding: 0px;">在清单 10 中，需要注意两点：第一，必须指定 servlet-class 为 org.jcrontab.web.loadCrontabServlet，因为它是整个任务调度的入口；第二，必须指定一个参数为 PROPERTIES_FILE，才能被 loadCrontabServlet 识别。</td>
+</tr>
+</tbody>
+</table>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">接下来，需要撰写 D:/Scheduler/src/jcrontab.properties 的内容，其内容根据需求的不同而改变。</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">当采用普通文件持久化时，jcrontab.properties 的内容主要包括：</p>
+<table style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;" border="0" cellspacing="0" cellpadding="0">
+<tbody style="margin: 0px; padding: 0px;">
+<tr style="margin: 0px; padding: 0px;">
+<td style="margin: 0px; padding: 0px;">
+<pre class="displaycode"> org.jcrontab.data.file = D:/Scheduler/src/crontab 
+ org.jcrontab.data.datasource = org.jcrontab.data.FileSource </pre>
+</td>
+</tr>
+</tbody>
+</table>
+<p>&nbsp;</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">其中数据来源 org.jcrontab.data.datasource 被描述为普通文件，即 org.jcrontab.data.FileSource。具体的文件即 org.jcrontab.data.file 指明为 D:/Scheduler/src/crontab。</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">Crontab 描述了任务的调度安排：</p>
+<table style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;" border="0" cellspacing="0" cellpadding="0">
+<tbody style="margin: 0px; padding: 0px;">
+<tr style="margin: 0px; padding: 0px;">
+<td style="margin: 0px; padding: 0px;">
+<pre class="displaycode"> */2 * * * * com.ibm.scheduler.JCronTask1 
+ * * * * * com.ibm.scheduler.JCronTask2#run Hello World </pre>
+</td>
+</tr>
+</tbody>
+</table>
+<p>&nbsp;</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">其中包含了两条任务的调度，分别是每两分钟执行一次 JCronTask1 的 main 方法，每一分钟执行一次 JCronTask2 的 run 方法。</p>
+<div><div id="highlighter_970048" class="syntaxhighlighter  java"><div class="toolbar"><span><a href="http://www.cnblogs.com/shenliang123/p/3231312.html#" class="toolbar_item command_help help">?</a></span></div><table border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="gutter"><div class="line number1 index0 alt2">1</div><div class="line number2 index1 alt1">2</div><div class="line number3 index2 alt2">3</div><div class="line number4 index3 alt1">4</div><div class="line number5 index4 alt2">5</div><div class="line number6 index5 alt1">6</div><div class="line number7 index6 alt2">7</div><div class="line number8 index7 alt1">8</div><div class="line number9 index8 alt2">9</div><div class="line number10 index9 alt1">10</div><div class="line number11 index10 alt2">11</div><div class="line number12 index11 alt1">12</div><div class="line number13 index12 alt2">13</div><div class="line number14 index13 alt1">14</div><div class="line number15 index14 alt2">15</div><div class="line number16 index15 alt1">16</div><div class="line number17 index16 alt2">17</div><div class="line number18 index17 alt1">18</div><div class="line number19 index18 alt2">19</div><div class="line number20 index19 alt1">20</div><div class="line number21 index20 alt2">21</div><div class="line number22 index21 alt1">22</div><div class="line number23 index22 alt2">23</div><div class="line number24 index23 alt1">24</div><div class="line number25 index24 alt2">25</div><div class="line number26 index25 alt1">26</div><div class="line number27 index26 alt2">27</div><div class="line number28 index27 alt1">28</div><div class="line number29 index28 alt2">29</div><div class="line number30 index29 alt1">30</div><div class="line number31 index30 alt2">31</div><div class="line number32 index31 alt1">32</div><div class="line number33 index32 alt2">33</div><div class="line number34 index33 alt1">34</div><div class="line number35 index34 alt2">35</div><div class="line number36 index35 alt1">36</div><div class="line number37 index36 alt2">37</div><div class="line number38 index37 alt1">38</div><div class="line number39 index38 alt2">39</div><div class="line number40 index39 alt1">40</div><div class="line number41 index40 alt2">41</div><div class="line number42 index41 alt1">42</div></td><td class="code"><div class="container"><div class="line number1 index0 alt2"><code class="java keyword">package</code> <code class="java plain">com.ibm.scheduler;</code></div><div class="line number2 index1 alt1">&nbsp;</div><div class="line number3 index2 alt2"><code class="java keyword">import</code> <code class="java plain">java.util.Date;</code></div><div class="line number4 index3 alt1">&nbsp;</div><div class="line number5 index4 alt2"><code class="java keyword">public</code> <code class="java keyword">class</code> <code class="java plain">JCronTask1 {</code></div><div class="line number6 index5 alt1">&nbsp;</div><div class="line number7 index6 alt2"><code class="java spaces">&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="java keyword">private</code> <code class="java keyword">static</code> <code class="java keyword">int</code> <code class="java plain">count = </code><code class="java value">0</code><code class="java plain">;</code></div><div class="line number8 index7 alt1">&nbsp;</div><div class="line number9 index8 alt2"><code class="java spaces">&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="java keyword">public</code> <code class="java keyword">static</code> <code class="java keyword">void</code> <code class="java plain">main(String[] args) {</code></div><div class="line number10 index9 alt1"><code class="java spaces">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="java plain">System.out.println(</code><code class="java string">"--------------Task1-----------------"</code><code class="java plain">);</code></div><div class="line number11 index10 alt2"><code class="java spaces">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="java plain">System.out.println(</code><code class="java string">"Current Time = "</code> <code class="java plain">+ </code><code class="java keyword">new</code> <code class="java plain">Date() + </code><code class="java string">", Count = "</code></div><div class="line number12 index11 alt1"><code class="java spaces">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="java plain">+ count++);</code></div><div class="line number13 index12 alt2"><code class="java spaces">&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="java plain">}</code></div><div class="line number14 index13 alt1"><code class="java plain">}</code></div><div class="line number15 index14 alt2">&nbsp;</div><div class="line number16 index15 alt1"><code class="java keyword">package</code> <code class="java plain">com.ibm.scheduler;</code></div><div class="line number17 index16 alt2">&nbsp;</div><div class="line number18 index17 alt1"><code class="java keyword">import</code> <code class="java plain">java.util.Date;</code></div><div class="line number19 index18 alt2">&nbsp;</div><div class="line number20 index19 alt1"><code class="java keyword">public</code> <code class="java keyword">class</code> <code class="java plain">JCronTask2 </code><code class="java keyword">implements</code> <code class="java plain">Runnable {</code></div><div class="line number21 index20 alt2">&nbsp;</div><div class="line number22 index21 alt1"><code class="java spaces">&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="java keyword">private</code> <code class="java keyword">static</code> <code class="java keyword">int</code> <code class="java plain">count = </code><code class="java value">0</code><code class="java plain">;</code></div><div class="line number23 index22 alt2">&nbsp;</div><div class="line number24 index23 alt1"><code class="java spaces">&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="java keyword">private</code> <code class="java keyword">static</code> <code class="java plain">String[] args;</code></div><div class="line number25 index24 alt2">&nbsp;</div><div class="line number26 index25 alt1"><code class="java spaces">&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="java keyword">public</code> <code class="java plain">JCronTask2(String[] args) {</code></div><div class="line number27 index26 alt2"><code class="java spaces">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="java plain">System.out.println(</code><code class="java string">"--------------Task2-----------------"</code><code class="java plain">);</code></div><div class="line number28 index27 alt1"><code class="java spaces">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="java plain">System.out.println(</code><code class="java string">"Current Time = "</code> <code class="java plain">+ </code><code class="java keyword">new</code> <code class="java plain">Date() + </code><code class="java string">", Count = "</code></div><div class="line number29 index28 alt2"><code class="java spaces">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="java plain">+ count++);</code></div><div class="line number30 index29 alt1"><code class="java spaces">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="java plain">JCronTask2.args = args;</code></div><div class="line number31 index30 alt2"><code class="java spaces">&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="java plain">}</code></div><div class="line number32 index31 alt1">&nbsp;</div><div class="line number33 index32 alt2"><code class="java spaces">&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="java color1">@Override</code></div><div class="line number34 index33 alt1"><code class="java spaces">&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="java keyword">public</code> <code class="java keyword">void</code> <code class="java plain">run() {</code></div><div class="line number35 index34 alt2"><code class="java spaces">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="java plain">System.out.println(</code><code class="java string">"enter into run method"</code><code class="java plain">);</code></div><div class="line number36 index35 alt1"><code class="java spaces">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="java keyword">if</code> <code class="java plain">(args != </code><code class="java keyword">null</code> <code class="java plain">&amp;&amp; args.length &gt; </code><code class="java value">0</code><code class="java plain">) {</code></div><div class="line number37 index36 alt2"><code class="java spaces">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="java keyword">for</code> <code class="java plain">(</code><code class="java keyword">int</code> <code class="java plain">i = </code><code class="java value">0</code><code class="java plain">; i &lt; args.length; i++) {</code></div><div class="line number38 index37 alt1"><code class="java spaces">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="java plain">System.out.print(</code><code class="java string">"This is arg "</code> <code class="java plain">+ i + </code><code class="java string">" "</code> <code class="java plain">+ args[i] + </code><code class="java string">"\n"</code><code class="java plain">);</code></div><div class="line number39 index38 alt2"><code class="java spaces">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="java plain">}</code></div><div class="line number40 index39 alt1"><code class="java spaces">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="java plain">}</code></div><div class="line number41 index40 alt2"><code class="java spaces">&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="java plain">}</code></div><div class="line number42 index41 alt1"><code class="java plain">}</code></div></div></td></tr></tbody></table></div></div>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">&nbsp;</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">&nbsp;</p>
+<table style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;" border="0" cellspacing="0" cellpadding="0">
+<tbody style="margin: 0px; padding: 0px;">
+<tr style="margin: 0px; padding: 0px;">
+<td style="margin: 0px; padding: 0px;">到此为止，基于普通文件持久化的 JCronTab 的实例就全部配置好了。启动 Web 应用服务器，便可以看到任务调度的输出结果：</td>
+</tr>
+</tbody>
+</table>
+<table style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;" border="0" cellspacing="0" cellpadding="0">
+<tbody style="margin: 0px; padding: 0px;">
+<tr style="margin: 0px; padding: 0px;">
+<td style="margin: 0px; padding: 0px;">
+<pre class="displaycode"> --------------Task2----------------- 
+ Current Time = Tue Feb 15 09:22:00 CST 2011, Count = 0 
+ enter into run method 
+ This is arg 0 Hello 
+ This is arg 1 World 
+ --------------Task1----------------- 
+ Current Time = Tue Feb 15 09:22:00 CST 2011, Count = 0 
+ --------------Task2----------------- 
+ Current Time = Tue Feb 15 09:23:00 CST 2011, Count = 1 
+ enter into run method 
+ This is arg 0 Hello 
+ This is arg 1 World 
+ --------------Task2----------------- 
+ Current Time = Tue Feb 15 09:24:00 CST 2011, Count = 2 
+ enter into run method 
+ This is arg 0 Hello 
+ This is arg 1 World 
+ --------------Task1----------------- 
+ Current Time = Tue Feb 15 09:24:00 CST 2011, Count = 1 </pre>
+</td>
+</tr>
+</tbody>
+</table>
+<p>&nbsp;</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">通过修改 jcrontab.properties 中 datasource，可以选择采用数据库或 xml 文件持久化，感兴趣的读者可以参考<span class="Apple-converted-space">&nbsp;</span><a style="margin: 0px; outline-style: none; outline-color: invert; outline-width: 0px; color: #3e62a6; padding: 0px;" href="http://blog.csdn.net/maskice/archive/2007/06/28/1670070.aspx" rel="nofollow">进阶学习 JCronTab</a>。</p>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">此外，JCronTab 还内置了发邮件功能，可以将任务执行结果方便地发送给需要被通知的人。其配置非常简单，只需要在 jcontab.properties 中添加几行配置即可：</p>
+<table style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;" border="0" cellspacing="0" cellpadding="0">
+<tbody style="margin: 0px; padding: 0px;">
+<tr style="margin: 0px; padding: 0px;">
+<td style="margin: 0px; padding: 0px;">
+<pre class="displaycode"> org.jcrontab.sendMail.to= Ther email you want to send to 
+ org.jcrontab.sendMail.from=The email you want to send from 
+ org.jcrontab.sendMail.smtp.host=smtp server 
+ org.jcrontab.sendMail.smtp.user=smtp username 
+ org.jcrontab.sendMail.smtp.password=smtp password </pre>
+</td>
+</tr>
+</tbody>
+</table>
+<p style="text-align: left; text-transform: none; background-color: #ffffff; text-indent: 0px; margin: 0px 0px 10px; font: 14px/22px 微软雅黑, Verdana, sans-serif, 宋体; white-space: normal; letter-spacing: normal; color: #000000; word-spacing: 0px; -webkit-text-stroke-width: 0px; padding: 0px;">本文介绍了四种常用的对任务进行调度的 Java 实现方法，即 Timer，ScheduledExecutor, Quartz 以及 JCronTab。文本对每种方法都进行了实例解释，并对其优缺点进行比较。对于简单的基于起始时间点与时间间隔的任务调度，使用 Timer 就足够了；如果需要同时调度多个任务，基于线程池的 ScheduledTimer 是更为合适的选择；当任务调度的策略复杂到难以凭借起始时间点与时间间隔来描述时，Quartz 与 JCronTab 则体现出它们的优势。熟悉 Unix/Linux 的开发人员更倾向于 JCronTab，且 JCronTab 更适合与 Web 应用服务器相结合。Quartz 的 Trigger 与 Job 松耦合设计使其更适用于 Job 与 Trigger 的多对多应用场景。</p></div><div id="MySignature" style="display: block;">希望多多交流，多多关注，共同成就梦想</div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+<div id="BlogPostCategory">分类: <a href="http://www.cnblogs.com/shenliang123/category/330336.html" target="_blank">java thorough</a></div>
+<div id="EntryTag"></div>
+<div id="blog_post_info"><div id="green_channel">
+        <a href="javascript:void(0);" id="green_channel_digg" onclick="DiggIt(3231312,cb_blogId,1);green_channel_success(this,&#39;谢谢推荐！&#39;);">好文要顶</a>
+            <a id="green_channel_follow" onclick="follow(&#39;8d5bd08e-a9ae-e011-8673-842b2b196315&#39;);" href="javascript:void(0);">关注我</a>
+    <a id="green_channel_favorite" onclick="AddToWz(cb_entryId);return false;" href="javascript:void(0);">收藏该文</a>
+    <a id="green_channel_weibo" href="javascript:void(0);" title="分享至新浪微博" onclick="ShareToTsina()"><img src="./几种任务调度的 Java 实现方法与比较 - 发表是最好的记忆 - 博客园_files/icon_weibo_24.png" alt=""></a>
+    <a id="green_channel_wechat" href="javascript:void(0);" title="分享至微信" onclick="shareOnWechat()"><img src="./几种任务调度的 Java 实现方法与比较 - 发表是最好的记忆 - 博客园_files/wechat.png" alt=""></a>
+</div>
+<div id="author_profile">
+    <div id="author_profile_info" class="author_profile_info">
+            <a href="http://home.cnblogs.com/u/shenliang123/" target="_blank"><img src="./几种任务调度的 Java 实现方法与比较 - 发表是最好的记忆 - 博客园_files/u315693.jpg" class="author_avatar" alt=""></a>
+        <div id="author_profile_detail" class="author_profile_info">
+            <a href="http://home.cnblogs.com/u/shenliang123/">发表是最好的记忆</a><br>
+            <a href="http://home.cnblogs.com/u/shenliang123/followees">关注 - 14</a><br>
+            <a href="http://home.cnblogs.com/u/shenliang123/followers">粉丝 - 402</a>
+        </div>
+    </div>
+    <div class="clear"></div>
+    <div id="author_profile_honor"></div>
+    <div id="author_profile_follow">
+                <a href="javascript:void(0);" onclick="follow(&#39;8d5bd08e-a9ae-e011-8673-842b2b196315&#39;);return false;">+加关注</a>
+    </div>
+</div>
+<div id="div_digg">
+    <div class="diggit" onclick="votePost(3231312,&#39;Digg&#39;)">
+        <span class="diggnum" id="digg_count">4</span>
+    </div>
+    <div class="buryit" onclick="votePost(3231312,&#39;Bury&#39;)">
+        <span class="burynum" id="bury_count">0</span>
+    </div>
+    <div class="clear"></div>
+    <div class="diggword" id="digg_tips">
+    </div>
+</div>
+</div>
+<div class="clear"></div>
+<div id="post_next_prev"><a href="http://www.cnblogs.com/shenliang123/p/3203546.html" class="p_n_p_prefix">« </a> 上一篇：<a href="http://www.cnblogs.com/shenliang123/p/3203546.html" title="发布于2013-07-21 11:36">CentOs中mysql的安装与配置</a><br><a href="http://www.cnblogs.com/shenliang123/p/3238072.html" class="p_n_p_prefix">» </a> 下一篇：<a href="http://www.cnblogs.com/shenliang123/p/3238072.html" title="发布于2013-08-05 14:07">myeclipse中发送邮件出现Exception in thread "main" java.lang.NoClassDefFoundError: com/sun/mail/util/LineInputStream</a><br></div>
+</div>
+
+
+	<div class="postDesc">posted on <span id="post-date">2013-08-01 21:46</span> <a href="http://www.cnblogs.com/shenliang123/">发表是最好的记忆</a> 阅读(<span id="post_view_count">22673</span>) 评论(<span id="post_comment_count">3</span>)  <a href="https://i.cnblogs.com/EditPosts.aspx?postid=3231312" rel="nofollow">编辑</a> <a href="http://www.cnblogs.com/shenliang123/p/3231312.html#" onclick="AddToWz(3231312);return false;">收藏</a></div>
+</div>
+<script type="text/javascript">var allowComments=true,cb_blogId=100104,cb_entryId=3231312,cb_blogApp=currentBlogApp,cb_blogUserGuid='8d5bd08e-a9ae-e011-8673-842b2b196315',cb_entryCreatedDate='2013/8/1 21:46:00';loadViewCount(cb_entryId);</script>
+
+</div><a name="!comments"></a><div id="blog-comments-placeholder"><div id="comments_pager_top"></div>
+<!--done-->
+<br>
+<b>评论:</b>
+<div class="feedbackNoItems"></div>
+	
+
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+			<a href="http://www.cnblogs.com/shenliang123/p/3231312.html#3174623" class="layer">#1楼</a><a name="3174623" id="comment_anchor_3174623"></a>
+				 <span class="comment_date">2015-05-02 14:17</span> | <a id="a_comment_author_3174623" href="http://home.cnblogs.com/u/460893/" target="_blank">mylaughing</a> <a href="http://msg.cnblogs.com/send/mylaughing" title="发送站内短消息" class="sendMsg2This">&nbsp;</a><br>
+				<div align="left"><div id="comment_body_3174623" class="blog_comment_body">当trigger为仅执行一次的情况时，如果trigger的时间是设置为当前时间之前，调度任务时会立即执行。这样是不合理的吧？因为时间已经“过期”了。有没有什么办法可以控制呢？</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(3174623,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(3174623,&#39;Bury&#39;,this)">反对(1)</a></div>&nbsp;&nbsp;<span class="comment_actions"></span></div>
+			</div>
+			
+			
+		</div>
+	
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+			<a href="http://www.cnblogs.com/shenliang123/p/3231312.html#3295353" class="layer">#2楼</a><a name="3295353" id="comment_anchor_3295353"></a>
+				 <span class="comment_date">2015-10-30 14:19</span> | <a id="a_comment_author_3295353" href="http://www.cnblogs.com/wmzsoft/" target="_blank">wmzsoft</a> <a href="http://msg.cnblogs.com/send/wmzsoft" title="发送站内短消息" class="sendMsg2This">&nbsp;</a><br>
+				<div align="left"><div id="comment_body_3295353" class="blog_comment_body"><a href="http://osgi.jxtech.net/jxweb/JxOsgiClound/clound_display.action?uid=2" target="_blank">这个任务调度插件相当不错</a>。</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(3295353,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(3295353,&#39;Bury&#39;,this)">反对(0)</a></div>&nbsp;&nbsp;<span class="comment_actions"></span></div>
+			</div>
+			
+			
+		</div>
+	
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+			<a href="http://www.cnblogs.com/shenliang123/p/3231312.html#3414448" class="layer">#3楼</a><a name="3414448" id="comment_anchor_3414448"></a><span id="comment-maxId" style="display:none;">3414448</span><span id="comment-maxDate" style="display:none;">2016/4/21 19:28:04</span>
+				 <span class="comment_date">2016-04-21 19:28</span> | <a id="a_comment_author_3414448" href="http://www.cnblogs.com/yuwei35kd/" target="_blank">yuwei35kd</a> <a href="http://msg.cnblogs.com/send/yuwei35kd" title="发送站内短消息" class="sendMsg2This">&nbsp;</a><br>
+				<div align="left"><div id="comment_body_3414448" class="blog_comment_body"><a href="http://www.cnblogs.com/shenliang123/p/3231312.html#3174623" title="查看所回复的评论" onclick="commentManager.renderComments(0,50,3174623);">@</a>
+mylaughing你为什么要把开始时间设置为当前时间之前的时间？哪个开始只是一个触发的时间，执行次数为1，我觉得立即执行也是合理的。你说的这种开始时间设置为当前时间之前的时间，我觉得这种场景就有悖与调度的定义。</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(3414448,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(3414448,&#39;Bury&#39;,this)">反对(0)</a></div><span id="comment_3414448_avatar" style="display:none;">http://pic.cnblogs.com/face/583976/20161010143151.png</span>&nbsp;&nbsp;<span class="comment_actions"></span></div>
+			</div>
+			
+			
+		</div>
+	
+
+
+
+<div id="comments_pager_bottom"></div></div><script type="text/javascript">var commentManager = new blogCommentManager();commentManager.renderComments(0);</script>
+<div id="comment_form" class="commentform">
+<a name="commentform"></a>
+<div id="divCommentShow"></div>
+<div id="comment_nav"><span id="span_refresh_tips"></span><a href="javascript:void(0);" onclick="return RefreshCommentList();" id="lnk_RefreshComments" runat="server" clientidmode="Static">刷新评论</a><a href="http://www.cnblogs.com/shenliang123/p/3231312.html#" onclick="return RefreshPage();">刷新页面</a><a href="http://www.cnblogs.com/shenliang123/p/3231312.html#top">返回顶部</a></div>
+<div id="comment_form_container"><div class="login_tips">注册用户登录后才能发表评论，请 <a rel="nofollow" href="javascript:void(0);" class="underline" onclick="return login(&#39;commentform&#39;);">登录</a> 或 <a rel="nofollow" href="javascript:void(0);" class="underline" onclick="return register();">注册</a>，<a href="http://www.cnblogs.com/">访问</a>网站首页。</div></div>
+<div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+<div id="ad_t2"></div>
+<div id="opt_under_post"></div>
+<div id="ad_c1" class="c_ad_block">     <ins class="adsbygoogle" style="display:inline-block;width:300px;height:250px" data-ad-client="ca-pub-4210569241504288" data-ad-slot="5457903683"></ins></div>
+<div id="under_post_news"><div class="itnews c_ad_block"><b>最新IT新闻</b>:<br> ·  <a href="http://news.cnblogs.com/n/555627/" target="_blank">锤子手机做到第三代，希望却越来越渺茫，背后原因是什么？</a><br> ·  <a href="http://news.cnblogs.com/n/555626/" target="_blank">摩拜单车核心数据泄露，赚钱乐观，扩展不易</a><br> ·  <a href="http://news.cnblogs.com/n/555625/" target="_blank">这是个展现梦境的古怪游戏，由一名热衷心理学的高中生开发</a><br> ·  <a href="http://news.cnblogs.com/n/555624/" target="_blank">Docker借阿里云落地中国，创业公司怎么办？</a><br> ·  <a href="http://news.cnblogs.com/n/555623/" target="_blank">Aurora研发ALIAS飞机自动飞行系统</a><br>» <a href="http://news.cnblogs.com/" title="IT新闻" target="_blank">更多新闻...</a></div></div>
+<div id="ad_c2" class="c_ad_block"></div>
+<div id="under_post_kb"><div class="itnews c_ad_block" id="kb_block"><b>最新知识库文章</b>:<br><div id="kb_recent"> ·  <a href="http://kb.cnblogs.com/page/553682/" target="_blank">陈皓：什么是工程师文化？</a><br> ·  <a href="http://kb.cnblogs.com/page/551422/" target="_blank">没那么难，谈CSS的设计模式</a><br> ·  <a href="http://kb.cnblogs.com/page/550625/" target="_blank">程序猿媳妇儿注意事项</a><br> ·  <a href="http://kb.cnblogs.com/page/540529/" target="_blank">可是姑娘，你为什么要编程呢？</a><br> ·  <a href="http://kb.cnblogs.com/page/549631/" target="_blank">知其所以然（以算法学习为例）</a><br></div>» <a href="http://kb.cnblogs.com/" target="_blank">更多知识库文章...</a></div></div>
+<div id="HistoryToday" class="c_ad_block"></div>
+<script type="text/javascript">
+    fixPostBody();
+    setTimeout(function () { incrementViewCount(cb_entryId); }, 50);
+    deliverAdT2();
+    deliverAdC1();
+    deliverAdC2();    
+    loadNewsAndKb();
+    loadBlogSignature();
+    LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+    GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate);
+    loadOptUnderPost();
+    GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);   
+</script>
+</div>
+
+
+</div>
+<div id="leftcontent">
+	
+		<div id="leftcontentcontainer">
+			
+<!--done-->
+<div class="newsItem">
+	<div id="blog-news"><div id="profile_block">昵称：<a href="http://home.cnblogs.com/u/shenliang123/">发表是最好的记忆</a><br>园龄：<a href="http://home.cnblogs.com/u/shenliang123/" title="入园时间：2011-07-15">5年3个月</a><br>粉丝：<a href="http://home.cnblogs.com/u/shenliang123/followers/">402</a><br>关注：<a href="http://home.cnblogs.com/u/shenliang123/followees/">14</a><div id="p_b_follow"><a href="javascript:void(0);" onclick="follow(&#39;8d5bd08e-a9ae-e011-8673-842b2b196315&#39;)">+加关注</a></div></div></div><script type="text/javascript">loadBlogNews();</script>
+</div>
+
+			<div id="blog-calendar" style="display:none"></div><script type="text/javascript">loadBlogDefaultCalendar();</script><br>
+			<div id="blog-sidecolumn"><div id="sidebar_search" class="sidebar-block"></div><div id="sidebar_shortcut" class="sidebar-block">
+<h3 class="catListTitle">常用链接</h3>
+<ul>
+<li><a href="http://www.cnblogs.com/shenliang123/p/" title="我的博客的随笔列表">我的随笔</a></li><li><a href="http://www.cnblogs.com/shenliang123/MyComments.html" title="我发表过的评论列表">我的评论</a></li><li><a href="http://www.cnblogs.com/shenliang123/OtherPosts.html" title="我评论过的随笔列表">我的参与</a></li><li><a href="http://www.cnblogs.com/shenliang123/RecentComments.html" title="我的博客的评论列表">最新评论</a></li><li><a href="http://www.cnblogs.com/shenliang123/tag/" title="我的博客的标签列表">我的标签</a></li>
+</ul>
+<div id="itemListLin_con" style="display:none;">
+
+</div></div><div id="sidebar_toptags" class="sidebar-block"></div><div id="sidebar_categories">
+		<h3 class="catListTitle">随笔分类<span style="font-size:11px;font-weight:normal">(204)</span></h3>
+		
+				<ul class="catList">
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_0" class="listitem" href="http://www.cnblogs.com/shenliang123/category/372520.html">ajax(8)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_1" class="listitem" href="http://www.cnblogs.com/shenliang123/category/388425.html">android(2)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_2" class="listitem" href="http://www.cnblogs.com/shenliang123/category/330337.html">C++(1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_3" class="listitem" href="http://www.cnblogs.com/shenliang123/category/372654.html">freemarker(1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_4" class="listitem" href="http://www.cnblogs.com/shenliang123/category/592569.html">git(1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_5" class="listitem" href="http://www.cnblogs.com/shenliang123/category/373996.html">Hibernate(1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_6" class="listitem" href="http://www.cnblogs.com/shenliang123/category/370272.html">IDE[myeclipse](7)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_7" class="listitem" href="http://www.cnblogs.com/shenliang123/category/330837.html">java  basic(31)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_8" class="listitem" href="http://www.cnblogs.com/shenliang123/category/330336.html">java thorough(31)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_9" class="listitem" href="http://www.cnblogs.com/shenliang123/category/372852.html">java入门(5)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_10" class="listitem" href="http://www.cnblogs.com/shenliang123/category/330340.html">js/jquery(18)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_11" class="listitem" href="http://www.cnblogs.com/shenliang123/category/498540.html">linux(13)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_12" class="listitem" href="http://www.cnblogs.com/shenliang123/category/370171.html">MSSQL(10)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_13" class="listitem" href="http://www.cnblogs.com/shenliang123/category/373193.html">read book(2)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_14" class="listitem" href="http://www.cnblogs.com/shenliang123/category/370170.html">spring(1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_15" class="listitem" href="http://www.cnblogs.com/shenliang123/category/330473.html">SSH2(9)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_16" class="listitem" href="http://www.cnblogs.com/shenliang123/category/381381.html">struts2(4)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_17" class="listitem" href="http://www.cnblogs.com/shenliang123/category/346836.html">tomcat(5)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_18" class="listitem" href="http://www.cnblogs.com/shenliang123/category/372516.html">web service(4)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_19" class="listitem" href="http://www.cnblogs.com/shenliang123/category/372517.html">workflow(jbpm)(4)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_20" class="listitem" href="http://www.cnblogs.com/shenliang123/category/379462.html">xml(3)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_21" class="listitem" href="http://www.cnblogs.com/shenliang123/category/484510.html">报表及图形开发(1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_22" class="listitem" href="http://www.cnblogs.com/shenliang123/category/330353.html">编程常规知识(8)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_23" class="listitem" href="http://www.cnblogs.com/shenliang123/category/662502.html">产品设计(1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_24" class="listitem" href="http://www.cnblogs.com/shenliang123/category/372687.html">控件(3)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_25" class="listitem" href="http://www.cnblogs.com/shenliang123/category/392157.html">面试题收集(2)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_26" class="listitem" href="http://www.cnblogs.com/shenliang123/category/366982.html">设计模式(5)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_27" class="listitem" href="http://www.cnblogs.com/shenliang123/category/449491.html">数据结构(6)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_28" class="listitem" href="http://www.cnblogs.com/shenliang123/category/491027.html">数据库(8)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_29" class="listitem" href="http://www.cnblogs.com/shenliang123/category/378612.html">搜索引擎</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_30" class="listitem" href="http://www.cnblogs.com/shenliang123/category/430678.html">项目管理(9)</a></li>
+			
+				</ul>
+			
+	
+		<h3 class="catListTitle">随笔档案<span style="font-size:11px;font-weight:normal">(189)</span></h3>
+		
+				<ul class="catList">
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_0" class="listitem" href="http://www.cnblogs.com/shenliang123/archive/2015/03.html">2015年3月 (1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_1" class="listitem" href="http://www.cnblogs.com/shenliang123/archive/2014/09.html">2014年9月 (1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_2" class="listitem" href="http://www.cnblogs.com/shenliang123/archive/2014/07.html">2014年7月 (6)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_3" class="listitem" href="http://www.cnblogs.com/shenliang123/archive/2014/06.html">2014年6月 (2)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_4" class="listitem" href="http://www.cnblogs.com/shenliang123/archive/2014/02.html">2014年2月 (1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_5" class="listitem" href="http://www.cnblogs.com/shenliang123/archive/2013/12.html">2013年12月 (4)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_6" class="listitem" href="http://www.cnblogs.com/shenliang123/archive/2013/11.html">2013年11月 (4)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_7" class="listitem" href="http://www.cnblogs.com/shenliang123/archive/2013/10.html">2013年10月 (1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_8" class="listitem" href="http://www.cnblogs.com/shenliang123/archive/2013/09.html">2013年9月 (1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_9" class="listitem" href="http://www.cnblogs.com/shenliang123/archive/2013/08.html">2013年8月 (7)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_10" class="listitem" href="http://www.cnblogs.com/shenliang123/archive/2013/07.html">2013年7月 (11)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_11" class="listitem" href="http://www.cnblogs.com/shenliang123/archive/2013/06.html">2013年6月 (3)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_12" class="listitem" href="http://www.cnblogs.com/shenliang123/archive/2013/05.html">2013年5月 (4)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_13" class="listitem" href="http://www.cnblogs.com/shenliang123/archive/2013/04.html">2013年4月 (2)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_14" class="listitem" href="http://www.cnblogs.com/shenliang123/archive/2013/02.html">2013年2月 (3)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_15" class="listitem" href="http://www.cnblogs.com/shenliang123/archive/2013/01.html">2013年1月 (9)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_16" class="listitem" href="http://www.cnblogs.com/shenliang123/archive/2012/11.html">2012年11月 (5)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_17" class="listitem" href="http://www.cnblogs.com/shenliang123/archive/2012/10.html">2012年10月 (1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_18" class="listitem" href="http://www.cnblogs.com/shenliang123/archive/2012/09.html">2012年9月 (1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_19" class="listitem" href="http://www.cnblogs.com/shenliang123/archive/2012/08.html">2012年8月 (1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_20" class="listitem" href="http://www.cnblogs.com/shenliang123/archive/2012/07.html">2012年7月 (3)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_21" class="listitem" href="http://www.cnblogs.com/shenliang123/archive/2012/06.html">2012年6月 (7)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_22" class="listitem" href="http://www.cnblogs.com/shenliang123/archive/2012/05.html">2012年5月 (13)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_23" class="listitem" href="http://www.cnblogs.com/shenliang123/archive/2012/04.html">2012年4月 (50)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_24" class="listitem" href="http://www.cnblogs.com/shenliang123/archive/2012/03.html">2012年3月 (4)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_25" class="listitem" href="http://www.cnblogs.com/shenliang123/archive/2012/01.html">2012年1月 (3)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_26" class="listitem" href="http://www.cnblogs.com/shenliang123/archive/2011/12.html">2011年12月 (1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_27" class="listitem" href="http://www.cnblogs.com/shenliang123/archive/2011/11.html">2011年11月 (2)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_28" class="listitem" href="http://www.cnblogs.com/shenliang123/archive/2011/10.html">2011年10月 (38)</a></li>
+			
+				</ul>
+			
+	
+		<h3 class="catListTitle">链接</h3>
+		
+	
+</div><div id="sidebar_scorerank" class="sidebar-block">
+<h3>积分与排名</h3>
+<ul>
+	<li>
+		积分 -
+		344681
+	</li><li>
+		排名 -
+		362
+	</li>
+</ul>
+</div><div id="sidebar_recentcomments" class="sidebar-block"><div id="recent_comments_wrap">
+<h3 class="catListTitle">最新评论</h3>
+<div class="RecentComment" id="RecentComments">
+	<div id="RecentCommentsBlock"><ul>
+        <li class="recent_comment_title"><a href="http://www.cnblogs.com/shenliang123/archive/2012/04/24/2467702.html#3535022">1. Re:java入门第三步之数据库连接</a></li>
+        <li class="recent_comment_body">很完整。。</li>
+        <li class="recent_comment_author">--taz372436</li>
+        <li class="recent_comment_title"><a href="http://www.cnblogs.com/shenliang123/archive/2013/01/30/2882610.html#3525840">2. Re:程序员应该读的书与经常上的网站</a></li>
+        <li class="recent_comment_body">校友，你好!作为一个菜鸟，得好好学习学习。。。</li>
+        <li class="recent_comment_author">--Codeangel</li>
+        <li class="recent_comment_title"><a href="http://www.cnblogs.com/shenliang123/archive/2011/10/27/2226892.html#3518669">3. Re:java 重定向和转发的区别</a></li>
+        <li class="recent_comment_body">这比喻 没什么挑剔的</li>
+        <li class="recent_comment_author">--动次·打次</li>
+        <li class="recent_comment_title"><a href="http://www.cnblogs.com/shenliang123/archive/2012/06/29/2569958.html#3515165">4. Re:The Struts dispatcher cannot be found. This is usually caused by using Struts tags without the associated filter. 异常</a></li>
+        <li class="recent_comment_body">采用第三中方法解决了</li>
+        <li class="recent_comment_author">--张然大大</li>
+        <li class="recent_comment_title"><a href="http://www.cnblogs.com/shenliang123/archive/2012/05/02/2479286.html#3506144">5. Re:玩转log4j</a></li>
+        <li class="recent_comment_body">多谢题主</li>
+        <li class="recent_comment_author">--LinKing1993</li>
+        <li class="recent_comment_title"><a href="http://www.cnblogs.com/shenliang123/archive/2012/04/05/2432880.html#3505785">6. Re:js验证身份证号，超准确</a></li>
+        <li class="recent_comment_body">这个怎么用呀</li>
+        <li class="recent_comment_author">--wangyonglei</li>
+        <li class="recent_comment_title"><a href="http://www.cnblogs.com/shenliang123/p/3344555.html#3495386">7. Re:web.xml 中的listener、 filter、servlet 加载顺序及其详解</a></li>
+        <li class="recent_comment_body">这是我看过的解释的最清楚的一篇了</li>
+        <li class="recent_comment_author">--w_zj</li>
+        <li class="recent_comment_title"><a href="http://www.cnblogs.com/shenliang123/p/3835072.html#3486797">8. Re:p2p网贷平台设计简析</a></li>
+        <li class="recent_comment_body">@xiao盛加油...</li>
+        <li class="recent_comment_author">--田园里的蟋蟀</li>
+        <li class="recent_comment_title"><a href="http://www.cnblogs.com/shenliang123/p/3835072.html#3486766">9. Re:p2p网贷平台设计简析</a></li>
+        <li class="recent_comment_body">现在我们两个毕业生帮老板做一个p2p平台，现在对数据库的表设计完全没有一点思路。求数据库表设计指导</li>
+        <li class="recent_comment_author">--xiao盛</li>
+        <li class="recent_comment_title"><a href="http://www.cnblogs.com/shenliang123/p/3835072.html#3486764">10. Re:p2p网贷平台设计简析</a></li>
+        <li class="recent_comment_body">@烧点饭现在我们老板就想搞一个p2p网贷平台，招了两个今年毕业的学生，一个就是我刚刚出道的，只会写基本的代码，对p2p平台完全不了解，另一个也是刚刚接触，不过他技术强一点。我都不到怎么办，完全没有头绪......</li>
+        <li class="recent_comment_author">--xiao盛</li>
+        <li class="recent_comment_title"><a href="http://www.cnblogs.com/shenliang123/p/3267920.html#3483342">11. Re:cookie记住密码功能</a></li>
+        <li class="recent_comment_body">没明白</li>
+        <li class="recent_comment_author">--柠檬不萌丨</li>
+        <li class="recent_comment_title"><a href="http://www.cnblogs.com/shenliang123/p/3411306.html#3473417">12. Re:我的简历</a></li>
+        <li class="recent_comment_body">@三餐吃凉皮兄弟 好眼力...</li>
+        <li class="recent_comment_author">--发表是最好的记忆</li>
+        <li class="recent_comment_title"><a href="http://www.cnblogs.com/shenliang123/p/3411306.html#3473306">13. Re:我的简历</a></li>
+        <li class="recent_comment_body">简历最后一行的时候多了一个零</li>
+        <li class="recent_comment_author">--三餐吃凉皮</li>
+        <li class="recent_comment_title"><a href="http://www.cnblogs.com/shenliang123/archive/2011/10/27/2226892.html#3467600">14. Re:java 重定向和转发的区别</a></li>
+        <li class="recent_comment_body">这是见过讲的最能够让人理解的了，例子很形象，受教了，谢谢</li>
+        <li class="recent_comment_author">--ShmilyCrh08</li>
+        <li class="recent_comment_title"><a href="http://www.cnblogs.com/shenliang123/p/3344555.html#3460264">15. Re:web.xml 中的listener、 filter、servlet 加载顺序及其详解</a></li>
+        <li class="recent_comment_body">赞，楼主</li>
+        <li class="recent_comment_author">--南开小巷</li>
+</ul>
+</div>
+</div>
+</div></div><div id="sidebar_topviewedposts" class="sidebar-block"><div id="topview_posts_wrap">
+<h3 class="catListTitle">阅读排行榜</h3>
+<div class="RecentComment" id="TopViewPosts"> 
+	<div id="TopViewPostsBlock"><ul><li><a href="http://www.cnblogs.com/shenliang123/archive/2011/10/27/2226892.html">1. java 重定向和转发的区别(77318)</a></li><li><a href="http://www.cnblogs.com/shenliang123/archive/2011/10/27/2226923.html">2. java 静态方法和实例方法的区别(70752)</a></li><li><a href="http://www.cnblogs.com/shenliang123/p/3203546.html">3. CentOs中mysql的安装与配置(63907)</a></li><li><a href="http://www.cnblogs.com/shenliang123/archive/2011/10/27/2226903.html">4. java  int与integer的区别(43510)</a></li><li><a href="http://www.cnblogs.com/shenliang123/archive/2012/05/11/2495252.html">5. org.w3c.dom(java dom)解析XML文档(35175)</a></li><li><a href="http://www.cnblogs.com/shenliang123/archive/2012/08/28/2660705.html">6. java与freemarker中map的遍历(35148)</a></li><li><a href="http://www.cnblogs.com/shenliang123/p/3824383.html">7. Linux(CentOs6.4)安装Git(31481)</a></li><li><a href="http://www.cnblogs.com/shenliang123/archive/2012/04/05/2432880.html">8. js验证身份证号，超准确(29996)</a></li><li><a href="http://www.cnblogs.com/shenliang123/archive/2012/07/05/2578586.html">9. android调用web service(cxf)实例(23860)</a></li><li><a href="http://www.cnblogs.com/shenliang123/archive/2012/04/16/2452156.html">10. java中 == 与 equal 的区别(22912)</a></li><li><a href="http://www.cnblogs.com/shenliang123/p/3231312.html">11. 几种任务调度的 Java 实现方法与比较(22673)</a></li><li><a href="http://www.cnblogs.com/shenliang123/p/3344555.html">12. web.xml 中的listener、 filter、servlet 加载顺序及其详解(22052)</a></li><li><a href="http://www.cnblogs.com/shenliang123/archive/2012/04/08/2437421.html">13. eclipse与myeclipse恢复已删除的文件和代码(19991)</a></li><li><a href="http://www.cnblogs.com/shenliang123/p/3829044.html">14. Centos6.4 本地yum源配置(19678)</a></li><li><a href="http://www.cnblogs.com/shenliang123/archive/2012/04/07/2435908.html">15. SQL中的五种数据类型：字符型，文本型，数值型，逻辑型和日期型(18172)</a></li></ul></div>
+</div>
+</div></div><div id="sidebar_topcommentedposts" class="sidebar-block"><div id="topfeedback_posts_wrap">
+<h3 class="catListTitle">评论排行榜</h3>
+<div class="RecentComment" id="TopCommentsPosts">
+	<div id="TopFeedbackPostsBlock"><ul><li><a href="http://www.cnblogs.com/shenliang123/p/3838273.html">1. 开源项目1：某大学校友管理系统(44)</a></li><li><a href="http://www.cnblogs.com/shenliang123/archive/2012/05/11/2495252.html">2. org.w3c.dom(java dom)解析XML文档(31)</a></li><li><a href="http://www.cnblogs.com/shenliang123/p/3835072.html">3. p2p网贷平台设计简析(26)</a></li><li><a href="http://www.cnblogs.com/shenliang123/archive/2012/04/16/2452156.html">4. java中 == 与 equal 的区别(10)</a></li><li><a href="http://www.cnblogs.com/shenliang123/p/3411306.html">5. 我的简历(9)</a></li><li><a href="http://www.cnblogs.com/shenliang123/archive/2011/10/27/2226903.html">6. java  int与integer的区别(8)</a></li><li><a href="http://www.cnblogs.com/shenliang123/archive/2011/10/27/2226892.html">7. java 重定向和转发的区别(7)</a></li><li><a href="http://www.cnblogs.com/shenliang123/p/3435427.html">8. p2p网贷系统即将上线(7)</a></li><li><a href="http://www.cnblogs.com/shenliang123/archive/2012/07/05/2578586.html">9. android调用web service(cxf)实例(7)</a></li><li><a href="http://www.cnblogs.com/shenliang123/archive/2012/03/26/2417798.html">10. 在使用Math.random()生成6位随机数遇到的问题，并成功得到6位随机数(6)</a></li><li><a href="http://www.cnblogs.com/shenliang123/archive/2012/04/20/2459075.html">11. 基于servlet+smartUpload的文件上传(6)</a></li><li><a href="http://www.cnblogs.com/shenliang123/archive/2012/04/07/2437168.html">12. myeclipse 8.5 workspace无故初始化(6)</a></li><li><a href="http://www.cnblogs.com/shenliang123/archive/2012/04/05/2432880.html">13. js验证身份证号，超准确(6)</a></li><li><a href="http://www.cnblogs.com/shenliang123/p/3835116.html">14. web安全浅析(5)</a></li><li><a href="http://www.cnblogs.com/shenliang123/archive/2013/01/30/2882610.html">15. 程序员应该读的书与经常上的网站(5)</a></li></ul></div>
+</div></div></div><div id="sidebar_topdiggedposts" class="sidebar-block"><div id="topdigg_posts_wrap">
+<h3 class="catListTitle">推荐排行榜</h3>
+<div class="RecentComment">
+	<div id="TopDiggPostsBlock"><ul><li><a href="http://www.cnblogs.com/shenliang123/archive/2011/10/27/2226923.html">1. java 静态方法和实例方法的区别(17)</a></li><li><a href="http://www.cnblogs.com/shenliang123/p/3838273.html">2. 开源项目1：某大学校友管理系统(14)</a></li><li><a href="http://www.cnblogs.com/shenliang123/archive/2011/10/27/2226903.html">3. java  int与integer的区别(12)</a></li><li><a href="http://www.cnblogs.com/shenliang123/archive/2011/10/27/2226892.html">4. java 重定向和转发的区别(9)</a></li><li><a href="http://www.cnblogs.com/shenliang123/archive/2012/05/11/2495252.html">5. org.w3c.dom(java dom)解析XML文档(9)</a></li><li><a href="http://www.cnblogs.com/shenliang123/p/3835072.html">6. p2p网贷平台设计简析(8)</a></li><li><a href="http://www.cnblogs.com/shenliang123/p/3835116.html">7. web安全浅析(7)</a></li><li><a href="http://www.cnblogs.com/shenliang123/archive/2012/05/02/2479286.html">8. 玩转log4j(6)</a></li><li><a href="http://www.cnblogs.com/shenliang123/archive/2012/04/16/2451996.html">9. java 自动装箱与拆箱(6)</a></li><li><a href="http://www.cnblogs.com/shenliang123/p/3203546.html">10. CentOs中mysql的安装与配置(5)</a></li><li><a href="http://www.cnblogs.com/shenliang123/p/3344555.html">11. web.xml 中的listener、 filter、servlet 加载顺序及其详解(4)</a></li><li><a href="http://www.cnblogs.com/shenliang123/p/3231312.html">12. 几种任务调度的 Java 实现方法与比较(4)</a></li><li><a href="http://www.cnblogs.com/shenliang123/archive/2011/10/25/2224353.html">13. 高质量C++/C编程指南(4)</a></li><li><a href="http://www.cnblogs.com/shenliang123/archive/2012/01/04/2312479.html">14. js的时间操作方法(3)</a></li><li><a href="http://www.cnblogs.com/shenliang123/archive/2012/04/05/2432880.html">15. js验证身份证号，超准确(3)</a></li></ul></div>
+</div></div></div></div><script type="text/javascript">loadBlogSideColumn();</script></div>
+	
+</div>
+
+<!--done-->
+<div class="footer">
+	Powered by: <a href="http://www.cnblogs.com/">博客园</a>	模板提供：<a href="http://blog.hjenglish.com/">沪江博客</a>
+	Copyright ©2016 发表是最好的记忆
+</div>
+
+
+
+
+
+</body></html>

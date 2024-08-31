@@ -121,6 +121,8 @@ bear 编译命令 # 比如说 bear make
 
 ### AOSP
 
+#### 单个项目
+
 先执行：
 
 ```
@@ -132,11 +134,35 @@ $ export SOONG_GEN_CMAKEFILES_DEBUG=1
 
 然后整编或单编后，会在out/development/ide/clion/目录生成CMakeLists.txt。然后用`cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=1`生成compile_commands.json。
 
-导入vscode时，先安装cmake插件：
+然后在项目源码目录的`.vscode/settings.json`配置：
+
+```
+{
+    "clangd.arguments": [
+        "--compile-commands-dir=build"
+     ]
+}
+```
+
+不过既然有CMakeLists.txt了，我们也可以直接通过CMake插件。
+
+先安装cmake插件：
 
 ![image-20230802112539838](_img/image-20230802112539838.png)
 
-装好后，ctrl+shift+p,选择CMake:Quick Start,然后选择生成的CMakeLists.txt。然后会生成`.vscode/settings.json`。
+
+
+然后把CMakeLists.txt复制到打开的项目根目录下。vscode不像CLion那么强大，CMakeLists必须放在你打开的目录下，而Clion可以先打开CMakeLists，然后菜单里修改CMakeList source dir，所以CLion不需要把CMakeLists.txt拷贝过来。
+
+如果vscode不拷贝CMakeLists，而是像CLion 那样，直接打开`out/development/ide/clion/`下包含CMakeLists的目录，然后再“Add Folder to workspace”(即vscode的Multi-root Workspaces，一个窗口打开多个folder，以.code-workspace作为workspace配置文件的后缀)。这也是不生效的，因为不会对别的folder生效。总而言之，必须把CMakeLists.txt放在folder根目录，至于是拷贝过来，还是软链接，都可以。
+
+打开后，vscode应该会提示configure，点确定。或者随时可以从左侧导航视图选中CMakeLists.txt，右击：
+
+![image-20240718184726844](./imgs/image-20240718184726844.png)
+
+然后就可以跳转了。
+
+理论上也可以这样，ctrl+shift+p,选择CMake:Quick Start,然后选择生成的CMakeLists.txt。然后会生成`.vscode/settings.json`。
 
 ![image-20230802112815344](_img/image-20230802112815344.png)
 
@@ -148,15 +174,199 @@ $ export SOONG_GEN_CMAKEFILES_DEBUG=1
 }
 ```
 
-我们自己把“--compile-commands-dir”加进去,最后内容如下：
+理论上是行的，但是也许是插件bug，实测不会激活cmake插件，必须要在目录下有一个CMakeLists.txt文件，才能激活插件。你可以新建一个空的CMakeLists.txt。但是，这样明显繁琐了，还不如直接把CMakeLists.txt复制过来（或软链接，优点是当CMakeList内容有变化，不需要每次重新拷贝一次）。
+
+#### 包含多个构建目标
+
+有时一个项目，一个目录，包含了多个构建目标，比如以aosp/system/core/init为例，Android.bp里有“init_second_stage”、“libinit”、“init_first_stage_soong”等，另外还有一些用于测试的目标。这个目标都生成一个独立的CMakeLists.txt文件。我希望把这些整合在一起。
+
+```cmake
+//项目目录下新建CMakeLists.txt，添加内容
+cmake_minimum_required(VERSION 3.5)
+project(init)
+set(ANDROID_ROOT /home/xue/ft24/source/android)
+set(ANDROID_CMAKE_DIR ${ANDROID_ROOT}/out/development/ide/clion)
+
+add_subdirectory(${ANDROID_CMAKE_DIR}/system/core/init/init_first_stage_soong-arm64-android build/init_first_stage_soong-arm64-android)
+add_subdirectory(${ANDROID_CMAKE_DIR}/system/core/init/init_second_stage-arm64-android build/init_second_stage-arm64-android)
+add_subdirectory(${ANDROID_CMAKE_DIR}/system/core/init/libinit-arm64-android build/libinit-arm64-android)
+```
+
+用这个文件代替前面说的软链接或拷贝。
+
+注意add_subdirectory必须指定第二个参数（第二个参数表示build目录），因为每个目标，输出的文件都是很多重名的，你不能采取默认，让他们都输出到一个目录。
+
+#### 多个项目
+
+假如想一次打开多个项目，可以用code-workspace文件（手动创建文件，或者菜单，Add Folder to workspace, 然后保存）
+
+1. 可以在源码的外面建一个工程的目录，用来放配置文件（避免污染源码，重拉代码这个配置也不会丢）
+
+2. 以“/home/xue/ProjectVscode/system_core_init”为例，在目录下放code-workspace文件
+
+   ```c++
+   {
+       // ctrl+H 替换代码路径为目标
+       "folders": [
+           {
+               "name": "init",
+               "path": "/home/xue/ft24/source/android/system/core/init"
+           },
+           {
+               "name": "installerhal",
+               "path": "/home/xue/ft24/source/android/vendor/iauto/proprietary/hardware/installerhal"
+           },
+           {
+               "path": "/home/xue/ft24/source/android/system/memory/lmkd/"
+           },
+           {
+               "path": "/home/xue/ft24/source/android/system/core/fs_mgr"
+           }
+       ]
+   }
+   
+   ```
+
+3. 但是CMakeLists.txt文件还是要放在各自folders的目录，放在system_core_init里面无效。即使把system_core_init本身也加到folders里，使得插件能激活，并且表面上解析了CMakeLists.txt，甚至能构建，但还是没用，语法解析、跳转的信息反馈不到vscode，因为作用不到别的folder。
+
+4. 假如你把CMakeLists.txt放在system_core_init里面，打开这个目录，然后再此目录下新建软链接，指向源码路径。这样打开后是可以解析C++和跳转的。而且这样其实就不需要上面配置folders了。
+
+   但是存在一个问题，vscode把软链接的路径和真实路径当做两个文件，在左侧导航栏，点击打开文件，使用的是软链接的路径，而跳转后，打开的是真实路径，导致同一个文件会打开两个tab。其中一个还不能识别语法。
+
+5. “.code-workspace”文件支持配置cmake.sourceDirectory：
+
+   ```
+   {
+       "settings": {
+           "cmake.sourceDirectory": [
+               "/home/xue/ft24/source/android/out/development/ide/clion/system/core/init/init_first_stage_soong-arm64-android",
+               "/home/xue/ft24/source/android/out/development/ide/clion/system/core/init/init_second_stage-arm64-android",
+               "/home/xue/ft24/source/android/out/development/ide/clion/system/core/init/libinit-arm64-android",
+               "/home/xue/ft24/source/android/out/development/ide/clion/system/core/fs_mgr/libfs_mgr-arm64-android",
+               "/home/xue/ft24/source/android/out/development/ide/clion/system/core/fs_mgr/libfstab-arm64-android",
+               "/home/xue/ft24/source/android/out/development/ide/clion//system/core/fs_mgr/libfs_mgr_binder-arm64-android"
+           ],
+   	},
+       "folders": [
+           ...
+       ]
+   }
+   ```
+
+   不过这样写，sourceDirectory会作用到每个folder上面，而不是哪个CmakeLists作用给哪个folder。然后，测试下来，还是没用。也就是说，不管什么情形，用什么方法，终究还是得在每个folder里面放一个CMakeLists.txt。
+
+6. 编写于2024年。不排除以后vscode以及cmake插件增强功能的可能。
+
+### 脚本
+
+遍历目录下所有CMakeLists.txt并生成compile_commands.json，合并到一起的脚本
+
+```shell
+# 这个脚本用于给安卓源码里的C++工程生成compile_commands.json
+# 先设置：
+# export SOONG_GEN_CMAKEFILES=1
+# export SOONG_GEN_CMAKEFILES_DEBUG=1
+# 然后整编代码或者编译需要导入工程的模块
+# 假设待导入工程为: aosp_dir/**/projA,
+# 假设使用VS Code作为IDE，
+# 将本脚本放到: aosp_dir/**/projA/.vscode/
+# 然后执行，会在aosp_dir/out/development/ide/clion/**/projA下面生成compile_commands.json文件
+# 并创建符号链接：aosp_dir/**/projA/.vscode/compile_commands.json 指向真实的文件。
+# 脚本会遍历projA下面的所有子构建项，并把子构建项的编译命令汇集在一个compile_commands.json里。
+
+# 执行前，先安装jq: sudo apt install jq
+
+WORK_DIR=$(cd $(dirname $0); pwd)
+ANDROID_BUILD_TOP=/home/xue/toyota_24mm_dev/source/android #末尾不要有斜杠“/”
+
+if [[ $WORK_DIR != $ANDROID_BUILD_TOP* ]]; then
+    echo Do not support directory outside android root
+    exit
+fi
+WORK_DIR_REAL=${WORK_DIR%/.vscode*} #去掉末尾/.vscode
+echo workspacedir=$WORK_DIR_REAL
+target_dir=$ANDROID_BUILD_TOP/out/development/ide/clion/${WORK_DIR_REAL#*$ANDROID_BUILD_TOP/}
+echo target_dir=$target_dir
+
+cd $target_dir
+if [ $? -ne 0 ]; then
+    echo "dir not exits"
+    exit
+fi
+echo -e "\n\n"
+for line in `find . -name CMakeLists.txt`
+do
+    if [[ "$line" == *"-arm64-android"* ]]
+    then
+        echo $line
+        cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang $line
+    fi
+done
+# merge compile_commands to one file
+# sudo apt install jq, if jq is not installed
+jq -s 'map(.[])' `find . -name compile_commands.json` > compile_commands.json
+
+rm $WORK_DIR/compile_commands.json
+ln -s $target_dir/compile_commands.json $WORK_DIR/compile_commands.json 
 
 ```
-{
-	"cmake.sourceDirectory":"xxxxx/xxx/xxx",
-    "clangd.arguments": [
-        "--compile-commands-dir=build"
-     ]
+
+将所有CMakeLists.txt合并的脚本
+
+```shell
+# use add_subdirectory to import all cmakelists into one file
+# 举例：命令 ./combine_cmake.sh system/core/init, 会在system/core/init目录下生成cmakelists文件
+
+function generageCMakeLists() {
+    if [ $# == 0 ];then
+        echo "未传参，需要传入相对于android根目录的路径"
+        exit
+    else
+        if [ -z "$ANDROID_BUILD_TOP" ];then
+            echo "先执行source build/envsetup.sh && lunch xxx"
+            exit
+        else
+            projPath="$ANDROID_BUILD_TOP/$1"
+            echo "project path=$projPath"
+            if [ ! -e $projPath ];then
+                echo "not exist: $projPath"
+                exit
+            fi
+
+            clionDir=$ANDROID_BUILD_TOP/out/development/ide/clion
+            cmakesDir="$ANDROID_BUILD_TOP/out/development/ide/clion/$1"
+            if [ ! -e $cmakesDir ];then
+                echo "not found: $cmakesDir"
+                exit
+            fi
+
+            # 1. 
+            cmakeFile="$projPath/CMakeLists.txt"
+            echo "cmake_minimum_required(VERSION 3.5)" > $cmakeFile
+            projName=$(basename "$projPath")
+            echo -e "project($projName)\n" >> $cmakeFile
+
+            # 2. 
+            echo "set(ANDROID_ROOT $ANDROID_BUILD_TOP)" >> $cmakeFile
+            echo -e "set(ANDROID_CMAKE_DIR \${ANDROID_ROOT}/out/development/ide/clion)\n" >> $cmakeFile
+            echo -e "set(PROJ_CMAKE_DIR \${ANDROID_CMAKE_DIR}/$1)\n" >> $cmakeFile
+
+            # 3.
+            for line in `find $cmakesDir -name CMakeLists.txt`
+            do
+                if [[ "$line" == *"-arm64-android"* ]]
+                then
+                    echo $line
+                    path=$(dirname $line)
+                    path=${path/$cmakesDir/\${PROJ_CMAKE_DIR\}}
+                    echo -e "add_subdirectory(${path} ${path}/build)" >> $cmakeFile
+                fi
+            done
+        fi
+    fi
 }
+
+generageCMakeLists "$1"
+
 ```
 
-不过我觉得，指定`compile-commands`就已经够用了，不一定非要装cmake插件，也不一定需要配置“cmake.sourceDirectory”。

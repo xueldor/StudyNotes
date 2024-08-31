@@ -1,0 +1,18 @@
+一、adb启动activity：
+$ adb shell
+$ am start -n ｛包(package)名｝/｛包名｝.{活动(activity)名称}
+am start -W package 可以查看启动时间
+如：启动浏览器
+# am start -n com.android.browser/com.android.browser.BrowserActivity
+
+二、adb启动service：
+$ adb shell
+$ am startservice -n ｛包(package)名｝/｛包名｝.{服务(service)名称}
+如：启动自己应用中一个service
+# am startservice -n com.android.traffic/com.android.traffic.maniservice
+
+三、adb发送broadcast：
+$ adb shell
+$ am broadcast -a <广播动作>
+如：发送一个网络变化的广播
+# am broadcast -a android.net.conn.CONNECTIVITY_CHANGE
