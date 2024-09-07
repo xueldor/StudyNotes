@@ -164,13 +164,17 @@ docker rm -f 381520f56638 51a69fcfcee0 be935278e4e6 b01c70cd1bcf 3f8e982a44d5 # 
 
 ```
 # 容器内什么都没有，需要手动安装很多常用工具包
+apt update
 # ping
 apt install iputils-ping
 # ifconfig
 apt install net-tools
 
-apt install gcc g++
+apt install gcc g++ git lrzsz # and so on
 
+#安装中文字符集和设置中文字符支持
+apt install language-pack-zh-hans
+locale-gen zh_CN.UTF-8
 ```
 
 ## 将容器的当前状态保存为一个新的 Docker 镜像
@@ -206,6 +210,90 @@ docker load -i D:\docker-images\springbootapp2-latest.tar
 2. docker load用来载入镜像包，docker import用来载入容器包，但两者都会恢复为镜像；
 3. docker load不能对载入的镜像重命名，而docker import可以为镜像指定新名称。
 4. **两种方法不可混用**
+
+## 中文乱码问题
+
+默认情况下，下载的ubuntu18.04镜像，是不支持中文路径的，显示为乱码；文件内容也不能是中文，无法正常显示; 编译时，python默认语言已经是utf-8,但还是报编码错误。。。等等各种与编码有关的错误。
+
+```
+输入locale -a，查看一下现在已安装的语言，已经有C.UTF-8字符集
+xuexiangyu@ft24mm:~$ locale -a
+C
+C.UTF-8
+POSIX
+
+输入locale查看下语言情况，发现全部是POSIX：
+LANG=
+LANGUAGE=
+LC_CTYPE="POSIX"
+LC_NUMERIC="POSIX"
+LC_TIME="POSIX"
+LC_COLLATE="POSIX"
+LC_MONETARY="POSIX"
+。。。
+```
+
+设置一下`LANG、LANGUAGE、LC_ALL`这三个就行了。LANG默认设置，`LC_*`没设值的时候就拿LANG；LANGUAGE是程序语言设置；LC_ALL强制设置所有`LC_*`
+
+
+1.  配置Dockerfile镜像时，永久修改，在 Dockerfile 中添加
+
+   ```
+   ENV LANG C.UTF-8
+   ENV LANGUAGE C.UTF-8
+   ENV LC_ALL C.UTF-8
+   ```
+
+2. 方法1可能有些困难，因为我们业余用户不想去配置Dockerfile。那么下载的镜像，容器已经运行起来了，我们可以在容器内修改：
+
+   ```
+   #安装中文字符集和设置中文字符支持。 应该不是必要的，但也没什么坏处
+   apt install language-pack-zh-hans
+   locale-gen zh_CN.UTF-8
+   # 执行后locale -a多了zh_CN.utf8 zh_SG.utf8
+   root@d6e997049683:/# locale -a
+   C
+   C.UTF-8
+   POSIX
+   zh_CN.utf8
+   zh_SG.utf8
+   
+   # 在/etc/bash.bashrc加入
+   export LANG="C.UTF-8"
+   export LC_ALL="C.UTF-8"
+   export LANGUAGE="C.UTF-8"
+   
+   #重新运行容器，用locale检查
+   docker restart  ft24mm
+   docker exec -it ft24mm /bin/bash
+   
+   xuexiangyu@ft24mm:/$ locale
+   LANG=C.UTF-8
+   LANGUAGE=C.UTF-8
+   LC_CTYPE="C.UTF-8"
+   LC_NUMERIC="C.UTF-8"
+   LC_TIME="C.UTF-8"
+   LC_COLLATE="C.UTF-8"
+   LC_MONETARY="C.UTF-8"
+   LC_MESSAGES="C.UTF-8"
+   LC_PAPER="C.UTF-8"
+   LC_NAME="C.UTF-8"
+   LC_ADDRESS="C.UTF-8"
+   LC_TELEPHONE="C.UTF-8"
+   LC_MEASUREMENT="C.UTF-8"
+   LC_IDENTIFICATION="C.UTF-8"
+   LC_ALL=C.UTF-8
+   ```
+
+   
+
+3. 启动时或进入bash时候，设置字符集
+
+   ```shell
+   docker run -i -t --env LANG=C.UTF-8 --env LANGUAG=C.UTF-8 --env LC_ALL=C.UTF-8 ubuntu /bin/bash
+   ```
+
+   这个方法也是推荐的，不需要在容器里折腾了。如果忘了在docker run时指定uft8,后续也可以在docker exec进入容器是指定。但是每次exec命令都要加，就比较烦了，那就不如用方法2了。
 
 ## 用vscode看代码
 
@@ -321,7 +409,7 @@ I have no name!@c3c58f0632a8:/$
 # 看着别扭， 我们以 root 身份进入容器
 docker exec -it -u root your_container /bin/bash
 
-# 在容器内创建用户
+# 在容器内创建用户。如果/home/xue已经存在，比如前面-v /home/xue/3ya会创建目录，那么这里会有些问题，没法在/home/xue下面创建必须得用户文件，并且/home/xue文件夹的权限也不对（-v映射时创建的用户是root，实际应该是xue）。所以应该先备份里面的文件，删除目录，再执行。或者前面先不要-v，后面再添加。
 useradd -d "/home/xue" -m -u 1000 -s "/bin/bash" xue
 ```
 
@@ -330,7 +418,7 @@ useradd -d "/home/xue" -m -u 1000 -s "/bin/bash" xue
 最后，汇总前面的知识。我们常用的run指令，完整版参考如下：
 
 ```shell
-docker run -itd --user $(id -u):$(id -g) --name dev_3ya -p 2222:22 -v /home/xue/3ya:/home/xue/3ya ubuntu:18.04
+docker run -itd --user $(id -u):$(id -g) --name dev_3ya --hostname dev_3ya -p 2222:22 -v /home/xue/3ya:/home/xue/3ya --env LANG=C.UTF-8 --env LANGUAG=C.UTF-8 --env LC_ALL=C.UTF-8 ubuntu:18.04
 ```
 
 项目中每次使用时，直接从这拷贝，改改名字和路径。

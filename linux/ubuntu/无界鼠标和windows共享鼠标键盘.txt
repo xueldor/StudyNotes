@@ -1,0 +1,7 @@
+synery软件
+1. 不要从官网下载，官网需要注册账号，收费
+2. https://sourceforge.net/projects/synergy-stable-builds/ 的版本比较老，ubuntu22和24安装不上
+3. 正解是从 https://github.com/DEAKSoftware/Synergy-Binaries/releases 下载 deb或AppImage，实测linux mint22可用。
+
+4. 安装后添加开机自动启动
+5. 开机自动登录，否则在用户名密码界面，软件没有运行，无法共享鼠标。

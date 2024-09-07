@@ -152,6 +152,50 @@ $ export SOONG_GEN_CMAKEFILES_DEBUG=1
 
 
 
+【可选步骤】
+
+如果没有安装ninja，会把cmake转成makefile。我希望用ninja，因此安装ninja-build:
+
+```
+sudo apt install ninja-build
+```
+
+然后打开`cmake-tools-kits.json`文件，`vim ~/.local/share/CMakeTools/cmake-tools-kits.json`，添加:
+
+```
+xue@S111-CCS2plus:~/ft24mm/source/android$ vim ~/.local/share/CMakeTools/cmake-tools-kits.json
+[
+  {
+    "name": "GCC 7.5.0 x86_64-linux-gnu",
+    "compilers": {
+      "C": "/usr/bin/gcc",
+      "CXX": "/usr/bin/g++"
+    },
+    "isTrusted": true
+  },{
+    "name": "clang+llvm-18.1.4-x86_64-linux-gnu",
+    "compilers": {
+      "C": "/home/xuexiangyu/opt/llvm/bin/clang",
+      "CXX": "/home/xuexiangyu/opt/llvm/bin/clang++"
+    },
+    "isTrusted": true
+  },{
+    "name": "android_cross_clang",
+    "compilers": {
+      "C": "/home/xuexiangyu/ft24mm/source/android/prebuilts/clang/host/linux-x86/clang-r416183b1/bin/clang",
+      "CXX": "/home/xuexiangyu/ft24mm/source/android/prebuilts/clang/host/linux-x86/clang-r416183b1/bin/clang++"
+    },
+    "isTrusted": true
+  }
+]
+```
+
+之所以这步可选，是因为默认插件会自动搜索到。但是如果没有搜索到我们想用的编译器，就需要自己去加的。交叉编译工具一般是搜不到的。
+
+【可选步骤-结束】
+
+
+
 然后把CMakeLists.txt复制到打开的项目根目录下。vscode不像CLion那么强大，CMakeLists必须放在你打开的目录下，而Clion可以先打开CMakeLists，然后菜单里修改CMakeList source dir，所以CLion不需要把CMakeLists.txt拷贝过来。
 
 如果vscode不拷贝CMakeLists，而是像CLion 那样，直接打开`out/development/ide/clion/`下包含CMakeLists的目录，然后再“Add Folder to workspace”(即vscode的Multi-root Workspaces，一个窗口打开多个folder，以.code-workspace作为workspace配置文件的后缀)。这也是不生效的，因为不会对别的folder生效。总而言之，必须把CMakeLists.txt放在folder根目录，至于是拷贝过来，还是软链接，都可以。
