@@ -1,6 +1,0 @@
-系统分了/boot、/、/home三个区，备份“/分区”，打开根目录，依次进入每一个子目录，df .看一下，不是挂载到根路径的目录都需要exclude。有些目录比如home是独立的home分区挂载过来的，有些如/proc是内核运行时临时mount出来的，没有对于硬盘上的文件，这些不要备份。
-sudo tar cvpzf /home/work/ubuntu_bak20210225.tar.gz  --exclude=/proc --exclude=/tmp --exclude=/lost+found --exclude=/media --exclude=/mnt --exclude=/run --exclude=/sys --exclude=/home /
-
-恢复
-sudo tar -xvpzf ubuntu_bak20210225.tar.gz -C /
-

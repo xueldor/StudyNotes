@@ -1,8 +1,0 @@
-<resources>
-    <string name="app_name">TestFreg</string>
-    <string name="reg1_value">reg1:</string>
-    <string name="hint">Please input a value...</string>
-    <string name="read">Read</string>
-    <string name="write">Write</string>
-    <string name="clear">Clear</string>
-</resources>

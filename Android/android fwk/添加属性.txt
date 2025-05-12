@@ -1,0 +1,6 @@
+1. 搜索 *.prop
+device/autochips/system/assi_64/system.prop
+
+2.搜索 *.mk,
+如./device/autochips/vendor/ac8025_hsae/device.mk 添加：
+PRODUCT_PROPERTY_OVERRIDES += persist.sys.timezone=Asia/Shanghai

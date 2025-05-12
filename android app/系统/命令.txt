@@ -1,2 +1,0 @@
-settings put system screen_brightness 150
-settings get system screen_brightness 

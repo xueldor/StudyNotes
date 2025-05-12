@@ -1,0 +1,5 @@
+默认time.android.com国内访问不通
+
+core/res/res/values/config.xml
+-    <string translatable="false" name="config_ntpServer">time.android.com</string>
++    <string translatable="false" name="config_ntpServer">cn.pool.ntp.org</string>

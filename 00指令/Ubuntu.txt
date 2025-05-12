@@ -1,4 +1,0 @@
-1. Ubuntu以root打开资源管理器 sudo nautilus .
-2. dpkg -L openjdk-7-jdk  : 找到openjdk-7-jdk的安装路径
-3. sudo apt-get install nautilus-open-terminal :右键里面添加一个“打开终端”的菜单
-4. 按下键盘上的ctrl+H组合键，可以让ubuntu中开头带“.”的文件夹显示出来

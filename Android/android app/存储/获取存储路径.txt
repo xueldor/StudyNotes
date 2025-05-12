@@ -1,0 +1,38 @@
+1.内部存储(随着 app 卸载而删除)
+1.1 根目录($rootDir)：/data，通过 Environment.getDataDirectory() 获取
+     应用程序目录($applicationDir)：$rootDir/data/包名（不一定，不同设备可能不同）
+1.2 假设我们的应用程序包名为com.learn.test，路径如下
+Context.getCacheDir():               /data/data/com.learn.test/cache
+Context.getFilesDir():               /data/data/com.learn.test/files
+Context.getFileStreamPath(""):       /data/data/com.learn.test/files
+Context.getFileStreamPath("test"):   /data/data/com.learn.test/files/test
+
+2.外部存储(随着 app 卸载而删除;4.4 之后不需要SDCARD权限)
+2.1 根目录($rootDir)：/storage/emulated/0（不一定，不同设备可能不同），通过 Environment.getExternalStorageDirectory() 获取。 
+2.2 应用程序目录($applicationDir)：$rootDir/Andorid/data/包名 
+应用缓存目录：$applicationDir/cache，通过Context.getExternalCacheDir()获取。 
+应用文件目录：$applicationDir/files，通过Context.getExternalFilesDir(String type)，type为空字符串时获取。type系统给我们提供了很多常用的类型，比如图片和下载等等:
+
+public static String DIRECTORY_MUSIC = "Music";
+public static String DIRECTORY_ALARMS = "Alarms";
+public static String DIRECTORY_NOTIFICATIONS = "Notifications";
+public static String DIRECTORY_PICTURES = "Pictures";
+public static String DIRECTORY_MOVIES = "Movies";
+public static String DIRECTORY_DOWNLOADS = "Download";
+public static String DIRECTORY_DCIM = "DCIM";
+public static String DIRECTORY_DOCUMENTS = "Documents";
+
+假设我们的应用程序包名为com.learn.test，路径如下：
+Environment.getExternalStorageDirectory():               /storage/emulated/0
+Context.getExternalCacheDir():                           /storage/emulated/0/Android/data/com.learn.test/cache
+Context.getExternalFilesDir(""):                         /storage/emulated/0/Android/data/com.learn.test/files
+Context.getExternalFilesDir("test"):                     /storage/emulated/0/Android/data/com.learn.test/files/test
+Context.getExternalFilesDir(Environment.DIRECTORY_PICTURES):    /storage/emulated/0/Android/data/com.learn.test/files/Pictures
+
+
+3 公共存储目录: 可以在外部存储上新建任意文件夹;在6.0及之后的系统需要动态申请权限;目录的内容不会随着应用的卸载而消失。如：
+
+Environment.getExternalStorageDirectory():                     /storage/emulated/0
+Environment.getExternalStoragePublicDirectory(""):             /storage/emulated/0
+Environment.getExternalStoragePublicDirectory("test"):         /storage/emulated/0/test
+Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)：  /storage/emulated/0/Pictures

@@ -1,6 +1,0 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Theme.TestFreg" parent="android:Theme.Light.NoTitleBar">
-
-    </style>
-</resources>

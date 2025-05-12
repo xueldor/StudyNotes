@@ -1,1 +1,0 @@
-#ifndef _FAKE_REG_H_#define _FAKE_REG_H_#include <linux/cdev.h>//字符设备#include <linux/semaphore.h>//信号量//定义虚拟设备freg在/dev下面的名称#define FREG_DEVICE_NODE_NAME "freg"struct fake_reg_dev {    char reg1;//假设有一个虚拟的硬件设备，有4个字节寄存器    char reg2;    char reg3;    char reg4;    struct semaphore sem;    struct cdev dev;};#endif

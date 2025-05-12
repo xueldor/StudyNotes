@@ -1,1 +1,0 @@
-copy /Y C:\Users\xuexiangyu\AppData\Local\Packages\Microsoft.Windows.ContentDeliveryManager_cw5n1h2txyewy\LocalState\Assets\*  E:\pictures\

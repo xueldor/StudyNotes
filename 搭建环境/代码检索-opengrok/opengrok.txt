@@ -10,15 +10,18 @@ export PATH=${JAVA_HOME}/bin:$PATH
 1. 卸载掉已经不维护的exuberant ctags, 改用universal-ctags
 sudo apt purge exuberant-ctags
 sudo apt install universal-ctags
-如果没有universal-ctags软件包，就得自己下载编译安装：
-2.   sudo apt install gcc make pkg-config autoconf automake python3-docutils \
+
+比较老（Ubuntu18）的ubuntu没有universal-ctags软件包，就得自己下载编译安装：
+1. sudo apt install gcc make pkg-config autoconf automake python3-docutils \
    libseccomp-dev libjansson-dev libyaml-dev libxml2-dev
 尤其是autoconf一定要装，否则下一步无法编译
-3. https://github.com/universal-ctags/ctags下载最新，执行
+2. https://github.com/universal-ctags/ctags下载最新，执行
 ./autogen.sh
 ./configure
 make
 sudo make install
+由于我在执行autogen时，出现了很多错误，无法解决。因此我用docker，下载一个ubuntu22的 docker镜像，然后apt install universal-ctags。
+后果就是opengrok必须部署在docker里。
 
 部署：
 opengrok解压后将/lib/source.war放在tomcat文件夹的webapp的目录下。

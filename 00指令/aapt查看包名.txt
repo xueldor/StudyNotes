@@ -1,1 +1,0 @@
-aapt dump badging <file_path.apk>

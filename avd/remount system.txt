@@ -1,2 +1,0 @@
-通过emulator.exe -avd Pixel_2_API_28 -writable-system启动模拟器，Pixel_2_API_28为模拟器名
-然后执行adb root命令和adb remount命令,/system就变为可写入状态了

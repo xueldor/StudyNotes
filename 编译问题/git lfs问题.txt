@@ -1,0 +1,8 @@
+Git LFS: (0 of 1 files) 0 B / 1.75 GB                                                                                                                          
+batch response: Post https://192.168.64.47:8443/Android/QCOM_SA8155_6155/qnx_apps/info/lfs/objects/batch: x509: cannot validate certificate for 192.168.64.47 because it doesn't contain any IP SANs
+error: failed to fetch some objects from 'https://192.168.64.47/Android/QCOM_SA8155_6155/qnx_apps.git/info/lfs'
+xue@ccs5:/data/626_8155/apps$ 
+
+
+把ssl认证关了即可：
+git config --global http.sslverify false

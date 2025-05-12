@@ -1,0 +1,63 @@
+./source/android/bionic/libc/kernel/uapi/linux/input-event-codes.h
+./source/kernel/common/include/uapi/linux/input-event-codes.h
+--------------bsp加
+
+source/android/frameworks/base/data/keyboards/Generic.kl
+key 195 HSAE_POWER
+key 196 HSAE_VOLDN
+key 197 HSAE_VOLUP
+key 198 HSAE_MEDIA
+key 199 HSAE_HOME
+key 249 HSAE_NAVI
+key 250 HSAE_CAMERA 
+key 251 HSAE_BACK
+
+frameworks/native/include/android/keycodes.h
+    /* hsae hard key */
+    AKEYCODE_HSAE_POWER = 289,
+    AKEYCODE_HSAE_VOLDN = 290,
+    AKEYCODE_HSAE_VOLUP = 291,
+    AKEYCODE_HSAE_MEDIA = 292,
+    AKEYCODE_HSAE_HOME = 293,
+    AKEYCODE_HSAE_NAVI = 294,
+    AKEYCODE_HSAE_CAMERA  = 295,
+    AKEYCODE_HSAE_BACK = 296
+
+frameworks/native/libs/input/InputEventLabels.cpp
+    DEFINE_KEYCODE(HSAE_POWER), \
+    DEFINE_KEYCODE(HSAE_VOLDN), \
+    DEFINE_KEYCODE(HSAE_VOLUP), \
+    DEFINE_KEYCODE(HSAE_MEDIA), \
+    DEFINE_KEYCODE(HSAE_HOME), \
+    DEFINE_KEYCODE(HSAE_NAVI), \
+    DEFINE_KEYCODE(HSAE_CAMERA), \
+    DEFINE_KEYCODE(HSAE_BACK)
+-------追加到#define KEYCODES_SEQUENCE
+
+frameworks/base/core/java/android/view/KeyEvent.java
+    public static final int KEYCODE_HSAE_POWER = 289;
+    public static final int KEYCODE_HSAE_VOLDN = 290;
+    public static final int KEYCODE_HSAE_VOLUP = 291;
+    public static final int KEYCODE_HSAE_MEDIA = 292;
+    public static final int KEYCODE_HSAE_HOME = 293;
+    public static final int KEYCODE_HSAE_NAVI = 294;
+    public static final int KEYCODE_HSAE_CAMERA = 295;
+    public static final int KEYCODE_HSAE_BACK = 296;
+
+public static final int LAST_KEYCODE = KEYCODE_HSAE_BACK;  ------- 一定要改
+
+
+core/api/current.txt
+core/api/test-current.txt
+-------------命令自动生成
+
+core/res/res/values/attrs.xml
+        <enum name="KEYCODE_HSAE_POWER" value="289" />
+        <enum name="KEYCODE_HSAE_VOLDN" value="290" />
+        <enum name="KEYCODE_HSAE_VOLUP" value="291" />
+        <enum name="KEYCODE_HSAE_MEDIA" value="292" />
+        <enum name="KEYCODE_HSAE_HOME" value="293" />
+        <enum name="KEYCODE_HSAE_NAVI" value="294" />
+        <enum name="KEYCODE_HSAE_CAMERA" value="295" />
+        <enum name="KEYCODE_HSAE_BACK" value="296" />
+

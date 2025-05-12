@@ -1,0 +1,5 @@
+package android.hardware.freg@1.0;
+
+interface IFreg {
+    getReg1() generates(uint64_t result);
+};

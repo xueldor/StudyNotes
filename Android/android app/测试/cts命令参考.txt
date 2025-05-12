@@ -1,0 +1,9 @@
+执行某个模块的所有case比如AutoCore
+run cts --abi arm64-v8a -m CtsAutoCoreTestCases --skip-device-info --skip-preconditions --skip-all-system-status-check --disable-reboot
+
+执行某个模块下的某个case类
+run cts --abi arm64-v8a -m CtsAutoCoreTestCases --test com.hsae.autocore.cts.VehicleTest --skip-device-info --skip-preconditions --skip-all-system-status-check --disable-reboot
+
+指定到具体一条case
+run cts --abi arm64-v8a -m CtsAutoCoreTestCases --test com.hsae.autocore.cts.VehicleTest#test_isAccOn --skip-device-info --skip-preconditions --skip-all-system-status-check --disable-reboot
+

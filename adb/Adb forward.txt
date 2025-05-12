@@ -1,5 +1,0 @@
-（参见安卓调试的几篇）
-
-adb forward tcp:5039 jdwp:950 #950是安卓端要debug的进程号
-
-pid=($(adb shell ps -A |grep -i  system_server));adb forward tcp:5039 jdwp:${pid[1]}

@@ -1,1 +1,0 @@
-cat source_file > dest_file

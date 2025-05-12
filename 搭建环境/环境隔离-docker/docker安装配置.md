@@ -295,6 +295,25 @@ LC_MONETARY="POSIX"
 
    这个方法也是推荐的，不需要在容器里折腾了。如果忘了在docker run时指定uft8,后续也可以在docker exec进入容器是指定。但是每次exec命令都要加，就比较烦了，那就不如用方法2了。
 
+## 时区问题
+
+docker里的时区可能是0，希望设置成东八区。
+
+```
+#docker里面
+mkdir -p /usr/share/zoneinfo/Asia/
+#docker外面
+docker cp /usr/share/zoneinfo/Asia/Shanghai imagename:/usr/share/zoneinfo/Asia/Shanghai
+docker cp /etc/localtime imagename:/etc/localtime
+docker cp /etc/timezone imagename:/etc/timezone
+
+cat /etc/timezone 
+Asia/Shanghai
+
+```
+
+
+
 ## 用vscode看代码
 
 由于不好在docker里面直接启动vscode，
@@ -354,6 +373,14 @@ ssh xue@192.168.22.128 # 连到宿主的ssh
 ```
 
 当然也可以研究一下上面的配网桥的方法。
+
+> docker容器里配置ssh，登录到root。需要：
+>
+> vim /etc/ssh/sshd_config
+>
+> PermitRootLogin yes
+>
+> UsePAM no
 
 ## docker容器内启动GUI
 

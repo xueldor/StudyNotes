@@ -1,5 +1,0 @@
-service freg_hal_service /vendor/bin/hw/android.hardware.freg@1.0-service
-    class hal
-    user system
-    group system
-	seclabel u:r:shell:s0

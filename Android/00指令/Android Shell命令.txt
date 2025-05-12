@@ -1,0 +1,94 @@
+#######################apk相关##############
+dump信息
+dumpsys activity
+dumpsys window
+dumpsys SurfaceFlinger
+dumpsys overlay
+等等
+dumpsys -l 查看所有可以dump的服务
+
+
+am启动activity、service
+am start -W package 可以查看启动时间
+am start -n com.android.browser/com.android.browser.BrowserActivity
+
+am startservice -n com.android.traffic/com.android.traffic.maniservice
+发送一个网络变化的广播
+# am broadcast -a android.net.conn.CONNECTIVITY_CHANGE
+
+
+pm命令
+1. pm install xxx.apk   --新安装
+2. pm install -r xxx.apk --安装一个已经安装的APK，保持其数据不变
+3. pm unstall [包名]   --卸载,清除数据和缓存
+查询
+pm list packages [-f]
+pm list permission-groups  察看已知的权限组：
+pm list permissions [-g] [-f] [-d] [-u] [GROUP]
+pm list instrumentation [-f] [TARGET-PACKAGE]
+pm list features    列出所有硬件相关信息：
+冻结应用
+pm enable PACKAGE_OR_COMPONENT
+pm disable PACKAGE_OR_COMPONENT
+重置权限
+pm reset-permissions
+
+
+getevent/sendevent命令
+getevent -l
+sendevent device type code value
+
+
+input keyevent 3   ----home
+input keyevent 4   ----back
+input keyevent --longpress 26   ----长按
+
+
+原生Settings设置查询
+settings put system screen_brightness_mode 0
+settings get system screen_brightness_mode
+settings delete global use_volume_key_for_ring
+
+
+####################### binder相关##############
+service list   ---列出所有service
+
+cmd 命令
+cmd命令用于与Android系统的各种服务进行交
+如：
+cmd activity start -n com.android.settings/.Settings
+原理是，通过defaultServiceManager()，拿到名为“activity”的服务，执行 IBinder::shellCommand(const sp<IBinder>& target, .......)
+
+cmd overlay命令
+cmd overlay list --user current
+cmd overlay [enable/disable] --user current [your RRO package name]
+cmd overlay dump [your RRO package name]
+
+cmd overlay lookup [--verbose] PACKAGE-TO-LOAD PACKAGE:TYPE/NAME
+cmd overlay lookup --verbose android android:bool/config_flipToScreenOffEnabled
+cmd overlay lookup --verbose --user 10 com.android.car.ui.paintbooth com.android.car.ui.paintbooth:color/widget_background
+
+cmd命令执行shellCommand，而service call可以调用binder的其他方法。
+
+Service Call命令（复杂，不常用）
+service call SERVICE CODE [i32 INT | s16 STR]...
+比如AppOpsService中的setMode方法，该服务在servicemanager里注册名为appops。
+在com.android.internal.app.IAppOpsService$Stub中找到：
+TRANSACTION_setMode = (android.os.IBinder.FIRST_CALL_TRANSACTION + 29)=30，
+TRANSACTION_setMode其中包含了4个参数，3个整形以及一个String类型，
+所以命令是： service call appops 30 i32 xx i32 xx s16 xx i32 xx （10决定调用appops的那个方法，i32表示参数是int类型）
+修改aidl后，code可能会变，这点需要注意。
+
+
+调试命令
+ps -o user,group,gid,pid,ppid,tid -p 459
+top -o PSR,PID,NI,%CPU,CMDLINE -d 1 -m 20 -s 4 -b
+top -o PSR,PID,TID,NI,%CPU,CMDLINE -d 1 -m 20 -s 4 -b -H
+
+抓trace
+perfetto -o /data/misc/perfetto-traces/trace_file.perfetto-trace -t 20s -b 300mb sched freq idle am wm pm ss gfx view binder_driver binder_lock aidl  hal dalvik camera input res memory
+perfetto -o /data/misc/perfetto-traces/trace_file.perfetto-trace -t 20s -b 300mb sched freq idle am wm pm sm ss power gfx view binder_driver binder_lock aidl  hal dalvik camera input res memory mmc sync
+atrace -t 10s -a sched freq idle am sm power pm ss wm gfx view binder_driver binder_lock aidl hal dalvik camera input res memory  mmc sync -z -c -o /data/local/tmp/boot_trace
+
+
+

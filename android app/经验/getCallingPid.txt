@@ -1,4 +1,0 @@
-Binder.getCallingPid()用于在binder的server端中获取是哪个client调用我提供的方法。
-因此Binder.getCallingPid()一定放在binder的实现里，（即XX extends xxx.Stub的方法的实现里面），必须在方法实现里直接调用，不能是里面的子线程、handler转发等。
-由于声明为oneway的接口，以及使用Messenger而不是使用AIDL，本质是使用IBinder.FLAG_ONEWAY进行交易，远程应用程序发送的消息是异步的，因此getCallingPid将始终返回0。
-即ONEWAY的接口无法使用getCallingPid。
