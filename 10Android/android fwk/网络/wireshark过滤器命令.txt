@@ -1,0 +1,17 @@
+查询dns记录
+1 根据端口号查询，dns的目标端口是53。主机向域名服务器请求时，服务器的端口是53；服务器应答给主机时，主机监听端口是53.
+udp.srcport == 53 or udp.dstport == 53
+
+2 直接输入dns,回车
+
+3 根据域名查询
+dns.qry.name==ccsgw.zznissan.com.cn  #精确匹配
+dns.qry.name contains kugou #模糊匹配
+
+
+查询过滤IP
+ip.addr==192.168.30.161
+相当于
+ip.src==192.168.30.161 or ip.dst==192.168.30.161
+
+

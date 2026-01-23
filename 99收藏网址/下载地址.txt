@@ -1,0 +1,6 @@
+https://winlibs.com/     GCC and MinGW-w64 for Windows
+
+https://github.com/llvm/llvm-project/releases    clang+llvm
+
+https://developer.android.google.cn/studio/platform    android studio for platform, 用于AOSP平台开发
+

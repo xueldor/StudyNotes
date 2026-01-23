@@ -1,0 +1,54 @@
+基于Android 11，回答以下问题：
+1. 对照ppt第11页，解释访问/sdcard，最终到/data/media/0的过程。
+sdcard通过软连接连接到/storage/emulated/0
+①软连接sdcard -> /storage/self/primary
+②软连接/storage/self/primary -> /storage/emulated/0
+③FUSE 将/storage/emulated 与/data/media进行绑定管理
+④访问/sdcard最终访问/data/media/0
+
+
+
+2. 应用A在sdcard下创建文件，文件所有者和所属组是谁？A:应用A   B:media provider？  C: media_rw  D: shell
+A
+
+
+3. 开机后，/sdcard目录是什么时候开始可以访问？
+用户解锁设备，触发StorageManager的onUserStart后
+
+4. 出于性能考虑，能否直接访问/data/media/0读取文件?(绕过fuse)
+仅有media_rw用户组的进程可以
+
+5. Android 11之后，WRITE_EXTERNAL_STORAGE、READ_EXTERNAL_STORAGE、MANAGE_EXTERNAL_STORAGE 的作用
+READ_EXTERNAL_STORAGE：通过MediaStore访问（读）sdcard的 共享目录DCIM、Pictures、Alarms， Music 下的其他应用创建的文件
+WRITE_EXTERNAL_STORAGE：无任何作用
+MANAGE_EXTERNAL_STORAGE：可访问（读写）sdcard的所有目录，但需要用户授权
+
+6. uevent是通过哪种机制发送：socket、管道、共享内存、消息队列、binder？
+socket
+7. 基于sdcardfs, 介绍/mnt/runtime目录下default  full  read  write四个目录的作用。
+
+8. 判断对错：微信双开，两个账号互相感知不到对方存在（即数据是彼此不可见的）？
+对
+
+9. 两个包名不同的应用，如何才能共享私有数据和keystore？
+通过sharedUserId 实现
+
+10. 安卓为什么放弃fuse使用sdcardfs？到了安卓11，为什么又从sdcardfs回到fuse？
+安卓用sdcardfs替换fuse可减少大量的I/O开销，消除双重缓存，提升执行效率，并解决一些与其fuse仿真FAT32有关的问题
+在android11上为了更好的权限控制，为了更好的支持 Scoped Storage,Android 11又用FUSE替换了SDCardFS
+
+11. 以ppt里演示的hellofs为例，对照ppt49页的fuse架构图，讲述命令“cat hello”,系统的执行过程。cat命令位于架构图哪个位置?
+
+12. fuse daemon什么时候destroy？
+
+13. 磁盘分区表格式分为GPT和MBR。请自行了解他们的区别和优势。
+GPT分区方案特点
+1、GPT分区列表支持最大128PB
+2、可以定义128个分区
+3、没有主分区，扩展分区和逻辑分区的概念，所有分区都能格式化
+MBR分区方案特点：
+1、最多支持四个主分区，
+2、在Linux上使用扩展分区和逻辑分区最多可以创建15个分区，
+3、由于分区中的数据以32位存储，使用MBR分区是最大支持2T空间。
+
+14. （开放题）思考前两天的科室例会上分享的问题。拔U盘时，vold会遍历/proc/pid/fd,找出占用U盘的进程，然后发送signal将进程杀死。如何合理的设计避免进程被杀？

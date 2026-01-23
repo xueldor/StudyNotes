@@ -1,0 +1,22 @@
+前提：1）没有其它app监听NetworkCallback
+2）把tbox拔插一次
+然后，同听app, 在onStop时会执行unregisterNetworkCallback，出现unregisterNetworkCallback最后触发了清IP，eth1 IP没了，和tbox连接断开。
+记录调用链路：
+
+app: 
+    framework/src/android/net/ConnectivityManager.java 
+                                       unregisterNetworkCallback ->mService.releaseNetworkRequest(r);  
+binder,进入system_server:
+     packages/modules/Connectivity/service/src/com/android/server/ConnectivityService
+                                  releaseNetworkRequest -> handler send EVENT_RELEASE_NETWORK_REQUESTEVENT_RELEASE_NETWORK_REQUEST 
+                                  handleReleaseNetworkRequest ->     handleRemoveNetworkRequest        ->NetworkOffer.onNetworkUnneeded
+NetworkOffer封装了一个binder INetworkOfferCallback, 服务端实例是NetworkOfferCallbackProxy，代码位于framework/src/android/net/NetworkProvider.java
+进入NetworkOfferCallbackProxy.onNetworkUnneeded:
+                                 mExecutor.execute(() -> callback.onNetworkUnneeded(request));   ->
+进入 NetworkFactoryImpl     ：
+                               NetworkOfferCallback.onNetworkUnneeded   ->  handleRemoveRequest ->
+                               EthernetNetworkFactory.releaseNetworkFor   ->  if (--network.refCount == 0) {network.stop(); }          <------计数为0触发
+                             -> NetworkInterfaceState.shutdownIpClient
+                             -> ipClient.shutdown();
+                            =====结束， ipClient 实现在packages/modules/NetworkStack/。不必要继续跟进了。
+原因是，如果不拔插，refCount计数很大，不会触发shutdown；拔插后，旧的network未清0，暗示注册的没释放，重新插上后也不会重新注册；插上后新的计数从0开始，unregisterNetworkCallback，计数回到0，触发shutdown。

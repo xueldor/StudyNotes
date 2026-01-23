@@ -1,0 +1,129 @@
+设置eth1 的ip
+ifconfig eth1 192.168.225.20 up
+
+# IP rule
+console:/ # ip ru
+0:      from all lookup local 
+9000:   from all lookup main 
+10000:  from all fwmark 0xc0000/0xd0000 lookup legacy_system 
+11000:  from all iif lo oif dummy0 uidrange 0-0 lookup dummy0 
+11000:  from all iif lo oif eth1 uidrange 0-0 lookup eth1 
+16000:  from all fwmark 0x10063/0x1ffff iif lo lookup local_network 
+16000:  from all fwmark 0x10064/0x1ffff iif lo lookup eth1 
+17000:  from all iif lo oif dummy0 lookup dummy0 
+17000:  from all iif lo oif eth1 lookup eth1 
+18000:  from all fwmark 0x0/0x10000 lookup legacy_system 
+19000:  from all fwmark 0x0/0x10000 lookup legacy_network 
+20000:  from all fwmark 0x0/0x10000 lookup local_network 
+23000:  from all fwmark 0x64/0x1ffff iif lo lookup eth1 
+29000:  from all fwmark 0x0/0xffff iif lo lookup eth1 
+32000:  from all unreachable
+前面的数字代表优先级，main表的优先级应该最高，权重9000在最上面
+
+#调整优先级
+console:/ #ip rule
+11000:  from all iif lo oif eth1 uidrange 0-0 lookup eth1
+17000:  from all iif lo oif wlan0 lookup wlan0 
+17000:  from all iif lo oif eth1 lookup eth1
+#下面将eth1调整程17500，优先走wlan0
+console:/ #ip rule help #查看帮助
+ip rule del from all iif lo oif eth1 lookup eth1 # from后面直接从ip rule拷过来
+ip rule add priority 17500 from all iif lo oif eth1 lookup eth1
+
+ip rule del priority 16000 from all iif lo oif eth1 lookup eth1 # 实测发现把11000:  from all iif lo oif eth1 uidrange 0-0 lookup eth1删掉了，所以加上priority 16000 
+
+# 查看main表的路由
+console:/ # ip route                                                           
+172.28.0.0/22 dev wlan0 proto kernel scope link src 172.28.0.193 
+192.168.225.0/24 dev eth1 proto kernel scope link src 192.168.225.20
+
+# 查看legacy_network表的路由
+ip route show table legacy_network
+# 查看所有路由
+ip route show table all
+
+# 查看该ip走哪条路由
+console:/ # ip route get 192.168.225.1
+192.168.225.1 dev eth1 src 192.168.225.20 uid 0 
+    cache 
+
+#当系统没有自动配置路由时，手动添加两条默认路由
+ip route add 192.168.225.0/24 via 192.168.225.20 dev eth1 table legacy_network
+ip route add default dev eth1 table legacy_network
+
+
+ip route add 192.168.225.0/24 via 192.168.225.1 dev eth1 table legacy_network
+ip route add default via 192.168.225.1 dev eth1 
+ip route add 192.168.225.0/24 dev eth1 table legacy_network    
+ip route add 192.168.224.0/24 dev eth1 table legacy_network src 192.168.225.20
+
+ip link show eth1
+getprop net.dns1
+
+dumpsys connectivity
+
+问题分析：
+ping -I eth1 192.168.225.1能ping通，不指定-I eth1，直接ping 192.168.225.1不能ping通。
+1. 先ip route，确定已经有路由了。
+2. ip route get 192.168.225.1
+发现走的wlan
+3. 所以ip route的路由没有生效
+4. ip ru, 根据优先级，从上到下看每个表的路由
+5. ip ru 发现缺了main表，即9000:   from all lookup main 这行
+临时对策：
+在init.rc里手动加上去，用ip rule命令:
+ip rule add from all lookup main pref 9000
+
+on property:sys.boot_completed=1
+    exec - root root -- /system/bin/ip rule add from all lookup main pref 9000
+宽容模式ok，打开selinux后保错：
+init: Command 'exec - root root -- /system/bin/ip rule add from all lookup main pref 9000' action=hsae.route=1 (/system/etc/init/hw/init.rc:1258) took 0ms and failed: Could not start exec service: File /system/bin/ip(labeled "u:object_r:system_file:s0") has incorrect label or no domain transition from u:r:init:s0 to another SELinux domain defined. Have you configured your service correctly? 
+指定selinx context即可，改成：
+on property:sys.boot_completed=1
+    exec u:r:su:s0 - root root -- /system/bin/ip rule add from all lookup main pref 9000
+
+问题：
+10500:  from all iif lo oif eth1 uidrange 0-0 lookup eth1 
+11000:  from all iif lo oif wlan0 uidrange 0-0 lookup wlan0 
+ip route get 180.101.51.73仍然走的wlan0。原因是oif eth1不匹配，去掉即可。可能连接指定了出口必须是wlan0，或者内核预估可能的出口不包含eth1。
+
+
+代码：
+APP内强制绑定wlan0
+ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+
+// 构建网络请求：指定使用WiFi（对应wlan0）
+NetworkRequest wifiRequest = new NetworkRequest.Builder()
+        .addTransportType(NetworkCapabilities.TRANSPORT_WIFI) // 传输类型为WiFi
+        .build();
+
+// 构建网络请求：指定使用以太网（对应eth1）
+NetworkRequest ethernetRequest = new NetworkRequest.Builder()
+        .addTransportType(NetworkCapabilities.TRANSPORT_ETHERNET) // 传输类型为以太网
+        .build();
+
+// 注册网络回调，获取匹配的网络对象
+cm.requestNetwork(wifiRequest, new ConnectivityManager.NetworkCallback() {
+    @Override
+    public void onAvailable(Network network) {
+        // 当请求的网络可用时，获取该网络对象
+        // 后续通信可绑定到该网络
+        bindNetworkForCommunication(network);
+    }
+});
+private void bindNetworkForCommunication(Network network) {
+    try {
+        // 示例1：使用Socket通信（绑定到指定网络）
+        Socket socket = new Socket();
+        network.bindSocket(socket); // 将Socket绑定到指定网络
+        socket.connect(new InetSocketAddress("目标IP", 端口), 5000);
+
+        // 示例2：使用HttpURLConnection（绑定到指定网络）
+        URL url = new URL("http://目标地址");
+        HttpURLConnection connection = (HttpURLConnection) network.openConnection(url); //通过network网络实例打开连接，而非直接url.openConnection()
+        connection.connect();
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+}
+申请ACCESS_NETWORK_STATE权限，且部分场景下需使用NetworkCapabilities细化网络要求

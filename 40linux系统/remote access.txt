@@ -1,0 +1,5 @@
+传输文件
+scp -r UpdateFragment.java  androido@192.168.20.24:/home/androido
+
+连接
+ssh androido@192.168.20.24

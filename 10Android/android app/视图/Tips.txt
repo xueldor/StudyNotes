@@ -1,0 +1,6 @@
+配置改变或屏幕旋转，导致activity重新创建后，activity对象是一个新的对象，但是getIntent还是原来的activity持有的intent，getIntent().getExtras()也能获取到原来的参数。
+如果执行了setIntent(new Intent())，那么旋转后，获取的是新的intent，但是如果setIntent(null)，则获取的还是之前的intent。
+如果前后执行：
+         setIntent(new Intent());
+         setIntent(null);
+那么旋转后，获得的刚开始最初进入activity传进来的(而不是new Intent())，也就是第一行setIntent(new Intent())是没用的。setIntent()方法只有一行赋值：mIntent = newIntent;我们推测其它地方也会持有一个intent对象，并在启动activity时传给它。当activity销毁relaunch时，会把getIntent()更新到那里，如果getIntent()是null，不会更新，relaunch还是旧的。

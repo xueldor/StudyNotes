@@ -1,0 +1,56 @@
+你好，翔宇：
+
+课题问答如下，如有问题，请邮件回复指正，感谢
+基于Android 11，回答以下问题：
+1. 对照ppt第11页，解释访问/sdcard，最终到/data/media/0的过程。
+/sdcard link ->/storage/self/primary
+/storage/self/primary link ->/storage/emulated/0
+/mnt/pass_through/0/emulated link /storage/emulated/
+/data/media bindMount /mnt/pass_through/0/emulated
+
+2. 应用A在sdcard下创建文件，文件所有者和所属组是谁？A:应用A   B:media provider？  C: media_rw  D: shell
+media provider
+
+3. 开机后，/sdcard目录是什么时候开始可以访问？
+onUserStart
+
+4. 出于性能考虑，能否直接访问/data/media/0读取文件?(绕过fuse)
+可以，通过 /mnt/pass_through/user/0访问
+
+5. Android 11之后，WRITE_EXTERNAL_STORAGE、READ_EXTERNAL_STORAGE、MANAGE_EXTERNAL_STORAGE 的作用
+WRITE_EXTERNAL_STORAGE 访问sdcard 公共区域
+READ_EXTERNAL_STORAGE 向下兼容
+MANAGE_EXTERNAL_STORAGE 访问sdcard目录
+
+6. uevent是通过哪种机制发送：socket、管道、共享内存、消息队列、binder？
+socket
+
+7. 基于sdcardfs, 介绍/mnt/runtime目录下default  full  read  write四个目录的作用。
+sdcardfs 拥有不同权限的app会bind mount到对应的目录
+read  只读权限的app bind到/mnt/runtime/read目录
+write 只写权限的app bind到/mnt/runtime/write目录
+full 具备所有权限的app bind到/mnt/runtime/full目录
+default 默认权限
+8. 判断对错：微信双开，两个账号互相感知不到对方存在（即数据是彼此不可见的）？
+是
+
+9. 两个包名不同的应用，如何才能共享私有数据和keystore？
+vold 授权应用uid为同一group
+
+10. 安卓为什么放弃fuse使用sdcardfs？到了安卓11，为什么又从sdcardfs回到fuse？
+fuse->sdcardfs 性能原因
+sdcardfs->fuse 权限管理
+
+11. 以ppt里演示的hellofs为例，对照ppt49页的fuse架构图，讲述命令“cat hello”,系统的执行过程。cat命令位于架构图哪个位置?
+顶层
+
+12. fuse daemon什么时候destroy？
+ Volume umount
+
+13. 磁盘分区表格式分为GPT和MBR。请自行了解他们的区别和优势。
+      MBR 适用于 BIOS系统，支持硬盘容量最大2G，主分区数量限制4个
+      GPT 适用于UEFI系统，，支持硬盘容量可扩展，基本不受限制，主分区数也不受限制	
+14. （开放题）思考前两天的科室例会上分享的问题。拔U盘时，vold会遍历/proc/pid/fd,找出占用U盘的进程，然后发送signal将进程杀死。如何合理的设计避免进程被杀？
+vold umount 调用killProcessesWithOpenFiles函数 ，if(!getProcessName.().strcmp(“指定应用名称”) return; else kill(pid);
+
+zhangmin@hangsheng.com.cn

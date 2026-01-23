@@ -1,0 +1,416 @@
+From c43ca367ab034e8fac78c0951e8cac5ef4e4d67b Mon Sep 17 00:00:00 2001
+From: liuxu <liuxu@hangsheng.com.cn>
+Date: Wed, 08 Nov 2023 17:05:57 +0800
+Subject: [PATCH] [feat][window] add custom view type, layer, permission
+
+Change-Id: I04562c709fe40a2bae4e6b2eecea99dafe721ac9
+---
+
+diff --git a/api/current.txt b/api/current.txt
+index 338bc91..50eb1bd 100644
+--- a/api/current.txt
++++ b/api/current.txt
+@@ -51929,6 +51929,36 @@
+     field public static final int SOFT_INPUT_STATE_UNCHANGED = 1; // 0x1
+     field public static final int SOFT_INPUT_STATE_UNSPECIFIED = 0; // 0x0
+     field public static final int SOFT_INPUT_STATE_VISIBLE = 4; // 0x4
++    field public static final int SYSTEMVIEW_TYPE_AIR = 2220; // 0x8ac
++    field public static final int SYSTEMVIEW_TYPE_APPS = 2100; // 0x834
++    field public static final int SYSTEMVIEW_TYPE_AVMRVM = 2390; // 0x956
++    field public static final int SYSTEMVIEW_TYPE_AVM_BTPHONE = 2400; // 0x960
++    field public static final int SYSTEMVIEW_TYPE_BTMUSIC = 2200; // 0x898
++    field public static final int SYSTEMVIEW_TYPE_BTPAIR = 2260; // 0x8d4
++    field public static final int SYSTEMVIEW_TYPE_CARLIST = 2270; // 0x8de
++    field public static final int SYSTEMVIEW_TYPE_CARLIST_PUP = 2280; // 0x8e8
++    field public static final int SYSTEMVIEW_TYPE_DVR = 2110; // 0x83e
++    field public static final int SYSTEMVIEW_TYPE_KEYBOARD = 2360; // 0x938
++    field public static final int SYSTEMVIEW_TYPE_NOTE = 2240; // 0x8c0
++    field public static final int SYSTEMVIEW_TYPE_NOTE_SHORTE = 2250; // 0x8ca
++    field public static final int SYSTEMVIEW_TYPE_RADIO = 2190; // 0x88e
++    field public static final int SYSTEMVIEW_TYPE_SCREENSAVER = 2380; // 0x94c
++    field public static final int SYSTEMVIEW_TYPE_SETTING = 2180; // 0x884
++    field public static final int SYSTEMVIEW_TYPE_STATUSBAR = 2290; // 0x8f2
++    field public static final int SYSTEMVIEW_TYPE_STATUSBAR_BTPHONE = 2310; // 0x906
++    field public static final int SYSTEMVIEW_TYPE_STATUSBAR_POPUP = 2300; // 0x8fc
++    field public static final int SYSTEMVIEW_TYPE_SYSTEMUIDROPDOWN = 2340; // 0x924
++    field public static final int SYSTEMVIEW_TYPE_SYSTEM_DIAGNOSTICS = 2420; // 0x974
++    field public static final int SYSTEMVIEW_TYPE_SYSTEM_UPDATE = 2410; // 0x96a
++    field public static final int SYSTEMVIEW_TYPE_THIRD_PARTY = 2120; // 0x848
++    field public static final int SYSTEMVIEW_TYPE_TOPBAR = 2320; // 0x910
++    field public static final int SYSTEMVIEW_TYPE_TURNING_OFF_SCREEN = 2430; // 0x97e
++    field public static final int SYSTEMVIEW_TYPE_USBMUSIC = 2210; // 0x8a2
++    field public static final int SYSTEMVIEW_TYPE_USB_CONNECT = 2230; // 0x8b6
++    field public static final int SYSTEMVIEW_TYPE_USB_SUPPORT = 2170; // 0x87a
++    field public static final int SYSTEMVIEW_TYPE_USER_GUIDE = 2350; // 0x92e
++    field public static final int SYSTEMVIEW_TYPE_VOLUME = 2370; // 0x942
++    field public static final int SYSTEMVIEW_TYPE_VR = 2330; // 0x91a
+     field public static final int TITLE_CHANGED = 64; // 0x40
+     field public static final int TYPE_ACCESSIBILITY_OVERLAY = 2032; // 0x7f0
+     field public static final int TYPE_APPLICATION = 2; // 0x2
+diff --git a/core/java/android/view/WindowManager.java b/core/java/android/view/WindowManager.java
+index 36fea58..70dc4d6 100644
+--- a/core/java/android/view/WindowManager.java
++++ b/core/java/android/view/WindowManager.java
+@@ -1110,6 +1110,43 @@
+          */
+         public static final int TYPE_APPLICATION_OVERLAY = FIRST_SYSTEM_WINDOW + 38;
+ 
++        //@date 2023.11.07 add custom window type
++        public static final int SYSTEMVIEW_TYPE_TURNING_OFF_SCREEN = FIRST_SYSTEM_WINDOW + 430;
++        public static final int SYSTEMVIEW_TYPE_SYSTEM_DIAGNOSTICS = FIRST_SYSTEM_WINDOW + 420;
++        public static final int SYSTEMVIEW_TYPE_SYSTEM_UPDATE = FIRST_SYSTEM_WINDOW + 410;
++        public static final int SYSTEMVIEW_TYPE_AVM_BTPHONE = FIRST_SYSTEM_WINDOW + 400;
++
++        public static final int SYSTEMVIEW_TYPE_AVMRVM = FIRST_SYSTEM_WINDOW + 390;
++        public static final int SYSTEMVIEW_TYPE_SCREENSAVER = FIRST_SYSTEM_WINDOW + 380;
++        public static final int SYSTEMVIEW_TYPE_VOLUME = FIRST_SYSTEM_WINDOW + 370;
++        public static final int SYSTEMVIEW_TYPE_KEYBOARD = FIRST_SYSTEM_WINDOW + 360;
++        public static final int SYSTEMVIEW_TYPE_USER_GUIDE = FIRST_SYSTEM_WINDOW + 350;
++        public static final int SYSTEMVIEW_TYPE_SYSTEMUIDROPDOWN = FIRST_SYSTEM_WINDOW + 340;
++        public static final int SYSTEMVIEW_TYPE_VR = FIRST_SYSTEM_WINDOW + 330;
++        public static final int SYSTEMVIEW_TYPE_TOPBAR = FIRST_SYSTEM_WINDOW + 320;
++        public static final int SYSTEMVIEW_TYPE_STATUSBAR_BTPHONE = FIRST_SYSTEM_WINDOW + 310;
++        public static final int SYSTEMVIEW_TYPE_STATUSBAR_POPUP = FIRST_SYSTEM_WINDOW + 300;
++
++        public static final int SYSTEMVIEW_TYPE_STATUSBAR = FIRST_SYSTEM_WINDOW + 290;
++        public static final int SYSTEMVIEW_TYPE_CARLIST_PUP = FIRST_SYSTEM_WINDOW + 280;
++        public static final int SYSTEMVIEW_TYPE_CARLIST = FIRST_SYSTEM_WINDOW + 270;
++        public static final int SYSTEMVIEW_TYPE_BTPAIR = FIRST_SYSTEM_WINDOW + 260;
++        public static final int SYSTEMVIEW_TYPE_NOTE_SHORTE = FIRST_SYSTEM_WINDOW + 250;
++        public static final int SYSTEMVIEW_TYPE_NOTE = FIRST_SYSTEM_WINDOW + 240;
++
++        public static final int SYSTEMVIEW_TYPE_USB_CONNECT = FIRST_SYSTEM_WINDOW + 230;
++        public static final int SYSTEMVIEW_TYPE_AIR = FIRST_SYSTEM_WINDOW + 220;
++        public static final int SYSTEMVIEW_TYPE_USBMUSIC = FIRST_SYSTEM_WINDOW + 210;
++        public static final int SYSTEMVIEW_TYPE_BTMUSIC = FIRST_SYSTEM_WINDOW + 200;
++        public static final int SYSTEMVIEW_TYPE_RADIO = FIRST_SYSTEM_WINDOW + 190;
++        public static final int SYSTEMVIEW_TYPE_SETTING = FIRST_SYSTEM_WINDOW + 180;
++
++        public static final int SYSTEMVIEW_TYPE_USB_SUPPORT = FIRST_SYSTEM_WINDOW + 170;
++        public static final int SYSTEMVIEW_TYPE_THIRD_PARTY = FIRST_SYSTEM_WINDOW + 120;
++
++        public static final int SYSTEMVIEW_TYPE_DVR = FIRST_SYSTEM_WINDOW + 110;
++        public static final int SYSTEMVIEW_TYPE_APPS = FIRST_SYSTEM_WINDOW + 100;
++
+         /**
+          * End of types of system windows.
+          */
+diff --git a/services/core/java/com/android/server/policy/PhoneWindowManager.java b/services/core/java/com/android/server/policy/PhoneWindowManager.java
+index ec38f31..12aa2a7 100755
+--- a/services/core/java/com/android/server/policy/PhoneWindowManager.java
++++ b/services/core/java/com/android/server/policy/PhoneWindowManager.java
+@@ -76,6 +76,36 @@
+ import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION;
+ import static android.view.WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY;
+ import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
++import static android.view.WindowManager.LayoutParams.SYSTEMVIEW_TYPE_TURNING_OFF_SCREEN;
++import static android.view.WindowManager.LayoutParams.SYSTEMVIEW_TYPE_SYSTEM_DIAGNOSTICS;
++import static android.view.WindowManager.LayoutParams.SYSTEMVIEW_TYPE_SYSTEM_UPDATE;
++import static android.view.WindowManager.LayoutParams.SYSTEMVIEW_TYPE_AVM_BTPHONE;
++import static android.view.WindowManager.LayoutParams.SYSTEMVIEW_TYPE_AVMRVM;
++import static android.view.WindowManager.LayoutParams.SYSTEMVIEW_TYPE_SCREENSAVER;
++import static android.view.WindowManager.LayoutParams.SYSTEMVIEW_TYPE_VOLUME;
++import static android.view.WindowManager.LayoutParams.SYSTEMVIEW_TYPE_KEYBOARD;
++import static android.view.WindowManager.LayoutParams.SYSTEMVIEW_TYPE_USER_GUIDE;
++import static android.view.WindowManager.LayoutParams.SYSTEMVIEW_TYPE_SYSTEMUIDROPDOWN;
++import static android.view.WindowManager.LayoutParams.SYSTEMVIEW_TYPE_VR;
++import static android.view.WindowManager.LayoutParams.SYSTEMVIEW_TYPE_TOPBAR;
++import static android.view.WindowManager.LayoutParams.SYSTEMVIEW_TYPE_STATUSBAR_BTPHONE;
++import static android.view.WindowManager.LayoutParams.SYSTEMVIEW_TYPE_STATUSBAR_POPUP;
++import static android.view.WindowManager.LayoutParams.SYSTEMVIEW_TYPE_STATUSBAR;
++import static android.view.WindowManager.LayoutParams.SYSTEMVIEW_TYPE_CARLIST_PUP;
++import static android.view.WindowManager.LayoutParams.SYSTEMVIEW_TYPE_CARLIST;
++import static android.view.WindowManager.LayoutParams.SYSTEMVIEW_TYPE_BTPAIR;
++import static android.view.WindowManager.LayoutParams.SYSTEMVIEW_TYPE_NOTE_SHORTE;
++import static android.view.WindowManager.LayoutParams.SYSTEMVIEW_TYPE_NOTE;
++import static android.view.WindowManager.LayoutParams.SYSTEMVIEW_TYPE_USB_CONNECT;
++import static android.view.WindowManager.LayoutParams.SYSTEMVIEW_TYPE_AIR;
++import static android.view.WindowManager.LayoutParams.SYSTEMVIEW_TYPE_USBMUSIC;
++import static android.view.WindowManager.LayoutParams.SYSTEMVIEW_TYPE_BTMUSIC;
++import static android.view.WindowManager.LayoutParams.SYSTEMVIEW_TYPE_RADIO;
++import static android.view.WindowManager.LayoutParams.SYSTEMVIEW_TYPE_SETTING;
++import static android.view.WindowManager.LayoutParams.SYSTEMVIEW_TYPE_USB_SUPPORT;
++import static android.view.WindowManager.LayoutParams.SYSTEMVIEW_TYPE_THIRD_PARTY;
++import static android.view.WindowManager.LayoutParams.SYSTEMVIEW_TYPE_DVR;
++import static android.view.WindowManager.LayoutParams.SYSTEMVIEW_TYPE_APPS;
+ import static android.view.WindowManager.LayoutParams.isSystemAlertWindowType;
+ import static android.view.WindowManager.TAKE_SCREENSHOT_FULLSCREEN;
+ import static android.view.WindowManager.TAKE_SCREENSHOT_SELECTED_REGION;
+@@ -2138,6 +2168,36 @@
+                 case TYPE_VOICE_INTERACTION:
+                 case TYPE_ACCESSIBILITY_OVERLAY:
+                 case TYPE_QS_DIALOG:
++                case SYSTEMVIEW_TYPE_TURNING_OFF_SCREEN:
++                case SYSTEMVIEW_TYPE_SYSTEM_DIAGNOSTICS:
++                case SYSTEMVIEW_TYPE_SYSTEM_UPDATE:
++                case SYSTEMVIEW_TYPE_AVM_BTPHONE:
++                case SYSTEMVIEW_TYPE_AVMRVM:
++                case SYSTEMVIEW_TYPE_SCREENSAVER:
++                case SYSTEMVIEW_TYPE_VOLUME:
++                case SYSTEMVIEW_TYPE_KEYBOARD:
++                case SYSTEMVIEW_TYPE_USER_GUIDE:
++                case SYSTEMVIEW_TYPE_SYSTEMUIDROPDOWN:
++                case SYSTEMVIEW_TYPE_VR:
++                case SYSTEMVIEW_TYPE_TOPBAR:
++                case SYSTEMVIEW_TYPE_STATUSBAR_BTPHONE:
++                case SYSTEMVIEW_TYPE_STATUSBAR_POPUP:
++                case SYSTEMVIEW_TYPE_STATUSBAR:
++                case SYSTEMVIEW_TYPE_CARLIST_PUP:
++                case SYSTEMVIEW_TYPE_CARLIST:
++                case SYSTEMVIEW_TYPE_BTPAIR:
++                case SYSTEMVIEW_TYPE_NOTE_SHORTE:
++                case SYSTEMVIEW_TYPE_NOTE:
++                case SYSTEMVIEW_TYPE_USB_CONNECT:
++                case SYSTEMVIEW_TYPE_AIR:
++                case SYSTEMVIEW_TYPE_USBMUSIC:
++                case SYSTEMVIEW_TYPE_BTMUSIC:
++                case SYSTEMVIEW_TYPE_RADIO:
++                case SYSTEMVIEW_TYPE_SETTING:
++                case SYSTEMVIEW_TYPE_USB_SUPPORT:
++                case SYSTEMVIEW_TYPE_THIRD_PARTY:
++                case SYSTEMVIEW_TYPE_DVR:
++                case SYSTEMVIEW_TYPE_APPS:
+                     // The window manager will check these.
+                     return ADD_OKAY;
+             }
+diff --git a/services/core/java/com/android/server/policy/WindowManagerPolicy.java b/services/core/java/com/android/server/policy/WindowManagerPolicy.java
+index 95e6950..41cd66e 100644
+--- a/services/core/java/com/android/server/policy/WindowManagerPolicy.java
++++ b/services/core/java/com/android/server/policy/WindowManagerPolicy.java
+@@ -59,6 +59,36 @@
+ import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION_STARTING;
+ import static android.view.WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY;
+ import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
++import static android.view.WindowManager.LayoutParams.SYSTEMVIEW_TYPE_TURNING_OFF_SCREEN;
++import static android.view.WindowManager.LayoutParams.SYSTEMVIEW_TYPE_SYSTEM_DIAGNOSTICS;
++import static android.view.WindowManager.LayoutParams.SYSTEMVIEW_TYPE_SYSTEM_UPDATE;
++import static android.view.WindowManager.LayoutParams.SYSTEMVIEW_TYPE_AVM_BTPHONE;
++import static android.view.WindowManager.LayoutParams.SYSTEMVIEW_TYPE_AVMRVM;
++import static android.view.WindowManager.LayoutParams.SYSTEMVIEW_TYPE_SCREENSAVER;
++import static android.view.WindowManager.LayoutParams.SYSTEMVIEW_TYPE_VOLUME;
++import static android.view.WindowManager.LayoutParams.SYSTEMVIEW_TYPE_KEYBOARD;
++import static android.view.WindowManager.LayoutParams.SYSTEMVIEW_TYPE_USER_GUIDE;
++import static android.view.WindowManager.LayoutParams.SYSTEMVIEW_TYPE_SYSTEMUIDROPDOWN;
++import static android.view.WindowManager.LayoutParams.SYSTEMVIEW_TYPE_VR;
++import static android.view.WindowManager.LayoutParams.SYSTEMVIEW_TYPE_TOPBAR;
++import static android.view.WindowManager.LayoutParams.SYSTEMVIEW_TYPE_STATUSBAR_BTPHONE;
++import static android.view.WindowManager.LayoutParams.SYSTEMVIEW_TYPE_STATUSBAR_POPUP;
++import static android.view.WindowManager.LayoutParams.SYSTEMVIEW_TYPE_STATUSBAR;
++import static android.view.WindowManager.LayoutParams.SYSTEMVIEW_TYPE_CARLIST_PUP;
++import static android.view.WindowManager.LayoutParams.SYSTEMVIEW_TYPE_CARLIST;
++import static android.view.WindowManager.LayoutParams.SYSTEMVIEW_TYPE_BTPAIR;
++import static android.view.WindowManager.LayoutParams.SYSTEMVIEW_TYPE_NOTE_SHORTE;
++import static android.view.WindowManager.LayoutParams.SYSTEMVIEW_TYPE_NOTE;
++import static android.view.WindowManager.LayoutParams.SYSTEMVIEW_TYPE_USB_CONNECT;
++import static android.view.WindowManager.LayoutParams.SYSTEMVIEW_TYPE_AIR;
++import static android.view.WindowManager.LayoutParams.SYSTEMVIEW_TYPE_USBMUSIC;
++import static android.view.WindowManager.LayoutParams.SYSTEMVIEW_TYPE_BTMUSIC;
++import static android.view.WindowManager.LayoutParams.SYSTEMVIEW_TYPE_RADIO;
++import static android.view.WindowManager.LayoutParams.SYSTEMVIEW_TYPE_SETTING;
++import static android.view.WindowManager.LayoutParams.SYSTEMVIEW_TYPE_USB_SUPPORT;
++import static android.view.WindowManager.LayoutParams.SYSTEMVIEW_TYPE_THIRD_PARTY;
++import static android.view.WindowManager.LayoutParams.SYSTEMVIEW_TYPE_DVR;
++import static android.view.WindowManager.LayoutParams.SYSTEMVIEW_TYPE_APPS;
+ import static android.view.WindowManager.LayoutParams.isSystemAlertWindowType;
+ 
+ import static java.lang.annotation.RetentionPolicy.SOURCE;
+@@ -803,8 +833,8 @@
+         if (type >= FIRST_APPLICATION_WINDOW && type <= LAST_APPLICATION_WINDOW) {
+             return APPLICATION_LAYER;
+         }
+-
+-        final int mMaxCustomizedWindowLayer = getMaxCustomizedWindowLayer() ;
++        final int mMaxHsaeWindowLayer = getMaxHsaeWindowLayer() ;
++        final int mMaxCustomizedWindowLayer = getMaxCustomizedWindowLayer() + mMaxHsaeWindowLayer;
+         switch (type) {
+             case TYPE_WALLPAPER:
+                 // wallpaper is at the bottom, though the window manager may move it.
+@@ -816,34 +846,64 @@
+                 return  APPLICATION_LAYER;
+             case TYPE_QS_DIALOG:
+                 return  APPLICATION_LAYER;
+-            case TYPE_PHONE:
++            case SYSTEMVIEW_TYPE_APPS:
+                 return  3;
++            case SYSTEMVIEW_TYPE_DVR:
++                return  4;
++            case SYSTEMVIEW_TYPE_THIRD_PARTY:
++                return  5;
++            case SYSTEMVIEW_TYPE_USB_SUPPORT:
++                return  6;
++            case SYSTEMVIEW_TYPE_SETTING:
++                return  7;
++            case SYSTEMVIEW_TYPE_RADIO:
++                return  8;
++            case SYSTEMVIEW_TYPE_BTMUSIC:
++                return  9;
++            case SYSTEMVIEW_TYPE_USBMUSIC:
++                return  10;
++            case SYSTEMVIEW_TYPE_AIR:
++                return  11;
++            case SYSTEMVIEW_TYPE_USB_CONNECT:
++                return  12;
++            case SYSTEMVIEW_TYPE_NOTE:
++                return  13;
++            case SYSTEMVIEW_TYPE_NOTE_SHORTE:
++                return  14;
++            case SYSTEMVIEW_TYPE_BTPAIR:
++                return  17;
++            case SYSTEMVIEW_TYPE_CARLIST:
++                return  18;
++            case SYSTEMVIEW_TYPE_CARLIST_PUP:
++                return  19;
++            case TYPE_PHONE:
++                return  mMaxHsaeWindowLayer + 3;
+             case TYPE_SEARCH_BAR:
+             case TYPE_VOICE_INTERACTION_STARTING:
+-                return  4;
++                return  mMaxHsaeWindowLayer + 4;
+             case TYPE_VOICE_INTERACTION:
+                 // voice interaction layer is almost immediately above apps.
+-                return  5;
++                return  mMaxHsaeWindowLayer + 5;
+             case TYPE_INPUT_CONSUMER:
+-                return  6;
++                return  mMaxHsaeWindowLayer + 6;
+             case TYPE_SYSTEM_DIALOG:
+-                return  7;
++                return  mMaxHsaeWindowLayer + 7;
+             case TYPE_TOAST:
+                 // toasts and the plugged-in battery thing
+-                return  8;
++                return  mMaxHsaeWindowLayer + 8;
+             case TYPE_PRIORITY_PHONE:
+                 // SIM errors and unlock.  Not sure if this really should be in a high layer.
+-                return  9;
++                return  mMaxHsaeWindowLayer + 9;
+             case TYPE_SYSTEM_ALERT:
+                 // like the ANR / app crashed dialogs
+                 // Type is deprecated for non-system apps. For system apps, this type should be
+                 // in a higher layer than TYPE_APPLICATION_OVERLAY.
+-                return  canAddInternalSystemWindow ? 13 : 10;
++                return  canAddInternalSystemWindow ? (mMaxHsaeWindowLayer + 13) : (mMaxHsaeWindowLayer + 10);
+             case TYPE_APPLICATION_OVERLAY:
+                 return  mMaxCustomizedWindowLayer + 12;
+             case TYPE_DREAM:
+                 // used for Dreams (screensavers with TYPE_DREAM windows)
+-                return  14;
++                return  mMaxHsaeWindowLayer + 14;
+             case TYPE_INPUT_METHOD:
+                 // on-screen keyboards and other such input method user interfaces go here.
+                 return  15;
+@@ -851,56 +911,87 @@
+                 // on-screen keyboards and other such input method user interfaces go here.
+                 return  16;
+             case TYPE_STATUS_BAR:
+-                return  17;
++                return  mMaxHsaeWindowLayer + 17;
+             case TYPE_STATUS_BAR_PANEL:
+-                return  18;
++                return  mMaxHsaeWindowLayer + 18;
+             case TYPE_STATUS_BAR_SUB_PANEL:
+-                return  19;
++                return  mMaxHsaeWindowLayer + 19;
+             case TYPE_KEYGUARD_DIALOG:
+-                return  20;
++                return  mMaxHsaeWindowLayer + 20;
+             case TYPE_VOLUME_OVERLAY:
+                 // the on-screen volume indicator and controller shown when the user
+                 // changes the device volume
+-                return  21;
++                return  mMaxHsaeWindowLayer + 21;
+             case TYPE_SYSTEM_OVERLAY:
+                 // the on-screen volume indicator and controller shown when the user
+                 // changes the device volume
+-                return  canAddInternalSystemWindow ? 22 : 11;
++                return  canAddInternalSystemWindow ? (mMaxHsaeWindowLayer + 22) : (mMaxHsaeWindowLayer + 11);
+             case TYPE_NAVIGATION_BAR:
+                 // the navigation bar, if available, shows atop most things
+-                return  23;
++                return  mMaxHsaeWindowLayer + 23;
+             case TYPE_NAVIGATION_BAR_PANEL:
+                 // some panels (e.g. search) need to show on top of the navigation bar
+-                return  24;
++                return  mMaxHsaeWindowLayer + 24;
+             case TYPE_SCREENSHOT:
+                 // screenshot selection layer shouldn't go above system error, but it should cover
+                 // navigation bars at the very least.
+-                return  25;
++                return  mMaxHsaeWindowLayer + 25;
+             case TYPE_SYSTEM_ERROR:
+                 // system-level error dialogs
+-                return  canAddInternalSystemWindow ? 26 : 10;
++                return  canAddInternalSystemWindow ? (mMaxHsaeWindowLayer + 26) : (mMaxHsaeWindowLayer + 10);
+             case TYPE_MAGNIFICATION_OVERLAY:
+                 // used to highlight the magnified portion of a display
+-                return  27;
++                return  mMaxHsaeWindowLayer + 27;
+             case TYPE_DISPLAY_OVERLAY:
+                 // used to simulate secondary display devices
+-                return  28;
++                return  mMaxHsaeWindowLayer + 28;
+             case TYPE_DRAG:
+                 // the drag layer: input for drag-and-drop is associated with this window,
+                 // which sits above all other focusable windows
+-                return  29;
++                return  mMaxHsaeWindowLayer + 29;
+             case TYPE_ACCESSIBILITY_OVERLAY:
+                 // overlay put by accessibility services to intercept user interaction
+-                return  30;
++                return  mMaxHsaeWindowLayer + 30;
+             case TYPE_SECURE_SYSTEM_OVERLAY:
+-                return  31;
++                return  mMaxHsaeWindowLayer + 31;
+             case TYPE_BOOT_PROGRESS:
+-                return  32;
++                return  mMaxHsaeWindowLayer + 32;
+             case TYPE_POINTER:
+                 // the (mouse) pointer layer
+-                return  33;
++                return  mMaxHsaeWindowLayer + 33;
+             case 2039:
+                 return mMaxCustomizedWindowLayer + 13;
++            case SYSTEMVIEW_TYPE_STATUSBAR:
++                return  51;
++            case SYSTEMVIEW_TYPE_STATUSBAR_POPUP:
++                return  52;
++            case SYSTEMVIEW_TYPE_STATUSBAR_BTPHONE:
++                return  53;
++            case SYSTEMVIEW_TYPE_TOPBAR:
++                return  54;
++            case SYSTEMVIEW_TYPE_VR:
++                return  55;
++            case SYSTEMVIEW_TYPE_SYSTEMUIDROPDOWN:
++                return  56;
++            case SYSTEMVIEW_TYPE_USER_GUIDE:
++                return  57;
++            case SYSTEMVIEW_TYPE_KEYBOARD:
++                return  58;
++            case SYSTEMVIEW_TYPE_VOLUME:
++                return  59;
++            case SYSTEMVIEW_TYPE_SCREENSAVER:
++                return  64;
++            case SYSTEMVIEW_TYPE_AVMRVM:
++                return  65;
++            case SYSTEMVIEW_TYPE_AVM_BTPHONE:
++                return  66;
++            case SYSTEMVIEW_TYPE_SYSTEM_UPDATE:
++                return  67;
++            case SYSTEMVIEW_TYPE_SYSTEM_DIAGNOSTICS:
++                return  68;
++            case SYSTEMVIEW_TYPE_TURNING_OFF_SCREEN:
++                return  69;
++
+             default:
+                 Slog.e("WindowManager", "Unknown window type: " + type);
+                 return APPLICATION_LAYER;
+@@ -911,6 +1002,9 @@
+         return 33;
+     }
+ 
++    default int getMaxHsaeWindowLayer() {
++        return 17;
++    }
+     /**
+      * Return how to Z-order sub-windows in relation to the window they are attached to.
+      * Return positive to have them ordered in front, negative for behind.

@@ -1,0 +1,7 @@
+整个repo回退到某日
+repo forall -c 'commitID=`git log --before "2022-06-01 23:00:00" -1 --pretty=format:"%H"`; git reset --hard $commitID'
+
+
+其他参数
+repo init --partial-clone --no-use-superproject --no-repo-verify  --depth=1 -b android-latest-release -u https://mirrors.tuna.tsinghua.edu.cn/git/AOSP/platform/manifest 
+可搭配 -g（按group过滤仓库）

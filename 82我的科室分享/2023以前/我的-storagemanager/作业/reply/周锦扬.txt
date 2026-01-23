@@ -1,0 +1,53 @@
+
+         已挑选其中五个问题进行了回答，如果问题还请指出并给点指导。
+
+ 
+
+         5. Android 11之后，WRITE_EXTERNAL_STORAGE、READ_EXTERNAL_STORAGE、MANAGE_EXTERNAL_STORAGE 的作用
+
+
+         答：WRITE_EXTERNAL_STORAGE 权限和 WRITE_MEDIA_STORAGE 特许权限将不再提供任何其他访问权限
+
+
+         文件访问权限：MANAGE_EXTERNAL_STORAGE
+
+
+         申请文件权限可以使用intent ACTION_MANAGE_ALL_ACCESS_PERMISSION来启权限配置页，可以授权所有文件读写权限和MediaStore.Files表内容访问权限
+
+
+6. uevent是通过哪种机制发送：socket、管道、共享内存、消息队列、binder？
+
+         答：Uevent是Android内核空间与用户空间进行通信的一种方式，其本质是通过netlink(通过socket)发送消息给用户进程
+
+
+7. 基于sdcardfs, 介绍/mnt/runtime目录下default  full  read  write四个目录的作用。
+
+         答：Android使用了mount namespace，在Zygote fork应用进程的时候会通过unshare系统调用为应用进程创建一个mount namespace，在应用自己的mount namespace中根据AMS传递给Zygote的参数决定将/storage bind mount到 /mnt/runtime/defalut/emulated，/mnt/runtime/read/emulated，/mnt/runtime/write/emulated，/mnt/runtime/full/emulated中的一个。在应用权限发生变化时，权限管理模块会调用到vold对应用进程空间的/storage根据权限变动重新挂载
+
+         好处是减少文件系统内核开销（inode、dentry），但是带来的问题是inode共享之后要做不同的权限控制需要动态生成inode的权限位，uid，gid，这些是sdcard_fs通过挂载参数来完成的
+
+
+ 
+
+10. 安卓为什么放弃fuse使用sdcardfs？到了安卓11，为什么又从sdcardfs回到fuse？
+
+         答：1.Android8引用sdcardfs解决了fuse的性能问题：
+
+                  性能差，体现在以下几点：访问路径长，从VFS到fuse到daemon，以及返回；         用户态和内核态频繁切换；增加了数据copy次数；I/O吞吐量低
+
+         2.Android 11为了支持分区存储， 又用FUSE 替换了SDCardFS。Android 12 支持 FUSE 透传功能，此功能可以最大限度地降低 FUSE 开销，从而实现可媲美直接访问下层文件系统的性能
+
+
+ 
+
+13. 磁盘分区表格式分为GPT和MBR。请自行了解他们的区别和优势。
+
+
+         区别：GPT（GUID分区表）是一种新的磁盘分区格式，它可以支持更大的磁盘容量，更大可以支持到18EB（18亿TB），而MBR（主引导记录）只能支持2TB的磁盘容量。此外，GPT还支持更多的分区，最多可以支持128个分区，而MBR只能支持4个分区。GPT还支持更多的文件系统，可以支持NTFS、FAT32、EXT4等多种文件系统，而MBR只能支持FAT32和NTFS文件系统。
+
+
+         优势：GPT的优点是它可以支持更大的磁盘容量和更多的分区，而MBR的优点是它更加稳定，更容易操作。
+
+        
+
+         缺点：GPT的缺点是它不能在BIOS系统中使用，而MBR的缺点是它只能支持2TB的磁盘容量和4个分区，而且只能支持FAT32和NTFS文件系统。

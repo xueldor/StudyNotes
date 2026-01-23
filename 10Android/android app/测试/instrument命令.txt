@@ -1,0 +1,1 @@
+am instrument -w -r  com.hsae.bluetoothservice.cts/android.support.test.runner.AndroidJUnitRunneram instrument -w -r -e debug false -e class 'com.hsae.autocore.cts.USBMediaTest' com.hsae.autocore.cts/android.support.test.runner.AndroidJUnitRunner如果你用的是androidx.test.runner.AndroidJUnitRunner,命令中相应改动。

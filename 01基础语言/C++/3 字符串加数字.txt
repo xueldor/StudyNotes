@@ -1,0 +1,1 @@
+cout<<"use count " + s1.use_count()<<endl;发现打印是se count ，前面的u没了，后面的count数字也没打印。想了一下，"use count "是一个c风格的string，即char*, s1.use_count()值是1，所以"use count " + s1.use_count()表示这个char*的地址加1，因此打印se count 就合理了。测试了一下cout<<"use count " + 2<<endl;，果然打印： e count。正确写法：cout<<"use count " << s1.use_count()<<endl;

@@ -1,0 +1,3 @@
+windows环境，安装好后记得打开 studio64.exe.vmoptions 和 studio.exe.vmoptions, 添加一个：-Dfile.encoding=UTF-8 ，否则
+1. Build Output 可能会乱码
+2. aidl中如果有中文注释，将不可编译。

@@ -1,0 +1,26 @@
+1、应用A在sdcard下创建文件，文件所有者和所属组是谁？
+
+         A:应用A   B:media provider？  C: media_rw  D: shell
+
+      答： B
+
+
+2. 开机后，/sdcard目录是什么时候开始可以访问？
+
+   答：系统unlock之后
+
+ 
+3. uevent是通过哪种机制发送：socket、管道、共享内存、消息队列、binder？
+
+    答：socket
+
+ 
+4. 两个包名不同的应用，如何才能共享私有数据和keystore？
+
+   答：使用相同的android:sharedUserId及签名。
+
+ 
+
+5. fuse daemon什么时候destroy？
+
+    答：拔出存储设备时。

@@ -1,0 +1,30 @@
+1. 如果出现破解不成功、偏好设置无法保存等奇怪现象，删除以下两个目录：
+C:\Users\xuexiangyu\AppData\Local\Temp\Typora
+C:\Users\xuexiangyu\AppData\Roaming\Typora
+
+2. 
+找到Typora安装目录，依次找到这个文件： 
+resources\page-dist\static\js\LicenseIndex.**********.********.chunk.js 
+用记事本打开它，查找：
+e.hasActivated="true"==e.hasActivated,
+替换为【e.hasActivated="true"=="true",】
+
+3. 关闭软件每次启动时的已激活弹窗
+这个时候每次打开软件都提示已经激活成功了，很烦
+由于每次打开软件都会弹出“已激活”的窗口，下面是关闭这个弹窗：
+resources\page-dist\license.html
+用记事本打开它，
+末尾位置【</body></html>】
+在</body>和</html>之间插入：
+<script>window.onload=function(){setTimeout(()=>{window.close();},5);}</script>
+
+4. 去除软件左下角“未激活”提示
+在Typora安装目录依次找到这个文件
+resources\locales\zh-Hans.lproj\Panel.json 
+查  找【"UNREGISTERED":"未激活",】
+替换为【"UNREGISTERED":" ",】
+
+
+5. 菜单“许可证信息”/“我的许可证”等界面不要乱点。
+
+6. 如果这时还没破解成功，把winmm.dll放到软件安装目录。

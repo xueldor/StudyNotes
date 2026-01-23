@@ -1,0 +1,28 @@
+diff --git a/winscope_proxy.py b/winscope_proxy.py
+index 344c3cc..9b92f6d 100644
+--- a/winscope_proxy.py
++++ b/winscope_proxy.py
+@@ -409,7 +409,10 @@ def call_adb(params: str, device: str = None, stdin: bytes = None):
+     command = ['adb'] + (['-s', device] if device else []) + params.split(' ')
+     try:
+         log.debug("Call: " + ' '.join(command))
+-        return subprocess.check_output(command, stderr=subprocess.STDOUT, input=stdin).decode('utf-8')
++        output = subprocess.check_output(command, stderr=subprocess.STDOUT, input=stdin).decode('utf-8')
++        if os.name == 'nt':
++            output = output.replace('\r\n', '\n')
++        return output
+     except OSError as ex:
+         log.debug('Error executing adb command: {}\n{}'.format(
+             ' '.join(command), repr(ex)))
+@@ -564,7 +567,10 @@ class TraceThread(threading.Thread):
+             self._keep_alive_timer.cancel()
+         log.debug("Sending SIGINT to the trace process on {}".format(
+             self._device_id))
+-        self.process.send_signal(signal.SIGINT)
++        if os.name == 'nt':
++            self.process.terminate()
++        else:
++            self.process.send_signal(signal.SIGINT)
+         try:
+             log.debug("Waiting for trace shell to exit for {}".format(
+                 self._device_id))

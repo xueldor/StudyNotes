@@ -1,0 +1,38 @@
+LoaderManager
+mRetrofit okhttp  rxjava rxandroid
+
+RxBinding rxbus
+Fork/Join框架
+
+Settings
+
+skia 2D
+libhwui(基于OpenGL的安卓2D绘制API)
+unity 3D
+opengl es
+vulkan
+
+minicap
+airtest
+opencv
+
+
+104727
+
+to learn:
+算法小炒-设计模式
+
+apk的安装、类加载、DexClassLoader
+dumpsys的原理
+
+
+C++\wp sp实现分析(C++模板)
+hidl、hwservicemanager 
+udev rules
+消息队列，信号灯，线程锁，内存映射，映射/dev/mem，shmXXX
+eventfd+epoll
+c类库
+
+低优先级：
+binder系统；UI系统；Audio系统；开机流程；bootchart；SELinux、nio 、android多用户与工作模式 、权限系统appops、log机制
+Java Instrumentation/asm/proxy  休眠

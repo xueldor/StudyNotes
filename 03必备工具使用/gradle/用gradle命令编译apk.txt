@@ -1,0 +1,11 @@
+OnlineVideo模块放弃make的方式，准备在服务器上配置gradle编译，集成到系统里。
+
+为了方便，先选择用gradlew
+1、OnlineVideo的代码目录，除了原来的文件之外，需要增加：
+     1） gradle 目录,里面包含gradle-wrapper.jar和gradle-wrapper.properties。
+     2） 增加build.gradle，原本在源码环境下用Android.mk编译，引用 autosdk很方便，现在需要额外把 autosdk的静态库jar包引进来，用compileOnly避免AutoSdk的class打包进apk。
+	 3) gradlew,赋予可执行权限。
+	 4） local.properties，打开文件，修改sdk路径有服务器上面的android_sdk路径。使用绝对地址。路径一定要写对。
+2、 执行./gradlew assembleRelease编译release版本的apk，./gradlew assembleDebug编译debug版本的apk。
+3、第一次执行时，会自动联网下载许多资源，需要耐心等待。
+4、如果服务器已经有了某个版本的gradle， 而且这个项目对gradle版本没有要求，则打开gradle-wrapper.properties，修改gradle版本为已存在的版本。这样避免构建时下载。

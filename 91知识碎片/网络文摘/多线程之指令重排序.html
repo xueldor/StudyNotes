@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<!-- saved from url=(0050)http://m.blog.csdn.net/article/details?id=51491578 -->
+<html style="font-size: 40px;"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+   
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-status-bar-style" content="yes">
+    <script type="text/javascript" charset="utf-8" async="" src="./多线程之指令重排序_files/rec.do"></script><script src="./多线程之指令重排序_files/hm.js.下载"></script><script src="./多线程之指令重排序_files/jquery-1.9.1.min.js.下载" type="text/javascript"></script>
+    <!--link( rel="stylesheet" href="http://c.csdnimg.cn/public/common/toolbar/css/index.css" )-->
+    <link rel="stylesheet" href="./多线程之指令重排序_files/bootstrap.css">
+    <link rel="stylesheet" href="./多线程之指令重排序_files/avatar.css">
+    <link rel="stylesheet" href="./多线程之指令重排序_files/common.css">
+    <!-- [if IE 7]-->
+    <!--link( rel="stylesheet" href="assets/css/font-awesome-ie7.min.css" )-->
+    <!-- [endif]-->
+    <link rel="stylesheet" href="./多线程之指令重排序_files/main.css">
+    <!-- [if lt IE 9]-->
+    <script src="./多线程之指令重排序_files/html5shiv.min.js.下载"></script>
+    <!-- [endif]-->
+    <title>多线程之指令重排序</title>
+    <script type="text/javascript" src="./多线程之指令重排序_files/blog_mobile.js.下载"></script>
+
+    <script language="javascript" type="text/javascript" src="http://ads.csdn.net/js/async_new.js"></script>
+
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?6bcd52f51e9b3dce32bec4a3997715ac";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+   
+</head>
+<body><link href="./多线程之指令重排序_files/jiathis_share.css" rel="stylesheet" type="text/css"><iframe frameborder="0" style="position: absolute; display: none; opacity: 0;" src="./多线程之指令重排序_files/saved_resource.html"></iframe><div class="jiathis_style" style="position: absolute; z-index: 1000000000; display: none; top: 50%; left: 50%; overflow: auto;"></div><div class="jiathis_style" style="position: absolute; z-index: 1000000000; display: none; overflow: auto;"></div><iframe frameborder="0" src="./多线程之指令重排序_files/jiathis_utility.html" style="display: none;"></iframe>
+    
+<!-- 广告位开始 --> 
+<ins data-revive-zoneid="202" data-revive-id="8c38e720de1c90a6f6ff52f3f89c4d57"></ins> 
+<!-- 广告位结束 -->
+
+
+<script language="JavaScript" type="text/javascript" src="./多线程之指令重排序_files/jquery.cookie.js.下载"></script>
+<script type="text/javascript" src="./多线程之指令重排序_files/main.js.下载"></script>
+<script type="text/javascript">
+    var fileName = '51491578';
+    var commentscount = 0;
+    var islock = false;
+    var currentUserName='';
+    
+</script>
+
+<script type="text/javascript" src="./多线程之指令重排序_files/digg.js.下载"></script>
+
+
+<div class="blog_main">
+      <div class="blog_top_wrap">
+        <div class="blog_top"><i id="menu_J" class="iconfont icon_l"></i>
+            <form method="get" action="http://m.blog.csdn.net/search/index" id="searchform">
+    <i id="search_J" class="iconfont icon_r"></i>
+    <div id="search_c_J" class="search">
+         <input type="text" placeholder="请输入" id="search" name="keyword" page="1" value=""><i class="iconfont icon_search"></i><i class="iconfont icon_close"></i>
+    </div>
+</form>
+<script type="text/javascript" src="./多线程之指令重排序_files/search.js.下载"></script>
+
+
+
+
+          <h2 class="blog_top_t">CSDN博客</h2>
+        </div>
+      </div>
+
+ 
+
+      <div class="main_list">
+     
+
+          <script type="text/javascript">             
+              var cpro_id = "u2901270";
+        </script>
+        <script type="text/javascript" src="http://cpro.baidustatic.com/cpro/ui/cm.js"></script>
+
+
+        <div class="blog_article">
+          <div class="blog_article_t">
+            <div class="article_l"><a href="http://m.blog.csdn.net/blog/index?username=zhushuai1221"><img src="./多线程之指令重排序_files/1_zhushuai1221.jpg" alt="img"></a>
+                <a href="http://m.blog.csdn.net/blog/index?username=zhushuai1221" class="article_user">zhushuai1221</a></div>
+            <div class="article_r">
+            </div>
+          </div>
+          <div class="blog_article_c clearfix">
+            <h3 class="article_t">多线程之指令重排序</h3>
+            <p class="date"><i>发表于</i><em>2016/5/24 16:51:49  &nbsp;</em><i>911</i><span>人阅读</span></p>
+            <p class="category_p">
+                    分类：
+                        <span>java基础</span>
+            </p>
+             
+<div class="article_c">
+
+<p></p>
+<h3 class="storytitle" style="font-family:Arial,Verdana,sans-serif; margin:0px 0px 5px; padding-bottom:2px; border-bottom-width:1px; border-bottom-style:solid; border-bottom-color:rgb(128,128,128)">
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:Arial; line-height:26px">
+<span style="font-size:18px">为什么会乱序</span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:Arial; line-height:26px">
+<span style="font-size:18px"><br>
+</span><span style="font-size:14px; font-weight:normal">现在的CPU一般采用流水线来执行指令。一个指令的执行被分成：取指、译码、访存、执行、写回、等若干个阶段。然后，多条指令可以同时存在于流水线中，同时被执行。</span><br>
+<span style="font-size:14px; font-weight:normal">指令流水线并不是串行的，并不会因为一个耗时很长的指令在“执行”阶段呆很长时间，而导致后续的指令都卡在“执行”之前的阶段上。</span><br>
+<span style="font-size:14px; font-weight:normal">相反，流水线是并行的，多个指令可以同时处于同一个阶段，只要CPU内部相应的处理部件未被占满即可。比如说CPU有一个加法器和一个除法器，那么一条加法指令和一条除法指令就可能同时处于“执行”阶段,&nbsp;而两条加法指令在“执行”阶段就只能串行工作。</span><br>
+<span style="font-size:14px; font-weight:normal">相比于串行+阻塞的方式，流水线像这样并行的工作，效率是非常高的。</span><br>
+<br>
+<span style="font-size:14px; font-weight:normal">然而，这样一来，乱序可能就产生了。比如一条加法指令原本出现在一条除法指令的后面，但是由于除法的执行时间很长，在它执行完之前，加法可能先执行完了。再比如两条访存指令，可能由于第二条指令命中了cache而导致它先于第一条指令完成。</span><br>
+<span style="font-size:14px; font-weight:normal">一般情况下，指令乱序并不是CPU在执行指令之前刻意去调整顺序。CPU总是顺序的去内存里面取指令，然后将其顺序的放入指令流水线。但是指令执行时的各种条件，指令与指令之间的相互影响，可能导致顺序放入流水线的指令，最终乱序执行完成。这就是所谓的“顺序流入，乱序流出”。</span><br>
+<br>
+<span style="font-size:14px; font-weight:normal">指令流水线除了在资源不足的情况下会卡住之外（如前所述的一个加法器应付两条加法指令的情况），指令之间的相关性也是导致流水线阻塞的重要原因。</span><br>
+<span style="font-size:14px; font-weight:normal">CPU的乱序执行并不是任意的乱序，而是以保证程序上下文因果关系为前提的。有了这个前提，CPU执行的正确性才有保证。比如：</span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:Arial; line-height:26px">
+<span style="font-weight:normal"><span style="font-size:14px">a++;&nbsp;b=f(a);&nbsp;c--;</span></span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:Arial; line-height:26px">
+<span style="font-weight:normal"><span style="font-size:14px">由于b=f(a)这条指令依赖于前一条指令a++的执行结果，所以b=f(a)将在“执行”阶段之前被阻塞，直到a++的执行结果被生成出来；而c--跟前面没有依赖，它可能在b=f(a)之前就能执行完。（注意，这里的f(a)并不代表一个以a为参数的函数调用，而是代表以a为操作数的指令。C语言的函数调用是需要若干条指令才能实现的，情况要更复杂些。）<br>
+<br>
+像这样有依赖关系的指令如果挨得很近，后一条指令必定会因为等待前一条执行的结果，而在流水线中阻塞很久，占用流水线的资源。而编译器的乱序，作为编译优化的一种手段，则试图通过指令重排将这样的两条指令拉开距离,&nbsp;以至于后一条指令进入CPU的时候，前一条指令结果已经得到了，那么也就不再需要阻塞等待了。比如将指令重排为：</span></span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:Arial; line-height:26px">
+<span style="font-weight:normal"><span style="font-size:14px">a++;&nbsp;c--;&nbsp;b=f(a);</span></span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:Arial; line-height:26px">
+<span style="font-size:14px; font-weight:normal">相比于CPU的乱序，编译器的乱序才是真正对指令顺序做了调整。但是编译器的乱序也必须保证程序上下文的因果关系不发生改变。</span><br>
+<br>
+<span style="font-size:18px">乱序的后果</span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:Arial; line-height:26px">
+<span style="font-size:18px"><br>
+</span><span style="font-size:14px; font-weight:normal">乱序执行，有了“保证上下文因果关系”这一前提，一般情况下是不会有问题的。因此，在绝大多数情况下，我们写程序都不会去考虑乱序所带来的影响。</span><br>
+<span style="font-size:14px; font-weight:normal">但是，有些程序逻辑，单纯从上下文是看不出它们的因果关系的。比如：</span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:Arial; line-height:26px">
+<span style="font-weight:normal"><span style="font-size:14px">*addr=5;&nbsp;val=*data;</span></span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:Arial; line-height:26px">
+<span style="font-weight:normal"><span style="font-size:14px">从表面上看，addr和data是没有什么联系的，完全可以放心的去乱序执行。但是如果这是在某某设备驱动程序中，这两个变量却可能对应到设备的地址端口和数据端口。并且，这个设备规定了，当你需要读写设备上的某个寄存器时，先将寄存器编号设置到地址端口，然后就可以通过对数据端口的读写而操作到对应的寄存器。那么这么一来，对前面那两条指令的乱序执行就可能造成错误。<br>
+对于这样的逻辑，我们姑且将其称作隐式的因果关系；而指令与指令之间直接的输入输出依赖，也姑且称作显式的因果关系。CPU或者编译器的乱序是以保持显式的因果关系不变为前提的，但是它们都无法识别隐式的因果关系。再举个例子：</span></span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:Arial; line-height:26px">
+<span style="font-weight:normal"><span style="font-size:14px">obj-&gt;data&nbsp;=&nbsp;xxx;&nbsp;obj-&gt;ready&nbsp;=&nbsp;1;</span></span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:Arial; line-height:26px">
+<span style="font-weight:normal"><span style="font-size:14px">当设置了data之后，记下标志，然后在另一个线程中可能执行：</span></span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:Arial; line-height:26px">
+<span style="font-weight:normal"><span style="font-size:14px">if&nbsp;(obj-&gt;ready)&nbsp;do_something(obj-&gt;data);</span></span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:Arial; line-height:26px">
+<span style="font-weight:normal"><span style="font-size:14px">虽然这个代码看上去有些别扭，但是似乎没错。不过，考虑到乱序，如果标志被置位先于data被设置，那么结果很可能就杯具了。因为从字面上看，前面的那两条指令其实并不存在显式的因果关系，乱序是有可能发生的。<br>
+<br>
+总的来说，如果程序具有显式的因果关系的话，乱序一定会尊重这些关系；否则，乱序就可能打破程序原有的逻辑。这时候，就需要使用屏障来抑制乱序，以维持程序所期望的逻辑。</span></span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:Arial; line-height:26px">
+<span style="font-weight:normal"><span style="font-size:14px"></span></span></p>
+<p style="font-size:14px; font-family:Arial; padding-bottom:0px; padding-top:0px; margin-top:0px; margin-bottom:0px; line-height:26px">
+<strong>屏障的作用</strong><br>
+内存屏障主要有：读屏障、写屏障、通用屏障、优化屏障、几种。<br>
+以读屏障为例，它用于保证读操作有序。屏障之前的读操作一定会先于屏障之后的读操作完成，写操作不受影响，同属于屏障的某一侧的读操作也不受影响。类似的，写屏障用于限制写操作。<span style="color:#990030">而通用屏障则对读写操作都有作用</span>。而优化屏障则用于限制编译器的指令重排，不区分读写。前三种屏障都隐含了优化屏障的功能。比如：</p>
+<p style="font-size:14px; font-family:Arial; padding-bottom:0px; padding-top:0px; margin-top:0px; margin-bottom:0px; line-height:26px">
+tmp&nbsp;<wbr>=&nbsp;<wbr>ttt;&nbsp;<wbr>*addr&nbsp;<wbr>=&nbsp;<wbr>5;&nbsp;<wbr>mb();&nbsp;<wbr>val&nbsp;<wbr>=&nbsp;<wbr>*data;</p>
+<p style="font-size:14px; font-family:Arial; padding-bottom:0px; padding-top:0px; margin-top:0px; margin-bottom:0px; line-height:26px">
+有了内存屏障就了确保先设置地址端口，再读数据端口。而至于设置地址端口与tmp的赋值孰先孰后，屏障则不做干预。<br>
+<br>
+有了内存屏障，就可以在隐式因果关系的场景中，保证因果关系逻辑正确。</p>
+<br>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:Arial; line-height:26px">
+<span style="font-weight:normal"><span style="font-size:14px"><br>
+</span></span></p>
+</h3>
+<h3 class="storytitle" style="font-family:Arial,Verdana,sans-serif; margin:0px 0px 5px; padding-bottom:2px; border-bottom-width:1px; border-bottom-style:solid; border-bottom-color:rgb(128,128,128)">
+<a target="_blank" href="http://blog.hesey.net/2011/07/reordering.html" rel="bookmark" style="color:rgb(0,0,0); text-decoration:none; font-size:18px">理解重排序</a></h3>
+<div class="storycontent" style="font-family:Arial,Verdana,sans-serif; font-size:16px; text-align:justify">
+<p style="">&nbsp; &nbsp; &nbsp;重排序通常是编译器或运行时环境为了优化程序性能而采取的对指令进行重新排序执行的一种手段。重排序分为两类：<span style="color:rgb(255,0,0)"><strong>编译期重排序</strong></span>和<span style="color:rgb(255,0,0)"><strong>运行期重排序</strong></span>，分别对应编译时和运行时环境。</p>
+<p style="">&nbsp; &nbsp; &nbsp;在并发程序中，程序员会特别关注不同进程或线程之间的数据同步，特别是多个线程同时修改同一变量时，必须采取可靠的同步或其它措施保障数据被正确地修改，这里的一条重要原则是：<span style="color:rgb(255,0,0)"><strong>不要假设指令执行的顺序，你无法预知不同线程之间的指令会以何种顺序执行。</strong></span></p>
+<p style="">&nbsp; &nbsp; &nbsp;但是在<span style="color:rgb(255,0,0)"><strong>单线程</strong></span>程序中，通常我们容易假设指令是<span style="color:rgb(255,0,0)"><strong>顺序执行</strong></span>的，否则可以想象程序会发生什么可怕的变化。理想的模型是：各种指令执行的顺序是唯一且有序的，这个顺序就是它们被编写在代码中的顺序，与处理器或其它因素无关，这种模型被称作<a target="_blank" href="http://en.wikipedia.org/wiki/Sequential_consistency" style="color:rgb(0,0,0); font-weight:bold"><span style="color:rgb(0,128,0)">顺序一致性模型</span></a>，也是基于冯·诺依曼体系的模型。当然，这种假设本身是合理的，在实践中也鲜有异常发生，但事实上，<span style="color:rgb(255,0,0)"><strong>没有哪个现代多处理器架构会采用这种模型</strong></span>，因为它是在是太低效了。而在编译优化和CPU流水线中，几乎都涉及到指令重排序。<span id="more-842"></span></p>
+<h1 style="font-size:20px; margin:15px 0px 2px; padding-bottom:2px">一、编译期重排序</h1>
+<blockquote style="border-left-width:5px; border-left-style:solid; border-left-color:rgb(204,204,204); margin-left:1.5em; padding-left:5px; margin-right:0px">
+<p style="">&nbsp; &nbsp; &nbsp;编译期重排序的典型就是通过调整指令顺序，在不改变程序语义的前提下，尽可能减少寄存器的读取、存储次数，充分复用寄存器的存储值。</p>
+<p style="">&nbsp; &nbsp; &nbsp;假设第一条指令计算一个值赋给变量A并存放在寄存器中，第二条指令与A无关但需要占用寄存器（假设它将占用A所在的那个寄存器），第三条指令使用A的值且与第二条指令无关。那么如果按照顺序一致性模型，A在第一条指令执行过后被放入寄存器，在第二条指令执行时A不再存在，第三条指令执行时A重新被读入寄存器，而这个过程中，A的值没有发生变化。通常编译器都会交换第二和第三条指令的位置，这样第一条指令结束时A存在于寄存器中，接下来可以直接从寄存器中读取A的值，降低了重复读取的开销。</p>
+</blockquote>
+<h1 style="font-size:20px; margin:15px 0px 2px; padding-bottom:2px">二、重排序对于流水线的意义</h1>
+<blockquote style="border-left-width:5px; border-left-style:solid; border-left-color:rgb(204,204,204); margin-left:1.5em; padding-left:5px; margin-right:0px">
+<p style="">&nbsp; &nbsp; &nbsp;现代CPU几乎都采用流水线机制加快指令的处理速度，一般来说，一条指令需要若干个CPU时钟周期处理，而通过流水线并行执行，可以在同等的时钟周期内执行若干条指令，具体做法简单地说就是把指令分为不同的执行周期，例如读取、寻址、解析、执行等步骤，并放在不同的元件中处理，同时在执行单元EU中，功能单元被分为不同的元件，例如加法元件、乘法元件、加载元件、存储元件等，可以进一步实现不同的计算并行执行。</p>
+<p style="">流水线架构决定了指令应该被并行执行，而不是在顺序化模型中所认为的那样。重排序有利于充分使用流水线，进而达到<a target="_blank" href="http://zh.wikipedia.org/wiki/%E8%B6%85%E7%B4%94%E9%87%8F" style="color:rgb(0,0,0); font-weight:bold"><span style="color:rgb(0,128,0)">超标量</span></a>的效果。</p>
+</blockquote>
+<h1 style="font-size:20px; margin:15px 0px 2px; padding-bottom:2px">三、确保顺序性</h1>
+<blockquote style="border-left-width:5px; border-left-style:solid; border-left-color:rgb(204,204,204); margin-left:1.5em; padding-left:5px; margin-right:0px">
+<p style="">&nbsp; &nbsp; &nbsp;尽管指令在执行时并不一定按照我们所编写的顺序执行，但毋庸置疑的是，<span style="color:rgb(255,0,0)"><strong>在单线程环境下，指令执行的最终效果应当与其在顺序执行下的效果一致</strong></span>，否则这种优化便会失去意义。</p>
+<p style="">通常无论是在编译期还是运行期进行的指令重排序，都会满足上面的原则。</p>
+</blockquote>
+<h1 style="font-size:20px; margin:15px 0px 2px; padding-bottom:2px">四、Java存储模型中的重排序</h1>
+<blockquote style="border-left-width:5px; border-left-style:solid; border-left-color:rgb(204,204,204); margin-left:1.5em; padding-left:5px; margin-right:0px">
+<p style="">&nbsp; &nbsp; &nbsp;在Java存储模型（Java Memory Model, JMM）中，重排序是十分重要的一节，特别是在并发编程中。JMM通过happens-before法则保证顺序执行语义，如果想要让执行操作B的线程观察到执行操作A的线程的结果，那么A和B就必须满足happens-before原则，否则，<span style="color:rgb(255,0,0)"><strong>JVM可以对它们进行任意排序以提高程序性能。</strong></span></p>
+<p style="">&nbsp; &nbsp; &nbsp;volatile关键字可以<span style="color:rgb(255,0,0)"><strong>保证变量的可见性</strong></span>，因为对volatile的操作都在Main Memory中，而Main Memory是被所有线程所共享的，这里的代价就是牺牲了性能，无法利用寄存器或Cache，因为它们都不是全局的，无法保证可见性，可能产生脏读。</p>
+<p style="">volatile还有一个作用就是<span style="color:rgb(255,0,0)"><strong>局部阻止重排序的发生</strong></span>，对volatile变量的操作指令都不会被重排序，因为如果重排序，又可能产生可见性问题。</p>
+<p style="">&nbsp; &nbsp; &nbsp;在保证可见性方面，锁（包括显式锁、对象锁）以及对原子变量的读写都可以确保变量的可见性。但是实现方式略有不同，例如同步锁保证得到锁时从内存里重新读入数据刷新缓存，释放锁时将数据写回内存以保数据可见，而volatile变量干脆都是读写内存。</p>
+</blockquote>
+</div>
+<p style="font-size:13px; line-height:19.5px; margin-top:10px; margin-bottom:10px; text-indent:20px; font-family:Verdana,Geneva,Arial,Helvetica,sans-serif">
+<span style="font-size:18px"><strong>Happens-before法则</strong></span></p>
+<p style="margin-top:10px; margin-bottom:10px"><span style="font-size:14px">Java存储模型有一个happens-before原则，就是如果动作B要看到动作A的执行结果（无论A/B是否在同一个线程里面执行），那么A/B就需要满足happens-before关系。</span></p>
+<p style="margin-top:10px; margin-bottom:10px"><span style="font-size:14px">在介绍happens-before法则之前介绍一个概念：JMM动作（Java Memeory Model Action），Java存储模型动作。一个动作（Action）包括：变量的读写、监视器加锁和释放锁、线程的start()和join()。后面还会提到锁的的。</span></p>
+<p style="margin-top:10px; margin-bottom:10px"><span style="font-size:14px">happens-before完整规则：</span></p>
+<blockquote>
+<p style="margin-top:10px; margin-bottom:10px"><span style="font-size:14px">（1）同一个线程中的每个Action都happens-before于出现在其后的任何一个Action。</span></p>
+<p style="margin-top:10px; margin-bottom:10px"><span style="font-size:14px">（2）对一个监视器的解锁happens-before于每一个后续对同一个监视器的加锁。</span></p>
+<p style="margin-top:10px; margin-bottom:10px"><span style="font-size:14px">（3）对volatile字段的写入操作happens-before于每一个后续的同一个字段的读操作。</span></p>
+<p style="margin-top:10px; margin-bottom:10px"><span style="font-size:14px">（4）Thread.start()的调用会happens-before于启动线程里面的动作。</span></p>
+<p style="margin-top:10px; margin-bottom:10px"><span style="font-size:14px">（5）Thread中的所有动作都happens-before于其他线程检查到此线程结束或者Thread.join（）中返回或者Thread.isAlive()==false。</span></p>
+<p style="margin-top:10px; margin-bottom:10px"><span style="font-size:14px">（6）一个线程A调用另一个另一个线程B的interrupt（）都happens-before于线程A发现B被A中断（B抛出异常或者A检测到B的isInterrupted（）或者interrupted()）。</span></p>
+<p style="margin-top:10px; margin-bottom:10px"><span style="font-size:14px">（7）一个对象构造函数的结束happens-before与该对象的finalizer的开始</span></p>
+<p style="margin-top:10px; margin-bottom:10px"><span style="font-size:14px">（8）如果A动作happens-before于B动作，而B动作happens-before与C动作，那么A动作happens-before于C动作。</span></p>
+</blockquote>
+<span style="font-family:SimSun"><br>
+</span>
+<p></p>
+<p><br>
+</p>
+<p></p>
+<h2 style="margin:0px 0px 10px; padding:0px; font-family:Arial; border:0px; float:none; clear:none; width:610px; color:rgb(34,34,34); line-height:24px">
+五、首先为何要指令重排序实例（instruction reordering）？</h2>
+<h2 style="margin:0px 0px 10px; padding:0px; font-family:Arial; border:0px; float:none; clear:none; width:610px; color:rgb(34,34,34); line-height:24px">
+<a target="_blank" name="t1" style="color:rgb(255,153,0)"></a><span style="font-size:14px"><span style="font-weight:normal">编译器或运行时环境为了</span>优化程序性能<span style="font-weight:normal">而采取的对指令进行重新排序执行的一种手段。</span></span></h2>
+<div style="font-family:Arial; font-size:14px; line-height:26px"><span style="font-size:14px">也就是说，对于下面两条语句：</span></div>
+<div style="font-family:Arial; font-size:14px; line-height:26px"><span style="font-size:14px">int a = 10;</span></div>
+<div style="font-family:Arial; line-height:26px"><span style="font-size:14px">int b = 20;</span></div>
+<div style="font-family:Arial; font-size:14px; line-height:26px"><span style="font-size:12px"><br>
+</span></div>
+<div style="font-family:Arial; line-height:26px"><span style="font-size:14px">&nbsp; &nbsp; &nbsp;在计算机执行上面两句话的时候，<strong>有可能</strong>第二条语句会先于第一条语句执行。所以，千万<span style="color:rgb(34,34,34); line-height:24px">不要随意假设指令执行的顺序。</span></span></div>
+<h2 style="margin:0px 0px 10px; padding:0px; font-family:Arial; border:0px; float:none; clear:none; width:610px; color:rgb(34,34,34); line-height:24px">
+<a target="_blank" name="t2" style="color:rgb(255,153,0)"></a><br>
+六、是不是所有的语句的执行顺序都可以重排呢？</h2>
+<div style="font-family:Arial; line-height:26px"><span style="font-size:14px">&nbsp; &nbsp; &nbsp;答案是否定的。为了讲清楚这个问题，先讲解另一个概念：<span style="color:rgb(34,34,34); line-height:24px">数据依赖性</span></span></div>
+<h2 style="margin:0px 0px 10px; padding:0px; font-family:Arial; border:0px; float:none; clear:none; width:610px; color:rgb(34,34,34); line-height:24px">
+<span style="font-size:14px"><a target="_blank" name="t3" style="color:rgb(255,153,0)"></a>6.1、什么是数据依赖性</span></h2>
+<p></p>
+<p style="margin-top:0px; margin-bottom:15px; padding-top:0px; padding-bottom:0px; font-family:Arial; border:0px; float:none; line-height:1.8; clear:none; width:610px">
+<span style="font-size:14px">&nbsp; &nbsp; &nbsp;如果两个操作访问同一个变量，且这两个操作中有一个为写操作，此时这两个操作之间就存在数据依赖。数据依赖分下列三种类型：<br>
+</span></p>
+<table border="1" width="400px" style="color:rgb(0,0,0); font-family:Arial; border-collapse:collapse; border-spacing:0px; margin:10px 0px; border:1px solid rgb(224,224,224); padding:0px; line-height:21px">
+<tbody style="margin:0px; border:0px; padding:0px">
+<tr style="margin:0px; border:0px; padding:0px">
+<td style="margin:0px; padding:0px; border:1px solid rgb(224,224,224)"><span style="font-family:Arial"><span style="font-size:14px">名称</span></span></td>
+<td style="margin:0px; padding:0px; border:1px solid rgb(224,224,224)"><span style="font-family:Arial"><span style="font-size:14px">代码示例</span></span></td>
+<td style="margin:0px; padding:0px; border:1px solid rgb(224,224,224)"><span style="font-family:Arial"><span style="font-size:14px">说明</span></span></td>
+</tr>
+<tr style="margin:0px; border:0px; padding:0px">
+<td style="margin:0px; padding:0px; border:1px solid rgb(224,224,224)"><span style="font-family:Arial"><span style="font-size:14px">写后读</span></span></td>
+<td style="margin:0px; padding:0px; border:1px solid rgb(224,224,224)"><span style="font-family:Arial"><span style="font-size:14px">a = 1;b = a;</span></span></td>
+<td style="margin:0px; padding:0px; border:1px solid rgb(224,224,224)"><span style="font-family:Arial"><span style="font-size:14px">写一个变量之后，再读这个位置。</span></span></td>
+</tr>
+<tr style="margin:0px; border:0px; padding:0px">
+<td style="margin:0px; padding:0px; border:1px solid rgb(224,224,224)"><span style="font-family:Arial"><span style="font-size:14px">写后写</span></span></td>
+<td style="margin:0px; padding:0px; border:1px solid rgb(224,224,224)"><span style="font-family:Arial"><span style="font-size:14px">a = 1;a = 2;</span></span></td>
+<td style="margin:0px; padding:0px; border:1px solid rgb(224,224,224)"><span style="font-family:Arial"><span style="font-size:14px">写一个变量之后，再写这个变量。</span></span></td>
+</tr>
+<tr style="margin:0px; border:0px; padding:0px">
+<td style="margin:0px; padding:0px; border:1px solid rgb(224,224,224)"><span style="font-family:Arial"><span style="font-size:14px">读后写</span></span></td>
+<td style="margin:0px; padding:0px; border:1px solid rgb(224,224,224)"><span style="font-family:Arial"><span style="font-size:14px">a = b;b = 1;</span></span></td>
+<td style="margin:0px; padding:0px; border:1px solid rgb(224,224,224)"><span style="font-family:Arial"><span style="font-size:14px">读一个变量之后，再写这个变量。</span></span></td>
+</tr>
+</tbody>
+</table>
+<p style="margin-top:0px; margin-bottom:15px; padding-top:0px; padding-bottom:0px; font-family:Arial; border:0px; float:none; line-height:1.8; clear:none; width:610px">
+<span style="font-size:14px">&nbsp; &nbsp; &nbsp;上面三种情况，只要重排序两个操作的执行顺序，程序的执行结果将会被改变。所以，<span style="line-height:1.8">编译器和处理器在重排序时，会遵守数据依赖性，编译器和处理器不会改变存在数据依赖关系的两个操作的执行顺序。也就是说：<strong><span style="color:rgb(255,0,0)">在单线程环境下</span>，指令执行的最终效果应当与其在顺序执行下的效果一致，否则这种优化便会失去意义。这句话有个专业术语叫做as-if-serial
+ semantics (as-if-serial语义)</strong></span></span></p>
+<p style="margin-top:0px; margin-bottom:15px; padding-top:0px; padding-bottom:0px; font-family:Arial; border:0px; float:none; line-height:1.8; clear:none; width:610px">
+<span style="line-height:1.8"><strong><span style="font-size:14px">七、重排序对多线程的影响</span></strong></span></p>
+<p style="margin-top:0px; margin-bottom:15px; padding-top:0px; padding-bottom:0px; font-family:Arial; border:0px; float:none; line-height:1.8; clear:none; width:610px">
+<span style="line-height:1.8"><span style="font-size:14px">&nbsp; &nbsp; &nbsp;现在让我们来看看，重排序是否会改变多线程程序的执行结果。请看下面的示例代码：</span></span></p>
+<p style="margin-top:0px; margin-bottom:15px; padding-top:0px; padding-bottom:0px; font-family:Arial; font-size:14px; border:0px; float:none; line-height:1.8; clear:none; width:610px">
+<span style="line-height:1.8"></span></p>
+<div class="dp-highlighter bg_java" style="font-family:Consolas,&#39;Courier New&#39;,Courier,mono,serif; width:936.53125px; overflow:auto; padding-top:1px; line-height:26px; margin:18px 0px!important; background-color:rgb(231,229,220)">
+<div class="bar" style="padding-left:45px">
+<div class="tools" style="padding:3px 8px 10px 10px; font-size:9px; line-height:normal; font-family:Verdana,Geneva,Arial,Helvetica,sans-serif; color:silver; border-left-width:3px; border-left-style:solid; border-left-color:rgb(108,226,108); background-color:rgb(248,248,248)">
+<strong>[java]</strong>&nbsp;<a target="_blank" href="http://blog.csdn.net/beiyetengqing/article/details/49580559#" class="ViewSource" title="view plain" style="color:rgb(160,160,160); text-decoration:none; border:none; padding:1px; margin:0px 10px 0px 0px; font-size:9px; display:inline-block; width:16px; height:16px; text-indent:-2000px; background-color:inherit">view
+ plain</a><span>&nbsp;<a target="_blank" href="http://blog.csdn.net/beiyetengqing/article/details/49580559#" class="CopyToClipboard" title="copy" style="color:rgb(160,160,160); text-decoration:none; border:none; padding:1px; margin:0px 10px 0px 0px; font-size:9px; display:inline-block; width:16px; height:16px; text-indent:-2000px; background-color:inherit">copy</a></span>
+<div style="position:absolute; left:719px; top:1138px; width:18px; height:18px; z-index:99">
+</div>
+<span></span></div>
+</div>
+<ol start="1" class="dp-j" style="padding:0px; border:none; color:rgb(92,92,92); margin:0px 0px 1px 45px!important; background-color:rgb(255,255,255)">
+<li class="alt" style="border-style:none none none solid; border-left-width:3px; border-left-color:rgb(108,226,108); list-style:decimal-leading-zero outside; color:inherit; line-height:18px; margin:0px!important; padding:0px 3px 0px 10px!important">
+<span style="margin:0px; padding:0px; border:none; color:black; background-color:inherit"><span class="keyword" style="margin:0px; padding:0px; border:none; color:rgb(0,102,153); font-weight:bold; background-color:inherit">class</span><span style="margin:0px; padding:0px; border:none; background-color:inherit">&nbsp;ReorderExample&nbsp;{&nbsp;&nbsp;</span></span></li><li style="border-style:none none none solid; border-left-width:3px; border-left-color:rgb(108,226,108); list-style:decimal-leading-zero outside; line-height:18px; margin:0px!important; padding:0px 3px 0px 10px!important; background-color:rgb(248,248,248)">
+<span style="margin:0px; padding:0px; border:none; color:black; background-color:inherit">&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword" style="margin:0px; padding:0px; border:none; color:rgb(0,102,153); font-weight:bold; background-color:inherit">int</span><span style="margin:0px; padding:0px; border:none; background-color:inherit">&nbsp;a&nbsp;=&nbsp;</span><span class="number" style="margin:0px; padding:0px; border:none; color:rgb(192,0,0); background-color:inherit">0</span><span style="margin:0px; padding:0px; border:none; background-color:inherit">;&nbsp;&nbsp;</span></span></li><li class="alt" style="border-style:none none none solid; border-left-width:3px; border-left-color:rgb(108,226,108); list-style:decimal-leading-zero outside; color:inherit; line-height:18px; margin:0px!important; padding:0px 3px 0px 10px!important">
+<span style="margin:0px; padding:0px; border:none; color:black; background-color:inherit">&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword" style="margin:0px; padding:0px; border:none; color:rgb(0,102,153); font-weight:bold; background-color:inherit">boolean</span><span style="margin:0px; padding:0px; border:none; background-color:inherit">&nbsp;flag&nbsp;=&nbsp;</span><span class="keyword" style="margin:0px; padding:0px; border:none; color:rgb(0,102,153); font-weight:bold; background-color:inherit">false</span><span style="margin:0px; padding:0px; border:none; background-color:inherit">;&nbsp;&nbsp;</span></span></li><li style="border-style:none none none solid; border-left-width:3px; border-left-color:rgb(108,226,108); list-style:decimal-leading-zero outside; line-height:18px; margin:0px!important; padding:0px 3px 0px 10px!important; background-color:rgb(248,248,248)">
+<span style="margin:0px; padding:0px; border:none; color:black; background-color:inherit">&nbsp;&nbsp;</span></li><li class="alt" style="border-style:none none none solid; border-left-width:3px; border-left-color:rgb(108,226,108); list-style:decimal-leading-zero outside; color:inherit; line-height:18px; margin:0px!important; padding:0px 3px 0px 10px!important">
+<span style="margin:0px; padding:0px; border:none; color:black; background-color:inherit">&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword" style="margin:0px; padding:0px; border:none; color:rgb(0,102,153); font-weight:bold; background-color:inherit">public</span><span style="margin:0px; padding:0px; border:none; background-color:inherit">&nbsp;</span><span class="keyword" style="margin:0px; padding:0px; border:none; color:rgb(0,102,153); font-weight:bold; background-color:inherit">void</span><span style="margin:0px; padding:0px; border:none; background-color:inherit">&nbsp;writer()&nbsp;{&nbsp;&nbsp;</span></span></li><li style="border-style:none none none solid; border-left-width:3px; border-left-color:rgb(108,226,108); list-style:decimal-leading-zero outside; line-height:18px; margin:0px!important; padding:0px 3px 0px 10px!important; background-color:rgb(248,248,248)">
+<span style="margin:0px; padding:0px; border:none; color:black; background-color:inherit">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;=&nbsp;<span class="number" style="margin:0px; padding:0px; border:none; color:rgb(192,0,0); background-color:inherit">1</span><span style="margin:0px; padding:0px; border:none; background-color:inherit">;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="comment" style="margin:0px; padding:0px; border:none; color:rgb(0,130,0); background-color:inherit">//&nbsp;1</span><span style="margin:0px; padding:0px; border:none; background-color:inherit">&nbsp;&nbsp;</span></span></li><li class="alt" style="border-style:none none none solid; border-left-width:3px; border-left-color:rgb(108,226,108); list-style:decimal-leading-zero outside; color:inherit; line-height:18px; margin:0px!important; padding:0px 3px 0px 10px!important">
+<span style="margin:0px; padding:0px; border:none; color:black; background-color:inherit">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;flag&nbsp;=&nbsp;<span class="keyword" style="margin:0px; padding:0px; border:none; color:rgb(0,102,153); font-weight:bold; background-color:inherit">true</span><span style="margin:0px; padding:0px; border:none; background-color:inherit">;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="comment" style="margin:0px; padding:0px; border:none; color:rgb(0,130,0); background-color:inherit">//&nbsp;2</span><span style="margin:0px; padding:0px; border:none; background-color:inherit">&nbsp;&nbsp;</span></span></li><li style="border-style:none none none solid; border-left-width:3px; border-left-color:rgb(108,226,108); list-style:decimal-leading-zero outside; line-height:18px; margin:0px!important; padding:0px 3px 0px 10px!important; background-color:rgb(248,248,248)">
+<span style="margin:0px; padding:0px; border:none; color:black; background-color:inherit">&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li class="alt" style="border-style:none none none solid; border-left-width:3px; border-left-color:rgb(108,226,108); list-style:decimal-leading-zero outside; color:inherit; line-height:18px; margin:0px!important; padding:0px 3px 0px 10px!important">
+<span style="margin:0px; padding:0px; border:none; color:black; background-color:inherit">&nbsp;&nbsp;</span></li><li style="border-style:none none none solid; border-left-width:3px; border-left-color:rgb(108,226,108); list-style:decimal-leading-zero outside; line-height:18px; margin:0px!important; padding:0px 3px 0px 10px!important; background-color:rgb(248,248,248)">
+<span style="margin:0px; padding:0px; border:none; color:black; background-color:inherit">&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword" style="margin:0px; padding:0px; border:none; color:rgb(0,102,153); font-weight:bold; background-color:inherit">public</span><span style="margin:0px; padding:0px; border:none; background-color:inherit">&nbsp;</span><span class="keyword" style="margin:0px; padding:0px; border:none; color:rgb(0,102,153); font-weight:bold; background-color:inherit">void</span><span style="margin:0px; padding:0px; border:none; background-color:inherit">&nbsp;reader()&nbsp;{&nbsp;&nbsp;</span></span></li><li class="alt" style="border-style:none none none solid; border-left-width:3px; border-left-color:rgb(108,226,108); list-style:decimal-leading-zero outside; color:inherit; line-height:18px; margin:0px!important; padding:0px 3px 0px 10px!important">
+<span style="margin:0px; padding:0px; border:none; color:black; background-color:inherit">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword" style="margin:0px; padding:0px; border:none; color:rgb(0,102,153); font-weight:bold; background-color:inherit">if</span><span style="margin:0px; padding:0px; border:none; background-color:inherit">&nbsp;(flag)&nbsp;{&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="comment" style="margin:0px; padding:0px; border:none; color:rgb(0,130,0); background-color:inherit">//&nbsp;3</span><span style="margin:0px; padding:0px; border:none; background-color:inherit">&nbsp;&nbsp;</span></span></li><li style="border-style:none none none solid; border-left-width:3px; border-left-color:rgb(108,226,108); list-style:decimal-leading-zero outside; line-height:18px; margin:0px!important; padding:0px 3px 0px 10px!important; background-color:rgb(248,248,248)">
+<span style="margin:0px; padding:0px; border:none; color:black; background-color:inherit">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword" style="margin:0px; padding:0px; border:none; color:rgb(0,102,153); font-weight:bold; background-color:inherit">int</span><span style="margin:0px; padding:0px; border:none; background-color:inherit">&nbsp;i&nbsp;=&nbsp;a&nbsp;*&nbsp;a;&nbsp;</span><span class="comment" style="margin:0px; padding:0px; border:none; color:rgb(0,130,0); background-color:inherit">//&nbsp;4</span><span style="margin:0px; padding:0px; border:none; background-color:inherit">&nbsp;&nbsp;</span></span></li><li class="alt" style="border-style:none none none solid; border-left-width:3px; border-left-color:rgb(108,226,108); list-style:decimal-leading-zero outside; color:inherit; line-height:18px; margin:0px!important; padding:0px 3px 0px 10px!important">
+<span style="margin:0px; padding:0px; border:none; color:black; background-color:inherit">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li style="border-style:none none none solid; border-left-width:3px; border-left-color:rgb(108,226,108); list-style:decimal-leading-zero outside; line-height:18px; margin:0px!important; padding:0px 3px 0px 10px!important; background-color:rgb(248,248,248)">
+<span style="margin:0px; padding:0px; border:none; color:black; background-color:inherit">&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li class="alt" style="border-style:none none none solid; border-left-width:3px; border-left-color:rgb(108,226,108); list-style:decimal-leading-zero outside; color:inherit; line-height:18px; margin:0px!important; padding:0px 3px 0px 10px!important">
+<span style="margin:0px; padding:0px; border:none; color:black; background-color:inherit">}&nbsp;&nbsp;</span></li></ol>
+</div>
+<br style="font-family:Arial; font-size:14px; line-height:26px">
+<span style="font-family:Arial; line-height:1.8"><span style="font-size:14px">&nbsp; &nbsp; &nbsp;flag变量是个标记，用来标识变量a是否已被写入。这里假设有两个线程A和B，A首先执行writer()方法，随后B线程接着执行reader()方法。线程B在执行操作4时，能否看到线程A在操作1对共享变量a的写入？</span></span>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:Arial; line-height:26px">
+</p>
+<p style="margin-top:0px; margin-bottom:15px; padding-top:0px; padding-bottom:0px; font-family:Arial; border:0px; float:none; line-height:1.8; clear:none; width:610px">
+<span style="font-size:14px">答案是：不一定能看到。</span></p>
+<p style="margin-top:0px; margin-bottom:15px; padding-top:0px; padding-bottom:0px; font-family:Arial; border:0px; float:none; line-height:1.8; clear:none; width:610px">
+<span style="font-size:14px">&nbsp; &nbsp; &nbsp;由于操作1和操作2没有数据依赖关系，编译器和处理器可以对这两个操作重排序；同样，操作3和操作4没有数据依赖关系，编译器和处理器也可以对这两个操作重排序。让我们先来看看，当操作1和操作2重排序时，可能会产生什么效果？请看下面的程序执行时序图：</span></p>
+<img src="./多线程之指令重排序_files/33.png" alt=""><br>
+<p><br>
+</p>
+<p></p>
+<p style="margin-top:0px; margin-bottom:15px; padding-top:0px; padding-bottom:0px; font-family:Arial; border:0px; float:none; line-height:1.8; clear:none; width:610px">
+<span style="font-size:14px">&nbsp; &nbsp; &nbsp;上图的执行顺序是：2 -&gt; 3 -&gt; 4 -&gt; 1 (这是完全存在并且合理的一种顺序，如果你不能理解，请先了解CPU是如何对多个线程进行时间分配的)</span></p>
+<p style="margin-top:0px; margin-bottom:15px; padding-top:0px; padding-bottom:0px; font-family:Arial; border:0px; float:none; line-height:1.8; clear:none; width:610px">
+<span style="font-size:14px">&nbsp; &nbsp; &nbsp;如上图所示，操作1和操作2做了重排序。程序执行时，线程A首先写标记变量flag，随后线程B读这个变量。由于条件判断为真，线程B将读取变量a。此时，变量a还根本没有被线程A写入，在这里多线程程序的语义被重排序破坏了！</span></p>
+<p style="margin-top:0px; margin-bottom:15px; padding-top:0px; padding-bottom:0px; font-family:Arial; border:0px; float:none; line-height:1.8; clear:none; width:610px">
+<span style="font-size:14px">&nbsp; &nbsp; &nbsp;下面再让我们看看，当操作3和操作4重排序时会产生什么效果。下面是操作3和操作4重排序后，程序的执行时序图：</span></p>
+<img src="./多线程之指令重排序_files/44.png" alt=""><br>
+<p><br>
+</p>
+<p><span style="font-family:Arial; line-height:1.8"><span style="font-size:18px">&nbsp;&nbsp;</span></span></p>
+<p style="margin-top:0px; margin-bottom:15px; padding-top:0px; padding-bottom:0px; font-family:Arial; border:0px; float:none; line-height:1.8; clear:none; width:610px">
+<span style="font-size:14px">&nbsp;在程序中，操作3和操作4存在控制依赖关系。当代码中存在控制依赖性时，会影响指令序列执行的并行度。为此，编译器和处理器会采用猜测（Speculation）执行来克服控制相关性对并行度的影响。以处理器的猜测执行为例，执行线程B的处理器可以提前读取并计算a*a，然后把计算结果临时保存到一个名为重排序缓冲（reorder buffer ROB）的硬件缓存中。当接下来操作3的条件判断为真时，就把该计算结果写入变量i中。<br>
+<br>
+从图中我们可以看出，猜测执行实质上对操作3和4做了重排序。重排序在这里破坏了多线程程序的语义！</span></p>
+<p style="margin-top:0px; margin-bottom:15px; padding-top:0px; padding-bottom:0px; font-family:Arial; border:0px; float:none; line-height:1.8; clear:none; width:610px">
+<span style="line-height:1.8"><span style="font-size:14px">在单线程程序中，对存在控制依赖的操作重排序，不会改变执行结果（这也是as-if-serial语义允许对存在控制依赖的操作做重排序的原因）；但在多线程程序中，对存在控制依赖的操作重排序，可能会改变程序的执行结果。</span></span></p>
+<h2 style="margin-top:0px; margin-bottom:15px; padding-top:0px; padding-bottom:0px; font-family:Arial; border:0px; float:none; line-height:1.8; clear:none; width:610px">
+<span style="line-height:1.8"><span style="font-family:Tahoma; line-height:25.2px"><span style="font-family:Arial; line-height:21.6px"><strong><span style="font-size:18px">为什么<span style="font-family:Tahoma; line-height:25.2px">volatile</span><span style="font-family:Tahoma; line-height:25.2px">禁止CPU指令的重排序</span>&nbsp;&nbsp;</span></strong></span></span></span></h2>
+<p style="margin-top:0px; margin-bottom:15px; padding-top:0px; padding-bottom:0px; border:0px; float:none; clear:none; width:610px">
+<span style="font-family:Tahoma"><span style="font-size:14px; line-height:25.2px">&nbsp;</span></span></p>
+<pre code_snippet_id="1695635" snippet_file_name="blog_20160524_1_3650670" name="code" class="java" style="width: 100%; overflow: hidden;">class VolatileExample {  
+  int x = 0;  
+  volatile boolean v = false;  
+  
+  //in thread A  
+  public void writer() {  
+    x = 42;  
+    v = true;  
+  }  
+  
+  //in thread B  
+  public void reader() {  
+    if (v == true) {  
+      //uses x - can we see x is 42?  
+    }  
+  }  
+} </pre><br>
+<p></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:Tahoma; font-size:14px; line-height:25.2px">
+&nbsp; &nbsp; &nbsp;在这种情况下，当thread A 执行完后，在thread B中能看到x等于42吗？（变量v肯定可以看到，根据可见性可以推断出来） 好吧，在旧的JMM模型下，答案是不一定。原因就是CPU指令在执行时的重排序。在旧的JMM模型下，只规定了volatile变量和volatile变量之间不能进行重排序，但是并没有保证volatile变量和non-volatile变量之间不能进行重排序，所以， 当在thread A中，指令的执行可能是：</p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:Tahoma; font-size:14px; line-height:25.2px">
+&nbsp;</p>
+<div class="dp-highlighter" style="margin:0px 0px 0px 9px; padding:1px; font-family:Monaco,&quot;DejaVu Sans Mono&quot;,&quot;Bitstream Vera Sans Mono&quot;,Consolas,&quot;Courier New&quot;,monospace; width:679px; overflow:auto; line-height:25.2px">
+<div class="bar" style="margin:0px; padding:0px">
+<div class="tools" style="margin:0px; padding:3px; font-weight:bold">Java代码&nbsp;&nbsp;<img alt="收藏代码" src="./多线程之指令重排序_files/122518450.png" class="star" style="margin:0px; padding:0px; max-width:635px; height:auto"></div>
+</div>
+<ol class="dp-j" style="margin:0px 0px 1px; padding:2px 0px; list-style:none outside none; word-break:normal; word-wrap:break-word; border:1px solid rgb(209,215,220); color:rgb(43,145,175)">
+<li style="margin:0px 0px 0px 38px; padding:0px 0px 0px 10px; list-style:none outside none; word-break:normal; word-wrap:break-word; border-left-width:1px; border-left-style:solid; border-left-color:rgb(209,215,220); line-height:18px; background-color:rgb(250,250,250)">
+<span style="margin:0px; padding:0px; list-style:none outside none; word-break:normal; word-wrap:break-word; color:black">v&nbsp;=&nbsp;<span class="keyword" style="margin:0px; padding:0px; list-style:none outside none; word-break:normal; word-wrap:break-word; color:rgb(127,0,85); font-weight:bold">true</span>;&nbsp;&nbsp;</span></li><li style="margin:0px 0px 0px 38px; padding:0px 0px 0px 10px; list-style:none outside none; word-break:normal; word-wrap:break-word; border-left-width:1px; border-left-style:solid; border-left-color:rgb(209,215,220); line-height:18px; background-color:rgb(250,250,250)">
+<span style="margin:0px; padding:0px; list-style:none outside none; word-break:normal; word-wrap:break-word; color:black">x&nbsp;=&nbsp;<span class="number" style="margin:0px; padding:0px; list-style:none outside none; word-break:normal; word-wrap:break-word; color:rgb(192,0,0)">42</span>;&nbsp;&nbsp;</span></li></ol>
+</div>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:Tahoma; font-size:14px; line-height:25.2px">
+&nbsp;这样，当thread B 看到v为true的时候，x实际上还没有执行，所以值不是42.</p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:Tahoma; font-size:14px; line-height:25.2px">
+&nbsp;</p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:Tahoma; font-size:14px; line-height:25.2px">
+&nbsp;&nbsp; 慢！眼尖的同学可能看出来了， 你说的这个跟重排序实际上没有关系呀，这个应该算是变量x的可见性问题，因为变量x不是声明为volatile的。</p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:Tahoma; font-size:14px; line-height:25.2px">
+&nbsp;</p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:Tahoma; font-size:14px; line-height:25.2px">
+&nbsp;&nbsp; 好吧，我承认我偷懒了，在描述volatile变量可见性特质的时候，在新的JMM模型下，当对volatile变量进行写的时候，该线程（这里是thread A）所能看到变量（比如说变量x），都会一起刷新到主存中。这个也就是为什么我们会说对volatile变量的写操作，实际上等价于使用了synchronized关键字后释放monitor时产生的效果。 在这个前提下，上面的问题的确是CPU指令重排序的问题。</p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:Tahoma; font-size:14px; line-height:25.2px">
+&nbsp;</p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:Tahoma; font-size:14px; line-height:25.2px">
+&nbsp;&nbsp; 但是幸运的是，JMM随后提出了happen-before原则来fix了这个问题（主要是volitale变量和non-volatile变量之间的重排序问题。）</p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:Tahoma; font-size:14px; line-height:25.2px">
+&nbsp;&nbsp;&nbsp; 这里我只挑跟这个问题相关的三条原则来进行讲解，其余的可以到官方文档去查看。</p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:Tahoma; font-size:14px; line-height:25.2px">
+&nbsp;</p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:Tahoma; font-size:14px; line-height:25.2px">
+&nbsp;&nbsp;&nbsp; 1. 单线程原则， 在单线程执行的环境下，指令的执行是跟程序代码的执行顺序一致。 对于上面的例子来说，在程序代码顺序上，x=42 先于 v=true， 那么在内存指令执行的时候也是如此。</p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:Tahoma; font-size:14px; line-height:25.2px">
+&nbsp;</p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:Tahoma; font-size:14px; line-height:25.2px">
+&nbsp;&nbsp;&nbsp; 2. volatile变量原则，对volatile变量的写操作要优先于对volatile变量的读操作。</p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:Tahoma; font-size:14px; line-height:25.2px">
+&nbsp;&nbsp;&nbsp; 3. 转递性原则，如果A操作先于B操作，B操作先于C操作，那么A操作肯定先于C操作。</p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:Tahoma; font-size:14px; line-height:25.2px">
+&nbsp;</p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:Tahoma; font-size:14px; line-height:25.2px">
+&nbsp;&nbsp;&nbsp; 还是上面的例子，先用单线程原则，可以判断出，在thread A的执行中， x=42肯定要优先于v=true进行执行， 而在thread B的执行中，对v的读取操作肯定要优先于对x的使用操作。</p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:Tahoma; font-size:14px; line-height:25.2px">
+&nbsp;&nbsp;&nbsp; 接着再使用volatile变量原则，可以判断，对v的写肯定要先于对v的读， 最后再根据转递性原则， 可以推出在thread A中x=42的赋值操作肯定要先于thread B中对x的使用， 也就是说，当v读取出来是为true的时候，x肯定是42. 指令不会进行重排序。</p>
+<br>
+<span style="font-size:14px"><span style="font-family:Arial; line-height:23.3999996185303px">参考：</span><br>
+</span>
+<p><span style="font-family:Arial; line-height:23.3999996185303px"><span style="font-size:14px">http://blog.csdn.net/beiyetengqing/article/details/49580559<br>
+</span></span></p>
+<p><span style="font-family:Arial; line-height:23.3999996185303px"><span style="font-size:14px">http://blog.hesey.net/2011/07/reordering.html</span><br>
+</span></p>
+<p><span style="font-family:Arial; line-height:23.3999996185303px"><span style="font-size:14px">http://www.iteye.com/problems/78031<br>
+</span></span></p>
+<p><br>
+</p>
+<p><br>
+</p>
+<p><br>
+</p>
+ </div>
+
+          </div>
+
+                               
+
+             <div class="blog_handle">
+        <span id="digg" style="cursor:pointer"><i class="iconfont"></i><em>0</em></span>
+        <span id="bury" style="cursor:pointer"><i class="iconfont"></i><em>0</em></span>
+       
+    </div>
+
+
+
+              <div class="prev_next">
+                        <a href="http://m.blog.csdn.net/article/details?id=51470396" class="prev" onclick="_gaq.push([&#39;_trackEvent&#39;,&#39;function&#39;, &#39;onclick&#39;, &#39;blog_articles_shangyipian&#39;]);">上一篇</a>                                                                       
+                        <a href="http://m.blog.csdn.net/article/details?id=51506546" class="next" onclick="_gaq.push([&#39;_trackEvent&#39;,&#39;function&#39;, &#39;onclick&#39;, &#39;blog_articles_shangyipian&#39;])">下一篇</a>
+              </div>         
+        </div>
+        
+    
+
+          <script type="text/javascript">
+               /*csdn wap端 博客内页-20:3 创建于 2016-05-10*/
+               var cpro_id = "u2634430";
+            </script>
+            <script type="text/javascript" src="http://cpro.baidustatic.com/cpro/ui/cm.js"></script>
+
+
+       
+<script type="text/javascript" src="./多线程之指令重排序_files/highcode.js.下载"></script>
+<script type="text/javascript">
+    var fileName = '51491578';
+    var commentscount = 0;
+    var islock = false;
+    var currentUserName='';
+    var topSize=3;
+    var listId = ".blog_comment_list";
+</script>
+
+<div class="no_comment" style=""><i class="iconfont"></i><span>暂无评论，</span><a href="http://m.blog.csdn.net/comment/post?id=51491578">我去发表</a><em>~</em></div>
+
+ <div class="blog_comment" style="display:none">
+       <h3 class="isComment">评论<span>（0）</span></h3>
+       <dl class="blog_comment_list"></dl>
+       <div class="checkAll"></div>
+ </div>
+
+<script type="text/javascript" src="./多线程之指令重排序_files/comment.js.下载"></script>
+
+
+
+               <div style="display:none" id="tags">多线程,class,rgb,cpu</div>
+
+   
+<script type="text/javascript">
+    /*wap端-博客内页热门文章上通栏-20:5*/
+    var cpro_id = "u2901277";
+</script>
+<script type="text/javascript" src="http://cpro.baidustatic.com/cpro/ui/cm.js"></script>
+
+       <div class="my_hot_article">
+          <h3 class="isArticle">我的热门文章</h3>
+          <ul class="hot_article">
+                <li><a href="http://m.blog.csdn.net/article/details?id=51740846">数据库SQL优化大总结之 百万级数据库优化方案</a></li>
+                <li><a href="http://m.blog.csdn.net/article/details?id=51755460">数据库索引工作原理</a></li>
+                <li><a href="http://m.blog.csdn.net/article/details?id=51282302">hibernate之实体粒度设计</a></li>
+                <li><a href="http://m.blog.csdn.net/article/details?id=51076156">蚁群算法浅谈</a></li>
+                <li><a href="http://m.blog.csdn.net/article/details?id=51182776">linux命令大全</a></li>
+          </ul>
+        </div>
+
+      
+<script type="text/javascript">
+    /*wap端-博客内页相关博文上通栏-20:5*/
+    var cpro_id = "u2901286";
+</script>
+<script type="text/javascript" src="http://cpro.baidustatic.com/cpro/ui/cm.js"></script>
+
+        <div class="">
+        
+          <ul class="tracking-ad" id="res" data-mod="popu_36"><div style="background-color:#fff;padding:5px"><div style="overflow:hidden;border-bottom: 1px solid #ddd;padding-bottom:8px"><p style="float:left;display:inline-block;color:#000;font-size:14px;margin-left:10px">相关博文</p><span style="color:#999;font-size:12px;float:right;margin-right:10px;">百度智荐</span></div><ul class="cid_article_list"><li class="cid_article" style=";border-bottom: 1px solid #ddd;;overflow:hidden;padding:10px"><a href="http://cir.baidu.com/api/c.do?tid=10101&amp;sid=2a83e3021d64cfc3854f7ac1e9f08d2a&amp;contentId=80687&amp;filterNum=0&amp;title=elasticsearch%20java%20%E5%A2%9E%E5%88%A0%E6%94%B9%E6%9F%A5%20%E7%89%88%E6%9C%AC2&amp;subDomain=m.blog.csdn.net&amp;mainDomain=csdn.net&amp;contentType=1&amp;flowType=2&amp;lang=zh-CN&amp;version=1.0&amp;redirectUrl=http%3A%2F%2Fm.blog.csdn.net%2Farticle%2Fdetails%3Fid%3D51706907" class="cid_title_link" target="_blank" style="text-decoration:none;" data-article-id="80687"><span style="display:inline-block;width:100%;white-space:nowrap;text-overflow:ellipsis;overflow:hidden;color:#000;font-size:0.6rem;">elasticsearch java 增删改查 版本2</span><p style="overflow:hidder;height:12px;line-height:12px;"><span style="float:left;font-size:12px;color:#999">2016-06-18</span><span style="float:right;font-size:12px;color:#999">201888次阅读</span></p></a></li><li class="cid_article" style=";border-bottom: 1px solid #ddd;;overflow:hidden;padding:10px"><a href="http://cir.baidu.com/api/c.do?tid=10101&amp;sid=2a83e3021d64cfc3854f7ac1e9f08d2a&amp;contentId=57296&amp;filterNum=0&amp;title=%E6%8E%A2%E7%B4%A2%E9%80%9A%E7%94%A8%E5%8F%AF%E7%BC%96%E7%A8%8B%E6%95%B0%E6%8D%AE%E5%B9%B3%E9%9D%A2&amp;subDomain=m.blog.csdn.net&amp;mainDomain=csdn.net&amp;contentType=1&amp;flowType=2&amp;lang=zh-CN&amp;version=1.0&amp;redirectUrl=http%3A%2F%2Fm.blog.csdn.net%2Farticle%2Fdetails%3Fid%3D70257477" class="cid_title_link" target="_blank" style="text-decoration:none;" data-article-id="57296"><span style="display:inline-block;width:100%;white-space:nowrap;text-overflow:ellipsis;overflow:hidden;color:#000;font-size:0.6rem;">探索通用可编程数据平面</span><p style="overflow:hidder;height:12px;line-height:12px;"><span style="float:left;font-size:12px;color:#999">2017-04-20</span><span style="float:right;font-size:12px;color:#999">148103次阅读</span></p></a></li><li class="cid_article" style=";border-bottom: 1px solid #ddd;;overflow:hidden;padding:10px"><a href="http://cir.baidu.com/api/c.do?tid=10101&amp;sid=2a83e3021d64cfc3854f7ac1e9f08d2a&amp;contentId=14117&amp;filterNum=0&amp;title=%E5%BE%AE%E4%BF%A1%E5%8F%91%E9%80%81amr%E6%96%87%E4%BB%B6%E5%AF%BC%E8%87%B4web%E7%AB%AF%E6%97%A0%E6%B3%95%E6%98%BE%E7%A4%BA%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88&amp;subDomain=m.blog.csdn.net&amp;mainDomain=csdn.net&amp;contentType=1&amp;flowType=2&amp;lang=zh-CN&amp;version=1.0&amp;redirectUrl=http%3A%2F%2Fm.blog.csdn.net%2Farticle%2Fdetails%3Fid%3D52623764" class="cid_title_link" target="_blank" style="text-decoration:none;" data-article-id="14117"><span style="display:inline-block;width:100%;white-space:nowrap;text-overflow:ellipsis;overflow:hidden;color:#000;font-size:0.6rem;">微信发送amr文件导致web端无法显示解决方案</span><p style="overflow:hidder;height:12px;line-height:12px;"><span style="float:left;font-size:12px;color:#999">2016-09-22</span><span style="float:right;font-size:12px;color:#999">146570次阅读</span></p></a></li><li class="cid_article" style=";border-bottom: 1px solid #ddd;;overflow:hidden;padding:10px"><a href="http://cir.baidu.com/api/c.do?tid=10101&amp;sid=2a83e3021d64cfc3854f7ac1e9f08d2a&amp;contentId=66337&amp;filterNum=0&amp;title=RxJava%2BRetrofit%2BOkHttp%E6%B7%B1%E5%85%A5%E6%B5%85%E5%87%BA-%E7%BB%88%E6%9E%81%E5%B0%81%E8%A3%85%E4%BA%8C%EF%BC%88%E7%BD%91%E7%BB%9C%E8%AF%B7%E6%B1%82%EF%BC%89&amp;subDomain=m.blog.csdn.net&amp;mainDomain=csdn.net&amp;contentType=1&amp;flowType=2&amp;lang=zh-CN&amp;version=1.0&amp;redirectUrl=http%3A%2F%2Fm.blog.csdn.net%2Farticle%2Fdetails%3Fid%3D51939574" class="cid_title_link" target="_blank" style="text-decoration:none;" data-article-id="66337"><span style="display:inline-block;width:100%;white-space:nowrap;text-overflow:ellipsis;overflow:hidden;color:#000;font-size:0.6rem;">RxJava+Retrofit+OkHttp深入浅出-终极封装二（网络请求）</span><p style="overflow:hidder;height:12px;line-height:12px;"><span style="float:left;font-size:12px;color:#999">2016-07-18</span><span style="float:right;font-size:12px;color:#999">141923次阅读</span></p></a></li><li class="cid_article" style=";border-bottom: 1px solid #ddd;;overflow:hidden;padding:10px"><a href="http://cir.baidu.com/api/c.do?tid=10101&amp;sid=2a83e3021d64cfc3854f7ac1e9f08d2a&amp;contentId=64327&amp;filterNum=0&amp;title=linux%E4%B8%8Bffmpeg%E8%BD%AC%E6%8D%A2amr%E4%B8%BAmp3%E5%A4%A7%E5%B0%8F%E4%B8%BA0%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88&amp;subDomain=m.blog.csdn.net&amp;mainDomain=csdn.net&amp;contentType=1&amp;flowType=2&amp;lang=zh-CN&amp;version=1.0&amp;redirectUrl=http%3A%2F%2Fm.blog.csdn.net%2Farticle%2Fdetails%3Fid%3D52639972" class="cid_title_link" target="_blank" style="text-decoration:none;" data-article-id="64327"><span style="display:inline-block;width:100%;white-space:nowrap;text-overflow:ellipsis;overflow:hidden;color:#000;font-size:0.6rem;">linux下ffmpeg转换amr为mp3大小为0的解决方案</span><p style="overflow:hidder;height:12px;line-height:12px;"><span style="float:left;font-size:12px;color:#999">2016-09-23</span><span style="float:right;font-size:12px;color:#999">134050次阅读</span></p></a></li><li class="cid_article" style=";border-bottom: 1px solid #ddd;;overflow:hidden;padding:10px"><a href="http://cir.baidu.com/api/c.do?tid=10101&amp;sid=2a83e3021d64cfc3854f7ac1e9f08d2a&amp;contentId=31840&amp;filterNum=0&amp;title=elasticsearch%20java%20%E5%A2%9E%E5%88%A0%E6%94%B9%E6%9F%A5%20%E7%89%88%E6%9C%AC1&amp;subDomain=m.blog.csdn.net&amp;mainDomain=csdn.net&amp;contentType=1&amp;flowType=2&amp;lang=zh-CN&amp;version=1.0&amp;redirectUrl=http%3A%2F%2Fm.blog.csdn.net%2Farticle%2Fdetails%3Fid%3D51706882" class="cid_title_link" target="_blank" style="text-decoration:none;" data-article-id="31840"><span style="display:inline-block;width:100%;white-space:nowrap;text-overflow:ellipsis;overflow:hidden;color:#000;font-size:0.6rem;">elasticsearch java 增删改查 版本1</span><p style="overflow:hidder;height:12px;line-height:12px;"><span style="float:left;font-size:12px;color:#999">2016-06-18</span><span style="float:right;font-size:12px;color:#999">133047次阅读</span></p></a></li><li class="cid_article" style=";border-bottom: 1px solid #ddd;;overflow:hidden;padding:10px"><a href="http://cir.baidu.com/api/c.do?tid=10101&amp;sid=2a83e3021d64cfc3854f7ac1e9f08d2a&amp;contentId=55667&amp;filterNum=0&amp;title=webstorm%202017%20%E6%BF%80%E6%B4%BB%E7%A0%B4%E8%A7%A3&amp;subDomain=m.blog.csdn.net&amp;mainDomain=csdn.net&amp;contentType=1&amp;flowType=2&amp;lang=zh-CN&amp;version=1.0&amp;redirectUrl=http%3A%2F%2Fm.blog.csdn.net%2Farticle%2Fdetails%3Fid%3D52448597" class="cid_title_link" target="_blank" style="text-decoration:none;" data-article-id="55667"><span style="display:inline-block;width:100%;white-space:nowrap;text-overflow:ellipsis;overflow:hidden;color:#000;font-size:0.6rem;">webstorm 2017 激活破解</span><p style="overflow:hidder;height:12px;line-height:12px;"><span style="float:left;font-size:12px;color:#999">2016-09-06</span><span style="float:right;font-size:12px;color:#999">127252次阅读</span></p></a></li><li class="cid_article" style=";border-bottom: 1px solid #ddd;;overflow:hidden;padding:10px"><a href="http://cir.baidu.com/api/c.do?tid=10101&amp;sid=2a83e3021d64cfc3854f7ac1e9f08d2a&amp;contentId=22553&amp;filterNum=0&amp;title=%E3%80%90%E5%85%AC%E5%91%8A%E3%80%91%E5%8D%9A%E5%AE%A2%E6%96%B0%E7%9A%AE%E8%82%A4%E4%B8%8A%E7%BA%BF%E5%95%A6&amp;subDomain=m.blog.csdn.net&amp;mainDomain=csdn.net&amp;contentType=1&amp;flowType=2&amp;lang=zh-CN&amp;version=1.0&amp;redirectUrl=http%3A%2F%2Fm.blog.csdn.net%2Farticle%2Fdetails%3Fid%3D51668917" class="cid_title_link" target="_blank" style="text-decoration:none;" data-article-id="22553"><span style="display:inline-block;width:100%;white-space:nowrap;text-overflow:ellipsis;overflow:hidden;color:#000;font-size:0.6rem;">【公告】博客新皮肤上线啦</span><p style="overflow:hidder;height:12px;line-height:12px;"><span style="float:left;font-size:12px;color:#999">2016-06-14</span><span style="float:right;font-size:12px;color:#999">103367次阅读</span></p></a></li><li class="cid_article" style=";overflow:hidden;padding:10px"><a href="http://cir.baidu.com/api/c.do?tid=10101&amp;sid=2a83e3021d64cfc3854f7ac1e9f08d2a&amp;contentId=22149&amp;filterNum=0&amp;title=sentinel%E6%90%AD%E5%BB%BAredis%E9%9B%86%E7%BE%A4%E7%BB%8F%E9%AA%8C%E6%80%BB%E7%BB%93&amp;subDomain=m.blog.csdn.net&amp;mainDomain=csdn.net&amp;contentType=1&amp;flowType=2&amp;lang=zh-CN&amp;version=1.0&amp;redirectUrl=http%3A%2F%2Fm.blog.csdn.net%2Farticle%2Fdetails%3Fid%3D52526812" class="cid_title_link" target="_blank" style="text-decoration:none;" data-article-id="22149"><span style="display:inline-block;width:100%;white-space:nowrap;text-overflow:ellipsis;overflow:hidden;color:#000;font-size:0.6rem;">sentinel搭建redis集群经验总结</span><p style="overflow:hidder;height:12px;line-height:12px;"><span style="float:left;font-size:12px;color:#999">2016-09-13</span><span style="float:right;font-size:12px;color:#999">101770次阅读</span></p></a></li></ul></div></ul>
+        </div>
+
+
+<script type="text/javascript" src="http://c.csdnimg.cn/rabbit/tracking-ad/main.js?20170606001"></script>
+
+
+
+
+
+
+
+
+       
+      </div>
+
+        
+   <div class="leftNav">
+      
+<div class="left_top">
+        <a href="https://passport.csdn.net/account/login?from=http%3a%2f%2fm.blog.csdn.net%2farticle%2fdetails%3fid%3d51491578"><img src="./多线程之指令重排序_files/1_csdn.jpg"></a>
+        <a href="https://passport.csdn.net/account/login?from=http%3a%2f%2fm.blog.csdn.net%2farticle%2fdetails%3fid%3d51491578" class="sign">未登录</a> 
+</div>
+        
+        <ul class="nav_list">
+            <li><a href="http://m.blog.csdn.net/home/index"><i>•</i><span>首页</span><img src="./多线程之指令重排序_files/iconfont-youjiantou.png" alt="img" class="arrow_r"></a></li>
+                <li><a href="http://m.blog.csdn.net/Column/Column?Channel=mobile&amp;Type="><i>•</i><span>移动开发</span><img src="./多线程之指令重排序_files/iconfont-youjiantou.png" alt="img" class="arrow_r"></a></li>
+                <li><a href="http://m.blog.csdn.net/Column/Column?Channel=web&amp;Type="><i>•</i><span>Web前端</span><img src="./多线程之指令重排序_files/iconfont-youjiantou.png" alt="img" class="arrow_r"></a></li>
+                <li><a href="http://m.blog.csdn.net/Column/Column?Channel=enterprise&amp;Type="><i>•</i><span>架构设计</span><img src="./多线程之指令重排序_files/iconfont-youjiantou.png" alt="img" class="arrow_r"></a></li>
+                <li><a href="http://m.blog.csdn.net/Column/Column?Channel=code&amp;Type="><i>•</i><span>编程语言</span><img src="./多线程之指令重排序_files/iconfont-youjiantou.png" alt="img" class="arrow_r"></a></li>
+                <li><a href="http://m.blog.csdn.net/Column/Column?Channel=www&amp;Type="><i>•</i><span>互联网</span><img src="./多线程之指令重排序_files/iconfont-youjiantou.png" alt="img" class="arrow_r"></a></li>
+                <li><a href="http://m.blog.csdn.net/Column/Column?Channel=database&amp;Type="><i>•</i><span>数据库</span><img src="./多线程之指令重排序_files/iconfont-youjiantou.png" alt="img" class="arrow_r"></a></li>
+                <li><a href="http://m.blog.csdn.net/Column/Column?Channel=system&amp;Type="><i>•</i><span>系统运维</span><img src="./多线程之指令重排序_files/iconfont-youjiantou.png" alt="img" class="arrow_r"></a></li>
+                <li><a href="http://m.blog.csdn.net/Column/Column?Channel=cloud&amp;Type="><i>•</i><span>云计算</span><img src="./多线程之指令重排序_files/iconfont-youjiantou.png" alt="img" class="arrow_r"></a></li>
+                <li><a href="http://m.blog.csdn.net/Column/Column?Channel=software&amp;Type="><i>•</i><span>研发管理</span><img src="./多线程之指令重排序_files/iconfont-youjiantou.png" alt="img" class="arrow_r"></a></li>
+                <li><a href="http://m.blog.csdn.net/Column/Column?Channel=other&amp;Type="><i>•</i><span>综合</span><img src="./多线程之指令重排序_files/iconfont-youjiantou.png" alt="img" class="arrow_r"></a></li>
+        </ul>
+   </div>
+   
+
+      <div id="mask"></div>
+    </div>
+
+
+   
+
+    <div class="backToTop" style="display: block;"><img src="./多线程之指令重排序_files/iconfont-fudongxiangshang.png" alt="img"></div>
+    <!--分享弹窗：-->
+    <div class="popup_cover"></div>
+    <div class="sharePopup_box">
+      <div class="sharePopup">
+        <!--JiaThis Button BEGIN-->
+        <div class="jiathis_style_32x32"><a class="jiathis_button_weixin" title="分享到微信"><span class="jiathis_txt jiathis_separator jtico jtico_weixin"><b><i class="iconfont"></i></b><em>微信分享</em></span></a><a class="jiathis_button_tsina" title="分享到微博"><span class="jiathis_txt jiathis_separator jtico jtico_tsina"><b><i class="iconfont"></i></b><em>新浪微博</em></span></a><a class="jiathis_button_cqq" title="分享到QQ好友"><span class="jiathis_txt jiathis_separator jtico jtico_cqq"><b><i class="iconfont"></i></b><em>QQ好友</em></span></a><a class="jiathis_button_qzone" title="分享到QQ空间"><span class="jiathis_txt jiathis_separator jtico jtico_qzone"><b><i class="iconfont"></i></b><em>QQ空间</em></span></a></div>
+        <script type="text/javascript" src="./多线程之指令重排序_files/jia.js.下载" charset="utf-8"></script><script type="text/javascript" src="./多线程之指令重排序_files/plugin.client.js.下载" charset="utf-8"></script>
+        <!--JiaThis Button END-->
+      </div>
+      <div class="sharePopup_cancel">取 消</div>
+    </div>
+    <script>
+      $(function(){
+        $('#share_btn').click(function(){
+          $('.popup_cover').stop().show();
+          $('.sharePopup_box').stop().slideDown();
+        });
+        $('.sharePopup_cancel').click(function(){
+          $('.popup_cover').stop().hide();
+          $('.sharePopup_box').stop().slideUp();
+        });
+      })
+    </script>
+
+
+
+
+<script>
+    // 指定需要处理的DOM元素
+    var cir_recommend_config = {
+        _popIn_read_selector: '.blog_article',
+        _recommend_article: [
+            {
+                tid: 10101,
+                selector: '#res'
+            }
+        ]
+    };
+</script>
+<script src="./多线程之指令重排序_files/cir.min.js.下载">
+</script>
+
+ <div class="ad_box">
+      <div class="ad_l"><a href="http://ms.csdn.net/download.html"><img src="./多线程之指令重排序_files/index_AD.jpg" alt="img"></a><span>即使是一小步<br>也想与你分享</span></div>
+      <div class="ad_r"><a href="http://ms.csdn.net/download.html" class="open_btn">打开</a><i class="ad_close iconfont"></i></div>
+    </div>
+
+   <div class="backToTop" style="z-index: 9999999; display: block;"><img src="./多线程之指令重排序_files/iconfont-fudongxiangshang.png" alt="img"></div>
+    <div class="blog_footer">©1999-2012, csdn.net, All Rights Reserved</div>
+    <script type="text/javascript" src="./多线程之指令重排序_files/fontSize.js.下载"></script>
+<script type="text/javascript" charset="utf-8" src="./多线程之指令重排序_files/tracking.js.下载"></script>
+
+
+
+
+
+</body></html>

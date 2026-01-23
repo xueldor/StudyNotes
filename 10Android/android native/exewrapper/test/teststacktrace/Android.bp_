@@ -1,0 +1,53 @@
+cc_defaults {
+   name: "testsubprocess_defaults",
+       srcs: [
+        "main.cpp",
+    ],
+	clang_cflags: ["-Wno-c++11-extensions"],
+    cflags: [
+        "-Wall",
+        "-Werror",
+        "-Wextra",
+        "-Wreturn-type",
+        "-Wno-unused",
+        "-Wno-date-time",
+        "-Wno-unused-parameter",
+        "-Wno-unused-variable",
+        "-Wno-unused-function",
+    ],
+    shared_libs: [
+        "libcutils",
+        "liblog",
+        "libutils",
+        "libbase",
+        "libhardware",
+        "libselinux",
+    ],
+}
+
+// compile to /system/bin
+cc_binary {
+    name: "system_testsubprocess",
+    stem: "testsubprocess",
+    defaults: [
+        "testsubprocess_defaults",
+    ],
+}
+// compile to recovery
+// cc_binary {
+//     name: "recovery_testsubprocess",
+//     stem: "testsubprocess",
+//     recovery:true,
+//     defaults: [
+//         "testsubprocess_defaults",
+//     ],
+// }
+// compile to /vendor/bin
+cc_binary {
+    name: "vendor_testsubprocess",
+    stem: "testsubprocess",
+    vendor:true,
+    defaults: [
+        "testsubprocess_defaults",
+    ],
+}

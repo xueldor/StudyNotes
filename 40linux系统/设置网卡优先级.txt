@@ -1,0 +1,17 @@
+公司的有线网存在的问题：
+1. 受到监控
+2. IT那边的策略限制，外网网页转半天打不开，把人急死
+
+目的：
+访问192.168开头（即局域网）时，走公司的网线；
+访问外网时，走自己开的WiFi。
+
+有些教程让设置路由，先route del,再route add -net，route add  defaule gw组合，一套下来，很容易把电脑搞得不能上网（没有加-p，重启即可恢复）
+
+现在用另一个方法：
+1. sudo apt install ifmetric
+2. ip route show 或route -n
+3. sudo ifmetric wlx003676369dc 90
+把wlx003676369dc这个网卡（无线网卡）的metric值调低，值越低，优先级越高。
+
+重启后，需要重新执行一下： sudo ifmetric wlx003676369dc 90

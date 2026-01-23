@@ -1,0 +1,24 @@
+C:\Users\xuexiangyu>route print
+===========================================================================
+接口列表
+ 23...8c ec 4b d6 b3 c0 ......Realtek PCIe GbE Family Controller #3
+ 15...a4 fc 77 49 4d 85 ......Qualcomm QCA9565 802.11b/g/n Wireless Adapter
+===========================================================================
+
+
+# 192.168.1.x 流量走无线网卡： 无线网卡的网关为 192.168.1.1
+route add 192.168.1.0 mask 255.255.255.0 192.168.1.1 metric 1 if 15
+
+# 其它局域网流量走公司的有线网卡：网关为 192.168.22.254
+route add 192.168.0.0 mask 255.255.0.0 192.168.22.254 metric 1 if 23
+
+route delete 192.168.22.24 mask 255.255.255.0 192.168.22.254
+route delete 0.0.0.0 mask 0.0.0.0 192.168.22.254
+
+route add 0.0.0.0 mask 0.0.0.0 192.168.1.1 metric 1 IF 15
+route add 0.0.0.0 mask 0.0.0.0 192.168.22.254 IF 23 metric 10
+route add 0.0.0.0 mask 0.0.0.0 192.168.23.254 IF 23 metric 20
+
+#-p永久修改（重启不复原）。metric越小优先级越高
+route change -p 0.0.0.0 mask 0.0.0.0 192.168.1.1 metric 1 if 15
+route change -p 0.0.0.0 mask 0.0.0.0 192.168.23.254 metric 5 IF 23

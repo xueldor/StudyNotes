@@ -1,0 +1,95 @@
+1. 对照ppt第11页，解释访问/sdcard，最终到/data/media/0的过程。
+
+/sdcard软连接/storage/self/primary  软链接 /mnt/user/0/primary 软链接primary -> /storage/emulated/0
+
+/mnt/user/0/emulated是一个挂载点，设备是/dev/fuse 所以访问所以访问/mnt/user/0/emulated 就会交给fuse处理
+
+fuse访问的/data/media/0
+
+ 
+
+2. 应用A在sdcard下创建文件，文件所有者和所属组是谁？A:应用A   B:media provider？  C: media_rw  D: shell
+
+理论上B，但实际上是sdcard_rw
+
+ 
+
+3. 开机后，/sdcard目录是什么时候开始可以访问？
+
+VolumeManager::linkPrimary 完成/mnt/user/0/primary -> /storage/emulated/0 这一对指向后
+
+但是应用调用需要等到unlock执行完
+
+ 
+
+4. 出于性能考虑，能否直接访问/data/media/0读取文件?(绕过fuse)
+
+可以，需要权限足够
+
+ 
+
+5. Android 11之后，WRITE_EXTERNAL_STORAGE、READ_EXTERNAL_STORAGE、MANAGE_EXTERNAL_STORAGE 的作用
+
+READ_EXTERNAL_STORAGE和WRITE_EXTERNAL_STORAGE 仅允许访问媒体文件
+
+MANAGE_EXTERNAL_STORAGE 允许管理所有文件
+
+ 
+
+6. uevent是通过哪种机制发送：socket、管道、共享内存、消息队列、binder？
+
+netlink属于socket
+
+ 
+
+7. 基于sdcardfs, 介绍/mnt/runtime目录下default  full  read  write四个目录的作用。
+
+sdcardfs相比fuse相同的操作减少了四次内核态，default  full  read  write是其实现所使用的虚拟文件系统
+
+ 
+
+8. 判断对错：微信双开，两个账号互相感知不到对方存在（即数据是彼此不可见的）？
+
+对
+
+ 
+
+9. 两个包名不同的应用，如何才能共享私有数据和keystore？
+
+使用相同的UID
+
+ 
+
+10. 安卓为什么放弃fuse使用sdcardfs？到了安卓11，为什么又从sdcardfs回到fuse？
+
+使用sdcardfs是为了更好的性能，再次用回fuse是为了权限的控制，且fuse性能有改善
+
+ 
+
+11. 以ppt里演示的hellofs为例，对照ppt49页的fuse架构图，讲述命令“cat hello”,系统的执行过程。cat命令位于架构图哪个位置?
+
+app→VFS→fuse  kernel
+
+ 
+
+12. fuse daemon什么时候destroy？
+
+daemon进程生命周期与操作系统一致
+
+ 
+
+13. 磁盘分区表格式分为GPT和MBR。请自行了解他们的区别和优势。
+
+在MBR硬盘中，分区信息直接存储于主引导记录（MBR）中（主引导记录中还存储着系统的引导程序）。但在GPT硬盘中，分区表的位置信息储存在GPT头中
+
+MBR易损坏，可兼容旧系统。GPT分区自带权限管理，需要配合uefi引导
+
+ 
+
+14. （开放题）思考前两天的科室例会上分享的问题。拔U盘时，vold会遍历/proc/pid/fd,找出占用U盘的进程，然后发送signal将进程杀死。如何合理的设计避免进程被杀？
+
+1、进行FD文件访问行为放在单独的进程中，使其被杀也不影响前台
+
+2、尽可能使用MediaProvide去访问资源
+
+3、读取完成后立即关闭fb

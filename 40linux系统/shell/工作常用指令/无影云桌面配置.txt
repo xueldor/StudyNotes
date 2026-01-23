@@ -1,0 +1,40 @@
+ubuntu18, 阿里无影云
+1. 默认域账号格式是： ecd\600970_1827621407188
+这个斜杠会导致源码编译失败。所以需要建一个user，下载代码编译。
+
+2. 云桌面只能用域账号登录，不能默认登到新建用户。本地客户端登录到的就是域账号，云端怎么配都没用。
+
+3. 自己新建的用户不能启动GUI程序。只有域账号和root账号可以执行gedit、vscode等程序。解决：
+在域账号的.bashrc文件添加一行: 
+xhost +
+不过这样每次打开新的shell都会执行一遍。所以加到.profile文件里更好
+
+4. 然后我们希望在桌面启动vscode时，就以新建的用户启动。用户名： xue
+我们先安装gosu：
+sudo apt install gosu
+进入/usr/share/applications,拷贝一份code.desktop：
+sudo cp code.desktop xue-code.desktop
+这样主界面菜单就有两个vscode图标。一个是原来的，由谁启动就以什么身份运行。另一个总是以xue的身份运行。
+编辑xue-code.desktop：
+Name改成xue VS Code，以区分图标
+Exec前面添加：
+sudo /usr/sbin/gosu xue,
+完整的Exec是：sudo /usr/sbin/gosu xue /usr/share/code/code --unity-launch %F
+下面一个new-empty-window也这样改。
+
+其它应用有需要的也这样改。
+
+然后域账号的.bashrc默认添加一行sudo /usr/sbin/gosu xue bash,这样打开terminal也自动切xue。但是要加在末尾，因为这行阻塞。我建议不要加，每次手动切，防止有无法预料的副作用。
+
+
+
+云桌面和本地桌面不是互通的，公司关闭了从里面往外拷贝的权限，要求使用oss作为中转。
+命令：
+ossutil64 cp filePath oss://hangshengbuket/yangzhou/wangjingguo/xuexiangyu/
+因为命令比较长，记不住，我们写一个函数,放到.bashrc里：
+function ossupload { 
+	ossutil64 cp $1 oss://hangshengbuket/yangzhou/wangjingguo/xuexiangyu/
+} 
+function ossdownload { 
+	ossutil64 cp oss://hangshengbuket/yangzhou/wangjingguo/xuexiangyu/$1 $2
+} 

@@ -1,0 +1,81 @@
+Building ... /home/xue/626/boot_8155/boot_images/QcomPkg/Drivers/VerifiedBootDxe/VerifiedBootDxe.inf [AARCH64]
+cp -f /home/xue/626/boot_8155/boot_images/Build/SDM855AU_Core/RELEASE_CLANG100LINUX/AARCH64/MdeModulePkg/Universal/ReportStatusCodeRouter/RuntimeDxe/RscRtDxe/DEBUG/*.map /home/xue/626/boot_8155/boot_images/Build/SDM855AU_Core/RELEASE_CLANG100LINUX/AARCH64/MdeModulePkg/Universal/ReportStatusCodeRouter/RuntimeDxe/RscRtDxe/OUTPUT
+GenFw -e DXE_CORE -o /home/xue/626/boot_8155/boot_images/Build/SDM855AU_Core/RELEASE_CLANG100LINUX/AARCH64/MdeModulePkg/Core/Dxe/DxeMain/DEBUG/DxeCore.efi /home/xue/626/boot_8155/boot_images/Build/SDM855AU_Core/RELEASE_CLANG100LINUX/AARCH64/MdeModulePkg/Core/Dxe/DxeMain/DEBUG/DxeCore.dll
+BaseTools C Tool binary was not found (GenFw)
+You may need to run:
+  make -C /home/xue/626/boot_8155/boot_images/BaseTools/Source/C
+cp -f /home/xue/626/boot_8155/boot_images/Build/SDM855AU_Core/RELEASE_CLANG100LINUX/AARCH64/MdeModulePkg/Core/Dxe/DxeMain/DEBUG/DxeCore.efi /home/xue/626/boot_8155/boot_images/Build/SDM855AU_Core/RELEASE_CLANG100LINUX/AARCH64/MdeModulePkg/Core/Dxe/DxeMain/OUTPUT
+cp: cannot stat '/home/xue/626/boot_8155/boot_images/Build/SDM855AU_Core/RELEASE_CLANG100LINUX/AARCH64/MdeModulePkg/Core/Dxe/DxeMain/DEBUG/DxeCore.efi': No such file or directory
+GNUmakefile:621: recipe for target '/home/xue/626/boot_8155/boot_images/Build/SDM855AU_Core/RELEASE_CLANG100LINUX/AARCH64/MdeModulePkg/Core/Dxe/DxeMain/DEBUG/DxeCore.efi' failed
+make: *** [/home/xue/626/boot_8155/boot_images/Build/SDM855AU_Core/RELEASE_CLANG100LINUX/AARCH64/MdeModulePkg/Core/Dxe/DxeMain/DEBUG/DxeCore.efi] Error 1
+cp -f /home/xue/626/boot_8155/boot_images/Build/SDM855AU_Core/RELEASE_CLANG100LINUX/AARCH64/MdeModulePkg/Core/RuntimeDxe/RuntimeDxe/DEBUG/RuntimeDxe.dll /home/xue/626/boot_8155/boot_images/Build/SDM855AU_Core/RELEASE_CLANG100LINUX/AARCH64/MdeModulePkg/Core/RuntimeDxe/RuntimeDxe/DEBUG/RuntimeDxe.debug
+
+
+build.py...
+ : error 7000: Failed to execute command
+        make tbuild [/home/xue/626/boot_8155/boot_images/Build/SDM855AU_Core/RELEASE_CLANG100LINUX/AARCH64/MdeModulePkg/Core/Dxe/DxeMain]
+
+
+build.py...
+ : error 7000: Failed to execute command
+        make tbuild [/home/xue/626/boot_8155/boot_images/Build/SDM855AU_Core/RELEASE_CLANG100LINUX/AARCH64/MdeModulePkg/Universal/StatusCodeHandler/RuntimeDxe/SCHandlerRtDxe]
+
+
+build.py...
+ : error 7000: Failed to execute command
+        make tbuild [/home/xue/626/boot_8155/boot_images/Build/SDM855AU_Core/RELEASE_CLANG100LINUX/AARCH64/MdeModulePkg/Universal/ReportStatusCodeRouter/RuntimeDxe/RscRtDxe]
+
+
+build.py...
+ : error 7000: Failed to execute command
+        make tbuild [/home/xue/626/boot_8155/boot_images/Build/SDM855AU_Core/RELEASE_CLANG100LINUX/AARCH64/MdeModulePkg/Core/RuntimeDxe/RuntimeDxe]
+
+
+build.py...
+ : error 7000: Failed to execute command
+        make tbuild [/home/xue/626/boot_8155/boot_images/Build/SDM855AU_Core/RELEASE_CLANG100LINUX/AARCH64/MdeModulePkg/Universal/SecurityStubDxe/SecurityStubDxe]
+
+
+build.py...
+ : error 7000: Failed to execute command
+        make tbuild [/home/xue/626/boot_8155/boot_images/Build/SDM855AU_Core/RELEASE_CLANG100LINUX/AARCH64/QcomPkg/Drivers/VerifiedBootDxe/VerifiedBootDxe]
+
+
+build.py...
+ : error 7000: Failed to execute command
+        make tbuild [/home/xue/626/boot_8155/boot_images/Build/SDM855AU_Core/RELEASE_CLANG100LINUX/AARCH64/ArmPkg/Drivers/CpuDxe/CpuDxe]
+
+
+build.py...
+ : error 7000: Failed to execute command
+        make tbuild [/home/xue/626/boot_8155/boot_images/Build/SDM855AU_Core/RELEASE_CLANG100LINUX/AARCH64/QcomPkg/XBLCore/XBLCore_AU]
+
+
+build.py...
+ : error F002: Failed to build module
+        /home/xue/626/boot_8155/boot_images/MdeModulePkg/Core/Dxe/DxeMain.inf [AARCH64, CLANG100LINUX, RELEASE]
+
+- Failed -
+Build end time: 15:10:02, Apr.03 2024
+Build total time: 00:00:17
+
+Traceback (most recent call last):
+  File "./boot_8155/boot_images/QcomPkg/buildex.py", line 1431, in <module>
+    main()
+  File "./boot_8155/boot_images/QcomPkg/buildex.py", line 488, in main
+    create_image(options,variant_flavor,build_dirt,tools_dirt)
+  File "./boot_8155/boot_images/QcomPkg/buildex.py", line 564, in create_image
+    dll_paths=process_components(options,variant_flavor,process_action,build_dirt,tools_dirt,merge_dict)
+  File "./boot_8155/boot_images/QcomPkg/buildex.py", line 628, in process_components
+    dsc_path=process_component(options,variant_flavor,component,process_dirt,build_dirt,tools_dirt)
+  File "./boot_8155/boot_images/QcomPkg/buildex.py", line 667, in process_component
+    "Building failed with error... " + str(error))
+NameError: ERROR: buildex::build: Building failed with error... Command '[u'build', u'-p', u'QcomPkg/SDMPkg/855/AU/Core.dsc', u'-j', u'QcomPkg/SDMPkg/855/AU/build_Core.log', u'-w', u'-a', u'AARCH64', u'-b', u'RELEASE', u'-D', u'PRODMODE=PRODMODE', u'-D', u'VAR=AU', u'-t', u'CLANG100LINUX']' returned non-zero exit status 1
+xue@fcn36vvlb5sjbwm:~/626$ 
+
+
+
+
+是在这一句:python ./boot_8155/boot_images/QcomPkg/buildex.py --variant AU -r RELEASE -t SDM855Pkg,QcomToolsPkg
+执行make -C /home/xue/626/boot_8155/boot_images/BaseTools/Source/C，根据报错信息推断是gcc版本问题。
+降级到gcc7.5解决。

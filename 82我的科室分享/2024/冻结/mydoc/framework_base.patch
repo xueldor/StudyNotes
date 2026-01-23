@@ -1,0 +1,158 @@
+diff --git a/core/java/android/os/Process.java b/core/java/android/os/Process.java
+index 9f37c487..7e8ba100 100644
+--- a/core/java/android/os/Process.java
++++ b/core/java/android/os/Process.java
+@@ -548,6 +548,13 @@ public class Process {
+      * @hide
+      **/
+     public static final int THREAD_GROUP_RESTRICTED = 7;
++    
++    /**
++     * group for hsae app
++     * @hide
++     **/
++    public static final int THREAD_GROUP_HSAE_APP = 8;
++
+ 
+     public static final int SIGNAL_QUIT = 3;
+     public static final int SIGNAL_KILL = 9;
+diff --git a/core/jni/android_util_Process.cpp b/core/jni/android_util_Process.cpp
+index dd62bb17..c576cda1 100644
+--- a/core/jni/android_util_Process.cpp
++++ b/core/jni/android_util_Process.cpp
+@@ -334,6 +334,9 @@ void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jin
+                 case SP_TOP_APP:
+                     taskprofile = "ProcessCapacityMax";
+                     break;
++                case SP_HSAE_APP:
++                    taskprofile = "ServiceCapacityHsaeApp";
++                    break;
+                 default:
+                     taskprofile = "ProcessCapacityNormal";
+                     break;
+@@ -442,6 +445,11 @@ static void get_cpuset_cores_for_policy(SchedPolicy policy, cpu_set_t *cpu_set)
+                 return;
+             }
+             break;
++	case SP_HSAE_APP:
++            if (!CgroupGetAttributePath("HsaeAppCapacityCPUs", &filename)) {
++                return;
++            }
++            break;
+         default:
+             return;
+     }
+diff --git a/core/jni/com_android_internal_os_Zygote.cpp b/core/jni/com_android_internal_os_Zygote.cpp
+index bed0aae0..f598f176 100644
+--- a/core/jni/com_android_internal_os_Zygote.cpp
++++ b/core/jni/com_android_internal_os_Zygote.cpp
+@@ -1653,7 +1655,16 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids,
+ 
+     // Must be called before losing the permission to set scheduler policy.
+     SetSchedulerPolicy(fail_fn, is_top_app);
+-
++    if (nice_name.has_value()) {
++       if(strncmp(nice_name.value().c_str(),"com.antutu.benchmark.auto",sizeof("com.antutu.benchmark.auto"))==0){
++	   int ret = set_sched_policy(0, SP_HSAE_APP);
++	   if (ret != 0) {
++		   ALOGE("xxxxx zygote set_sched_policy call default failure,ret:%d,(%s)", ret,nice_name.value().c_str());
++	   } else {
++		   ALOGD("xxxxx zygote set_sched_policy call default success,ret==0,(%s)", nice_name.value().c_str());
++	   }
++       }
++    }
+     if (setresuid(uid, uid, uid) == -1) {
+         fail_fn(CREATE_ERROR("setresuid(%d) failed: %s", uid, strerror(errno)));
+     }
+
+diff --git a/core/proto/android/server/activitymanagerservice.proto b/core/proto/android/server/activitymanagerservice.proto
+index 17dc4589..e27af289 100644
+--- a/core/proto/android/server/activitymanagerservice.proto
++++ b/core/proto/android/server/activitymanagerservice.proto
+@@ -831,6 +831,7 @@ message ProcessOomProto {
+         SCHED_GROUP_DEFAULT = 1;
+         SCHED_GROUP_TOP_APP = 2;
+         SCHED_GROUP_TOP_APP_BOUND = 3;
++        SCHED_GROUP_HSAE_APP = 9;
+     }
+     optional SchedGroup sched_group = 4 [ default = SCHED_GROUP_UNKNOWN];
+ 
+diff --git a/services/core/java/com/android/server/am/OomAdjuster.java b/services/core/java/com/android/server/am/OomAdjuster.java
+index 88ca8a5e..aec77466 100644
+--- a/services/core/java/com/android/server/am/OomAdjuster.java
++++ b/services/core/java/com/android/server/am/OomAdjuster.java
+@@ -425,7 +425,8 @@ public class OomAdjuster {
+ 
+         mProcessGroupHandler = new Handler(adjusterThread.getLooper(), msg -> {
+             final int pid = msg.arg1;
+-            final int group = msg.arg2;
++            int group = msg.arg2;
++	    final String appName = (String)msg.obj;
+             if (pid == ActivityManagerService.MY_PID) {
+                 // Skip setting the process group for system_server, keep it as default.
+                 return true;
+@@ -434,6 +435,10 @@ public class OomAdjuster {
+                 Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "setProcessGroup "
+                         + msg.obj + " to " + group);
+             }
++            if (appName != null && appName.startsWith("com.antutu.benchmark.auto")) {
++                group = Process.THREAD_GROUP_HSAE_APP; // alway 8
++            }
++	    Slog.w(TAG, "xxxxxx setProcessGroup " + pid + " to " + group + " appName=" + appName);
+             try {
+                 setProcessGroup(pid, group);
+             } catch (Exception e) {
+@@ -2494,6 +2499,9 @@ public class OomAdjuster {
+ 
+         capability |= getDefaultCapability(psr, procState);
+ 
++	if(app.processName.startsWith("com.antutu.benchmark.auto")){
++            schedGroup = ProcessList.SCHED_GROUP_HSAE_APP;
++        }
+         // Do final modification to adj.  Everything we do between here and applying
+         // the final setAdj must be done in this function, because we will also use
+         // it when computing the final cached adj later.  Note that we don't need to
+@@ -2663,6 +2671,9 @@ public class OomAdjuster {
+                     case ProcessList.SCHED_GROUP_RESTRICTED:
+                         processGroup = THREAD_GROUP_RESTRICTED;
+                         break;
++		    case ProcessList.SCHED_GROUP_HSAE_APP:
++			processGroup = Process.THREAD_GROUP_HSAE_APP;
++			break;
+                     default:
+                         processGroup = THREAD_GROUP_DEFAULT;
+                         break;
+diff --git a/services/core/java/com/android/server/am/ProcessList.java b/services/core/java/com/android/server/am/ProcessList.java
+index 922ec7ca..0cb1e272 100644
+--- a/services/core/java/com/android/server/am/ProcessList.java
++++ b/services/core/java/com/android/server/am/ProcessList.java
+@@ -286,6 +286,8 @@ public final class ProcessList {
+     // Activity manager's version of Process.THREAD_GROUP_TOP_APP
+     // Disambiguate between actual top app and processes bound to the top app
+     static final int SCHED_GROUP_TOP_APP_BOUND = 4;
++    // hsae-app custom
++    static final int SCHED_GROUP_HSAE_APP = 10;
+ 
+     // The minimum number of cached apps we want to be able to keep around,
+     // without empty apps being able to push them out of memory.
+@@ -4291,6 +4293,9 @@ public final class ProcessList {
+                 case SCHED_GROUP_TOP_APP_BOUND:
+                     schedGroup = ProcessOomProto.SCHED_GROUP_TOP_APP_BOUND;
+                     break;
++		case SCHED_GROUP_HSAE_APP:
++                    schedGroup = ProcessOomProto.SCHED_GROUP_HSAE_APP;
++                    break;
+             }
+             if (schedGroup != ProcessOomProto.SCHED_GROUP_UNKNOWN) {
+                 proto.write(ProcessOomProto.SCHED_GROUP, schedGroup);
+@@ -4394,6 +4399,9 @@ public final class ProcessList {
+                 case SCHED_GROUP_TOP_APP_BOUND:
+                     schedGroup = 'B';
+                     break;
++		case SCHED_GROUP_HSAE_APP:
++                    schedGroup = 'C';
++                    break;
+                 default:
+                     schedGroup = '?';
+                     break;
+

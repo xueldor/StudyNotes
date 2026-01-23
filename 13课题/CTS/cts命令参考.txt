@@ -1,0 +1,23 @@
+参考命令
+run cts --abi arm64-v8a -m CtsAutoCoreTestCases --skip-device-info --skip-preconditions --skip-all-system-status-check --disable-reboot
+
+run cts --abi arm64-v8a -m CtsAutoCoreTestCases --test com.hsae.autocore.cts.InstrumentTest --skip-device-info --skip-preconditions --skip-all-system-status-check --disable-reboot
+
+指定到case
+run cts --abi arm64-v8a -m CtsAutoCoreTestCases --test com.hsae.autocore.cts.VehicleTest#test_isAccOn --skip-device-info --skip-preconditions --skip-all-system-status-check --disable-reboot
+
+
+run cts --abi arm64-v8a -m CtsAutoCoreTestCases --test com.hsae.autocore.cts.AudioTest#testHasNext --skip-device-info --skip-preconditions --skip-all-system-status-check --disable-reboot
+
+
+run cts --abi arm64-v8a -m CtsAutoCoreTestCases --test com.hsae.autocore.cts.AudioTest#testExitApp --skip-device-info --skip-preconditions --skip-all-system-status-check --disable-reboot
+
+
+run cts --abi arm64-v8a -m CtsAutoCoreTestCases --test com.hsae.autocore.cts.AudioKaoLaTest#testLaunchApp --skip-device-info --skip-preconditions --skip-all-system-status-check --disable-reboot
+
+
+run cts --abi arm64-v8a -m CtsAutoCoreTestCases --test com.hsae.autocore.cts.AudioBluetoothTest --skip-device-info --skip-preconditions --skip-all-system-status-check --disable-reboot
+
+am instrument -w -r  com.hsae.bluetoothservice.cts/android.support.test.runner.AndroidJUnitRunner
+
+am instrument -w -r -e debug false -e class 'com.hsae.autocore.cts.USBMediaTest' com.hsae.autocore.cts/android.support.test.runner.AndroidJUnitRunner

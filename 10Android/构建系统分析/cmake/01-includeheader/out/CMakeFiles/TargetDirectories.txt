@@ -1,0 +1,3 @@
+/media/xue/D/cmake/01-includeheader/out/CMakeFiles/rebuild_cache.dir
+/media/xue/D/cmake/01-includeheader/out/CMakeFiles/hello_headers.dir
+/media/xue/D/cmake/01-includeheader/out/CMakeFiles/edit_cache.dir

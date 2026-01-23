@@ -1,0 +1,9 @@
+device/qcom/sepolicy/qva/private/uppertest.te
+
+device/qcom/sepolicy_vndr/qva/vendor/common/file_contexts
+
+device/qcom/sm6150_au/features/sepolicy/CSM/CSM.te
+
+system/sepolicy/vendor/someip_ets_proxy.te
+
+system/sepolicy/public/domain.te

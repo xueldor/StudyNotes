@@ -1,0 +1,5 @@
+在idea打开页面
+
+    点击 help
+    点击Edit Custom VM options
+    在末行添加： -Drecreate.x11.input.method=true

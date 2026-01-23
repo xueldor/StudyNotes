@@ -1,0 +1,36 @@
+{
+    "projects" : [
+        {
+            "name" : "ZNA_H60A",
+            "description" : "郑州日产",
+            "repo_init" : "repo init -u ssh://xuexiangyu@192.168.64.47:29418/hsae/atc_8025/platform/manifest -b  ZNA_H60A  --repo-url=ssh://xuexiangyu@192.168.64.47:29418/git-repo --depth=1",
+            "repo_sync" : "repo sync -dcq",
+            "branch" : "ZNA_H60A",
+            "cared_dir" : "source/" 
+        },
+        {
+            "name" : "626_8155",
+            "description" : "LK1A_CDC",
+            "repo_init" : "repo init -u ssh://xuexiangyu@192.168.64.47:29418/Android/QCOM_SA8155_6155/platform/manifest -b 626_8155 -m default.xml --repo-url=ssh://xuexiangyu@192.168.64.47:29418/git-repo --depth=1",
+            "repo_sync" : "repo sync -dcq",
+            "branch" : "626_8155",
+            "cared_dir" : "lagvm/LINUX/android" 
+        },
+	{
+            "name" : "iov2.0_plus_qm_MC_CY24",
+            "description" : "iov2.0_plus_qm_MC_CY24",
+            "repo_init" : "ls",
+            "repo_sync" : "ls",
+            "branch" : "iov2.0_plus_qm_MC_CY24",
+            "cared_dir" : "./"
+        }
+    ],
+    "globalConfig" : {
+        "ignoreFile" : [
+            "f:*.db","f:*.zip","f:*.apk","f:*.so","f:*.bin","d:out","d:build"  ,"d:cts"  ,"d:dalvik"  ,"d:developers"  ,"d:development"
+            ,"d:device"  ,"d:pdk"  ,"d:platform_testing"  ,"d:sdk"  ,"d:test"  ,"d:testing"  ,"d:tests" 
+            ,"d:toolchain"  ,"d:tools"  ,"d:.git"  ,"d:.repo"
+        ]
+    }
+
+}

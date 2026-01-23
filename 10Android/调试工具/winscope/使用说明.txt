@@ -1,0 +1,3 @@
+ 适用平台： ATC AC8025，android 12
+1. 执行 python ./tools/winscope/adb_proxy/winscope_proxy.py
+2. 浏览器打开winscope.html，按界面提示操作。

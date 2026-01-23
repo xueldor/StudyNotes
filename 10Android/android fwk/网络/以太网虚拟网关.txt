@@ -1,0 +1,26 @@
+项目需要将一个网关虚拟成三个虚拟网关，并设置不同网段通过不同的网关
+
+
+ifconfig eth0 up
+ifconfig eth0 promisc
+
+#vlan-id 100  File_Transfer Domain
+toybox vconfig add eth0 100
+ifconfig eth0.100 hw ether AA:BB:CC:DD:00:01
+ifconfig eth0.100 192.168.10.1
+
+#vlan-id 400 IP_Video Domain
+toybox vconfig add eth0 400
+ifconfig eth0.400 hw ether AA:BB:CC:DD:00:01
+ifconfig eth0.400 192.168.40.1
+
+#vlan-id 600 SOME_IP Unsecure Domain
+toybox vconfig add eth0 600
+ifconfig eth0.600 hw ether AA:BB:CC:DD:00:01
+ifconfig eth0.600 192.168.60.1
+
+
+#路由配置
+ip route add 192.168.10.2 via 192.168.10.1 dev eth0.100 table legacy_network
+ip route add 192.168.40.2 via 192.168.40.1 dev eth0.400 table legacy_network
+ip route add 192.168.60.2 via 192.168.60.1 dev eth0.600 table legacy_network

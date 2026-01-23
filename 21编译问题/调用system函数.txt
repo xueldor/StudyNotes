@@ -1,0 +1,21 @@
+代码调用： 
+system("ifconfig eth1 192.168.225.20");
+error: calling 'system' uses a command processor [cert-env33-c,-warnings-as-errors]
+        system("ifconfig eth1 192.168.225.20");
+
+后面加个注释即可：
+system("ifconfig eth1 192.168.225.20");// NOLINT(cert-env33-c)
+
+
+
+这个错误 error: calling 'system' uses a command processor [cert-env33-c,-warnings-as-errors] 是一个非常典型的 安全编译警告，并且被你的编译系统（很可能是 Android 的 Clang 编译器）当作 错误 来处理（因为 -Werror 选项）。
+一、错误原因解析
+system() 函数的危险性：system("command") 函数的工作原理是：它会创建一个新的 shell 进程（如 /bin/sh），然后让这个 shell 去执行你提供的命令字符串。
+安全漏洞：如果命令字符串的任何部分是由用户输入或不受信任的来源构成的，攻击者就可以注入恶意命令。例如，如果你的代码是 system("ping " + user_input)，而用户输入了 google.com; rm -rf /，那么实际执行的命令将是 ping google.com; rm -rf /，这会导致系统文件被删除。
+非确定性：system() 的行为依赖于当前环境（如 PATH 环境变量），这可能导致在不同系统或配置下行为不一致。
+编译器警告：编译器的静态分析工具（cert-env33-c 是 CERT C 编码标准中的一条规则）识别到了 system() 的使用，并发出了警告，提示你这存在安全风险
+
+解决方案：使用 POSIX 网络 API
+在 Android NDK 开发中，绝对不要 使用 system("ifconfig ...") 或 system("ip ...") 来配置网络。正确的做法是直接调用 Linux 内核提供的 Netlink API 来完成这些配置。
+Netlink 是一种用于内核与用户空间进程之间通信的套接字（socket）协议，是配置网络的标准和高效方式。
+

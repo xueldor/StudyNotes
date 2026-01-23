@@ -1,0 +1,22 @@
+深入理解Flutter的图形图像绘制原理——图形库skia剖析 https://segmentfault.com/a/1190000038827450
+
+Skia深入分析5——skia文字绘制的实现 https://developer.aliyun.com/article/57401
+
+使用FreeType绘制字体  https://blog.csdn.net/furtherchan/article/details/8667884
+
+OpenGL 编程指南笔记   https://blog.csdn.net/wlk1229/category_7471718.html
+
+
+如何理解 OpenGL 中着色器、渲染管线、光栅化等概念 https://www.zhihu.com/question/29163054 
+https://github.com/positiveczp/positiveczp.github.io
+
+[译] Android 字体渲染器  https://toutiao.io/posts/2ypmb/preview
+
+
+
+
+
+
+
+
+

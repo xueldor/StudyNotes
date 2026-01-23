@@ -1,0 +1,166 @@
+./source/android/bionic/libc/kernel/uapi/linux/input-event-codes.h
+./source/kernel/common/include/uapi/linux/input-event-codes.h
+--------------bsp加
+
+source/android/frameworks/base/data/keyboards/Generic.kl
+key 195 HSAE_POWER
+key 196 HSAE_VOLDN
+key 197 HSAE_VOLUP
+key 198 HSAE_MEDIA
+key 199 HSAE_HOME
+key 249 HSAE_NAVI
+key 250 HSAE_CAMERA 
+key 251 HSAE_BACK
+
+frameworks/native/include/android/keycodes.h
+    /* hsae hard key */
+    AKEYCODE_HSAE_POWER = 289,
+    AKEYCODE_HSAE_VOLDN = 290,
+    AKEYCODE_HSAE_VOLUP = 291,
+    AKEYCODE_HSAE_MEDIA = 292,
+    AKEYCODE_HSAE_HOME = 293,
+    AKEYCODE_HSAE_NAVI = 294,
+    AKEYCODE_HSAE_CAMERA  = 295,
+    AKEYCODE_HSAE_BACK = 296
+
+frameworks/native/libs/input/InputEventLabels.cpp
+    DEFINE_KEYCODE(HSAE_POWER), \
+    DEFINE_KEYCODE(HSAE_VOLDN), \
+    DEFINE_KEYCODE(HSAE_VOLUP), \
+    DEFINE_KEYCODE(HSAE_MEDIA), \
+    DEFINE_KEYCODE(HSAE_HOME), \
+    DEFINE_KEYCODE(HSAE_NAVI), \
+    DEFINE_KEYCODE(HSAE_CAMERA), \
+    DEFINE_KEYCODE(HSAE_BACK)
+-------追加到#define KEYCODES_SEQUENCE
+
+frameworks/base/core/java/android/view/KeyEvent.java
+    public static final int KEYCODE_HSAE_POWER = 289;
+    public static final int KEYCODE_HSAE_VOLDN = 290;
+    public static final int KEYCODE_HSAE_VOLUP = 291;
+    public static final int KEYCODE_HSAE_MEDIA = 292;
+    public static final int KEYCODE_HSAE_HOME = 293;
+    public static final int KEYCODE_HSAE_NAVI = 294;
+    public static final int KEYCODE_HSAE_CAMERA = 295;
+    public static final int KEYCODE_HSAE_BACK = 296;
+
+public static final int LAST_KEYCODE = KEYCODE_HSAE_BACK;  ------- 一定要改
+
+
+core/api/current.txt
+core/api/test-current.txt
+-------------命令自动生成
+
+core/res/res/values/attrs.xml
+        <enum name="KEYCODE_HSAE_POWER" value="289" />
+        <enum name="KEYCODE_HSAE_VOLDN" value="290" />
+        <enum name="KEYCODE_HSAE_VOLUP" value="291" />
+        <enum name="KEYCODE_HSAE_MEDIA" value="292" />
+        <enum name="KEYCODE_HSAE_HOME" value="293" />
+        <enum name="KEYCODE_HSAE_NAVI" value="294" />
+        <enum name="KEYCODE_HSAE_CAMERA" value="295" />
+        <enum name="KEYCODE_HSAE_BACK" value="296" />
+
+
+添加监听自定义按键的接口
+1. 应用可通过在activity里重写public boolean dispatchKeyEvent(KeyEvent event)，监听以上自定义按键。
+2. 也可在framework里定制专用接口
+core/java/android/view/IHsaeKeyEventListener.aidl
++package android.view;
++
++/**
++ * Listener to be invoked when hsae key event changes.
++ * {@hide}
++ */
++oneway interface IHsaeKeyEventListener {
++    void onKeyEventChanged(int keycode, boolean isDown);
++}
+
+
+core/java/android/view/IWindowManager.aidl
++import android.view.IHsaeKeyEventListener;
++    /**
++    * To monitor key events but do not intercept it
++    */
++    void registerHsaeKeyEventListener(IHsaeKeyEventListener listener);
+ }
+
+services/core/java/com/android/server/policy/PhoneWindowManager.java
++    private HsaeKeyEventListener mHsaeKeyEventListener;
++    @Override
++    public void registerHsaeKeyEventListener(HsaeKeyEventListener hsaeKeyEventListener) {
++        mHsaeKeyEventListener = hsaeKeyEventListener;
++    }
++
+
+# interceptKeyBeforeDispatching函数中
++        // all keys greater than PROFILE_SWITCH are customized by HSAE
++        if (keyCode > KeyEvent.KEYCODE_PROFILE_SWITCH) {
++            Log.d("PhoneWindowManager", "HSAE key " + (down?"down":"up") + ", keyCode:" + keyCode);
++            if (null != mHsaeKeyEventListener) {
++                mHsaeKeyEventListener.onHsaeKeyEvent(keyCode, down);
++            }
++        }
+        switch(keyCode) {
+            case KeyEvent.KEYCODE_HOME:
++          case KeyEvent.KEYCODE_HSAE_HOME:  //这是为了能够把KEYCODE_HSAE_HOME对到原生的KEYCODE_HOME
+
+services/core/java/com/android/server/policy/WindowManagerPolicy.java
++    void registerHsaeKeyEventListener(HsaeKeyEventListener hsaeKeyEventListener);
++
++    interface HsaeKeyEventListener {
++        void onHsaeKeyEvent(int keyCode, boolean isDown);
++    }
+
+
+services/core/java/com/android/server/wm/WindowManagerService.java
+import android.os.RemoteCallbackList;
+import android.view.IHsaeKeyEventListener;
+
+private RemoteCallbackList<IHsaeKeyEventListener> mHsaeKeyEventListeners = new RemoteCallbackList<IHsaeKeyEventListener>();
+private WindowManagerPolicy.HsaeKeyEventListener mHsaeKeyEventListenerInternal;
+
++    @Override
++    public void registerHsaeKeyEventListener(IHsaeKeyEventListener listener) {
++        Log.d(TAG, "register hsaeKeyEvent listener from " + Binder.getCallingPid());
++        mHsaeKeyEventListeners.register(listener);
++        if (mHsaeKeyEventListenerInternal == null) {
++            mHsaeKeyEventListenerInternal = new WindowManagerPolicy.HsaeKeyEventListener() {
++                @Override
++                public void onHsaeKeyEvent(int keyCode, boolean isDown) {
++                    if (null == mHsaeKeyEventListeners) {
++                        return;
++                    }
++                    int i = mHsaeKeyEventListeners.beginBroadcast();
++                    while (i > 0) {
++                        i--;
++                        IHsaeKeyEventListener listener = mHsaeKeyEventListeners
++                                .getBroadcastItem(i);
++                        try {
++                            listener.onKeyEventChanged(keyCode, isDown);
++                        } catch (RemoteException e) {
++                            // Nothing to do in here, RemoteCallbackListener will
++                            // clean it up.
++                        }
++                    }
++                    mHsaeKeyEventListeners.finishBroadcast();
++
++                }
++            };
++            mPolicy.registerHsaeKeyEventListener(mHsaeKeyEventListenerInternal);
++        }
++    }
+
+
+core/java/com/android/internal/policy/DecorView.java
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        final int keyCode = event.getKeyCode();
+        final int action = event.getAction();
+        final boolean isDown = action == KeyEvent.ACTION_DOWN;
+  //添加，为了把KEYCODE_HSAE_BACK怼到KEYCODE_BACK，触发activity默认回退行为
+        if (keyCode == KeyEvent.KEYCODE_HSAE_BACK) {
+            KeyEvent back = new KeyEvent(event.getDownTime(), event.getEventTime(), event.getAction(), 
+                        KeyEvent.KEYCODE_BACK, event.getRepeatCount(), event.getMetaState(), 
+                        event.getDeviceId(), event.getScanCode(), event.getFlags(), event.getSource());
+            dispatchKeyEvent(back);
+        }

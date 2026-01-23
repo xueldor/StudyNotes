@@ -1,0 +1,64 @@
+升级是有风险的，做好备份、确保可以恢复。
+通过ssh连接 shell，风险更大。
+本文通过纯ssh连接进行升级，服务器在远程，拿不到，一旦出现故障只能联系管理员。
+
+# 1. 更新软件源缓存
+sudo apt update
+# 2. 升级所有已安装包（包括内核）
+sudo apt upgrade -y
+# 3. 升级系统级组件（如内核、系统服务）
+sudo apt dist-upgrade -y
+# 4. 清理无用包和缓存，释放磁盘空间
+sudo apt autoremove -y
+sudo apt autoclean
+
+第三方 PPA（非 Ubuntu 官方源）是升级冲突的主要元凶，很多 PPA 不支持跨版本升级，必须暂时禁用：
+# 1. 列出所有已启用的 PPA
+sudo apt-add-repository --list
+# 2. 禁用所有第三方 PPA（备份源列表后重命名 .list 文件）
+sudo mkdir -p /etc/apt/sources.list.d/disabled
+sudo mv /etc/apt/sources.list.d/*.list /etc/apt/sources.list.d/disabled/
+
+把/usr/local/lib下的安装文件删掉。最好是make install方式安装的库和程序都卸掉，防止升级后这些库的优先级高于系统默认，导致起不来。
+
+ 检查磁盘空间（至少 10GB 可用）
+# 查看根分区可用空间
+df -h /
+
+安装升级工具
+sudo apt install -y update-manager-core
+编辑 /etc/update-manager/release-upgrades，确保 Prompt=lts
+执行升级命令
+sudo do-release-upgrade
+升级过程中会弹出多个确认提示。
+
+重启后验证版本：
+lsb_release -a
+然后恢复第三方 PPA 并更新
+
+清理旧内核（可选）
+# 查看已安装的内核
+dpkg --list | grep linux-image
+# 卸载旧内核（替换为实际的旧内核版本）
+sudo apt remove -y linux-image-4.15.0-xxx-generic
+
+千万别使用 apt dist-upgrade 直接升级，do-release-upgrade 会自动处理配置文件冲突、内核兼容性等问题，最大化降低升挂的风险。
+
+
+问题：
+我在/usr/local/lib安装了GLIBC_2.29,升级前忘了先把它删除。由于/usr/local/lib的优先级比/lib/x86_64-linux-gnu高，升级后系统起不来。
+如果都没法进shell，那没办法。我是刚开始能进去，能正常启动，然后作死执行了一些命令后，变成优先加载/usr/local/lib/下的so库，于是连基本的ls、cat、vi等基础命令都不能执行了。
+1、此时ssh窗口千万别关，一关就没法重新连上了。
+2、我们用LD_PRELOAD临时加载执行命令，想办法恢复:
+LD_PRELOAD=/lib/x86_64-linux-gnu/libc.so.6:/lib/x86_64-linux-gnu/libpthread.so.0:/lib/x86_64-linux-gnu/librt.so.1 ls
+或者设置LD_LIBRARY_PATH：
+export LD_LIBRARY_PATH=/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
+在当前窗口临时生效。这样一些命令就可以运行了，但是要修复问题，需要删除/usr/local/lib，也就需要先获取root权限。
+常规我们通过sudo获取root，但是sudo里面会重置环境，也就是LD_LIBRARY_PATH清除了，所以这种方法无效。
+可以提前配置sudo的配置文件让它不要重置环境，但是已经到这一步就没办法了。只能想其它办法突破root权限，能不能成功碰运气。
+比如，假如安装了docker，是不是可以创建一个容器，把/usr/local/lib挂到里面？因为进入容器默认是root身份，可以删除。本质是借助其它已经拥有root权限的程序。
+
+
+/usr/local/lib优先级定义在
+cat /etc/ld.so.conf  和
+cat /etc/ld.so.conf.d/*.conf

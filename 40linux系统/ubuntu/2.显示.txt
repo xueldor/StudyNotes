@@ -1,0 +1,7 @@
+HDMI接到电视上，不识别显示器。
+sudo gedit /etc/default/grub
+将GRUB_GFXMODE注释放开
+GRUB_GFXMODE=3840x2160
+
+sudo update-grub
+重启

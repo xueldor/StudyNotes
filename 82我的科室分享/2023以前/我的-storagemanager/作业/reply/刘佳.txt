@@ -1,0 +1,45 @@
+关于Storage Manager培训理论课题思考题 回答如下：
+
+2. 应用A在sdcard下创建文件，文件所有者和所属组是谁？A:应用A   B:media provider？  C: media_rw  D: shell
+
+答：B:media provider
+
+
+5. Android 11之后，WRITE_EXTERNAL_STORAGE、READ_EXTERNAL_STORAGE、MANAGE_EXTERNAL_STORAGE 的作用
+
+答：在Android 11之前，应用程序只需要申请`WRITE_EXTERNAL_STORAGE`和`READ_EXTERNAL_STORAGE`权限来访问外部存储（例如sdcard）。这些权限允许应用程序读取和写入设备上的任何文件。
+
+在Android 11及以后的版本中，`WRITE_EXTERNAL_STORAGE`和`READ_EXTERNAL_STORAGE`权限仍然存在，但它们的作用范围受到了限制。应用程序只能在其专用目录中自由读取和写入文件，而不能直接访问其他应用程序的文件或整个外部存储。
+
+新增的`MANAGE_EXTERNAL_STORAGE`权限允许应用程序请求管理外部存储的权限，例如删除或修改其他应用程序的文件。然而，这个权限对大多数应用程序是不必要的，而且Google在Android 11中限制了对这个权限的访问，只允许特定的系统应用程序使用。
+
+
+6. uevent是通过哪种机制发送：socket、管道、共享内存、消息队列、binder？
+
+答： uevent是通过socket机制发送的。
+
+
+在Android系统中，uevent是一种通过内核生成的事件，用于通知用户空间设备的插拔、状态变化等事件。这些事件以文本形式发送给用户空间，通过uevent机制，应用程序可以监听和响应这些事件。
+
+当内核检测到设备的插拔或状态变化时，它会生成一个uevent事件。该事件通过一个特殊的socket（`/dev/uevent`）发送给用户空间。应用程序可以通过监听这个socket来获取这些事件，并根据需要做出相应的处理。
+
+
+
+8. 判断对错：微信双开，两个账号互相感知不到对方存在（即数据是彼此不可见的）？
+
+答：对
+
+
+9. 两个包名不同的应用，如何才能共享私有数据和keystore？
+
+答：
+
+1. Content Provider: 一个应用程序可以通过Content Provider提供数据，另一个应用程序可以使用相同的Content Provider来访问该数据。这需要在应用程序中定义和注册Content Provider，并在另一个应用程序中根据URI来读取和写入数据。
+
+
+2. 共享用户ID（sharedUserId）: 如果你控制这两个应用程序的代码，你可以将它们的AndroidManifest.xml文件中的`android:sharedUserId`属性设置为相同的值。这将导致这两个应用程序在同一个Linux用户ID下运行，从而可以访问彼此的私有目录和keystore。
+
+注意：使用共享用户ID需要小心，并确保应用程序之间的互操作性和安全性。
+
+
+3. 定制权限和签名：如果你有控制两个应用程序的源代码和构建过程，你可以自定义权限，使其中一个应用程序允许另一个应用程序访问其私有数据或keystore。此外，你还可以使用相同的签名密钥对两个应用程序进行签名，以便它们可以互相信任并访问彼此的数据。

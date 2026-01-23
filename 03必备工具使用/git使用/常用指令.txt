@@ -1,0 +1,138 @@
+一、撤销修改
+    大致分为撤销工作区、撤销暂存区
+1、git checkout -- test.txt
+git checkout -- .
+丢弃工作区的修改，用暂存区的内容覆盖工作区。如果test.txt的修改还没add到暂存区，那么效果是回到和版本库一模一样的状态。
+
+--的意思是将后面的强制解释为文件路径。比如：
+git checkout master：检出master分支
+git checkout -- master ： 从当前索引检出名为“master”的文件
+
+2、git reset HEAD readme.txt
+丢弃暂存区的修改
+
+tip:checkout为检出版本库,加分支名会切换到该分支并检出，reset用来回退到某次提交
+
+二、
+git clean -f
+删除当前目录下所有没有track过的文件。不会删除.gitignore文件里面指定的文件夹和文件, 不管这些文件有没有被track过。
+git clean经常和git reset --hard一起结合使用，reset只影响被track过的文件, 所以需要clean来删除没有track过的文件，结合使用这两个命令才能让你的工作目录完全回到一个指定的<commit>的状态
+相关指令有：
+git clean -n:告诉你哪些文件会被删除,不会真正的删除文件, 只是一个提醒
+git clean -f:删除当前目录下所有没有track过的文件
+git clean -df:删除当前目录下没有被track过的文件和文件夹
+
+三、配合开发
+1、下载代码，拷贝到android studio项目目录，配置好android studio以及.gitignore文件；
+2、创建dev分支，然后切换到dev分支:
+   git checkout -b dev
+3、在dev分支上做开发，完成后正常提交
+4、切换回master分支(master改为你们项目的提交分支)
+5、把dev分支的工作成果合并到master分支上：
+   git merge dev
+6、删除dev分支：
+   git branch -d dev
+ps：这种方式和直接在master分支上工作效果是一样的，但过程更安全。
+tip：如果master分支上有其他人提交，merge时需要手动合并，然后commit后，除了包含两个分支的提交，还会产生一个merge的commitid，此commitid的parent有两个
+这种情况可以用rebase：
+git checkout dev
+git rebase master # 将dev上的commit在master分支上做一次衍合处理
+# git提示readme文件出现了代码冲突，处理完毕后
+git add readme # 添加冲突处理后的文件,不要commit
+git rebase --continue # 加上--continue参数让rebase继续处理
+rebase结束后，dev分支就好像是从master的当前位置分离出来,而不是master过去的位置分离，因此然后再git checkout master加上git merge dev，git可以用f-f处理
+一旦分支中的提交对象发布到公共仓库，就千万不要对该分支进行衍合操作
+相关指令有：
+git pull --rebase相当于1、git fetch origin 2、git rebase FETCH_HEAD
+git pull 相当于 git fetch + git merge FETCH_HEAD
+
+四、远程分支
+1、git remote -v显示详细的信息
+2、git checkout -b dev origin/dev 创建远程origin的dev分支到本地
+3、git checkout dev
+  1)切换到本地的dev分支。如果本地没有dev分支，那么实际执行的是git checkout -b dev origin/dev
+  2)如果origin/dev也不存在，但是当前目录有一个文件叫dev，那么相当于git checkout -- dev,即检出dev文件
+  3)分支dev存在，dev文件也存在，则git checkout dev报错，不能用简写的语法
+  4)不符合上面几条，直接报错
+  5)如果执行git checkout origin/dev,注意在git中，远程分支是无法检出的，这句实际上会检出为detached head
+4、或者git clone时加上-b参数
+5. git remote add origin 地址（设置远程remote地址）；
+6、关联本地分支和远程分支git branch --set-upstream-to=origin/dev dev,末尾的dev可省
+
+五、merge时出现冲突(状态为(master|MERGING))
+git diff --check:检查冲突标志
+1、用git reset回到merge前的状态
+2、也可以用git merge --abort指令撤销merging
+3、撤销merge后用rebase
+4、rebase过程中出现问题用git rebase --abort,然后重新rebase
+当然，也可以解冲突，然后提交
+
+六、提交代码
+git commit --amend：重新提交最后一次commit，
+用途:已经commit了后发现有一个地方没改好，编辑后重新提交。commitid会变，可以通过commitid回到amend之前的commit
+git commit --amend --no-edit :--no-edit表示不要重新编辑提交信息。使用上次commit的msg
+git push --no-thin origin HEAD:refs/for/master 
+--no-thin选项
+默认情况下，git push会在向服务器推送时进行优化,以将所发送的包降低到最小. 做法是发送时忽略本地仓库和远端仓库中共有的部分. 即 git push默认是采用 --thin 选项的.如果本地的某个git对象和服务器不一致了，git push时就会报错，这时加上--no-thin 参数,把该传的都传过去,问题就解决了.
+本地提交了多次，push之时希望合并为一个commit然后在push，保持远程仓库的history简洁:
+git rebase -i HEAD~3  :合并HEAD~3(不包含HEAD~3)到当前commit，合并为一个commit。即合并最近三次提交.
+git cherry-pick commitid  :导入其它分支的某次提交，生成新id
+
+七、过滤跟踪
+1、配置.gitignore
+2、或者使用git update-index --assume-unchanged命令
+git update-index --assume-unchanged controllers/ApiController.php  //这里忽略ApiController.php 文件
+git update-index --no-assume-unchanged   controllers/ApiController.php  //恢复跟踪
+git ls-files -v | grep '^h\ '   //查看忽略列表
+
+八、detached HEAD
+.git目录下的HEAD文件指示了当前指向的branch。例如ref: refs/heads/cn202sr
+让HEAD指向一个commit id，就变成了detached HEAD。例如git checkout deab1f9890^(id为deab1f9890的提交的前一次提交)
+这时git branch显示：* (HEAD detached at 514b81c)，git status 亦然
+此时head指向某个特定的commit点，而不是指向每一个特定的分支，如果我们此时提交一个commit，只能被head索引到，不属于任何一个分支
+然后用git checkout master时一定要注意，刚才提交的commit已经处于无法被索引到的状态。最终将被git的默认回收机制所回收
+repo sync得到的就是detached HEAD
+
+九、
+git branch -avv
+cat .git/config
+git remote show origin,如果remote不叫origin，改成对应的名字。从.git/config文件中可以看到[remote "origi"]
+查看本地和远程的关联
+
+
+十、关于.git目录
+进入.git目录，打开HEAD文件，内容是"ref: refs/heads/cn202sr"。即当前是指向cn202sr分支。然后打开refs/heads目录下cn202sr文件，文件内容是一个ID。
+refs下有heads、remotes、tags三个目录，heads表示本地。remotes表示远程。因为远程可能有多个，所以，remotes下还有一层目录。如remotes/origin,remotes/hsae。目录下是所有的branch的指针.
+在refs/heads目录下,将cn202sr文件复制一份，重命名为vvv。然后git branch -a查看分支，可以看到多了一个vvv分支
+git pull origin refs/heads/cn202sr-release:refs/heads/cn202sr-release   ：理解为，从origin代表的远程仓库(origi定义在config文件中)，读取refs/heads/cn202sr-release文件中的id，将其代表的变更pull到本地，并更新本地的refs/heads/cn202sr-release文件
+
+
+
+repo指令
+1、所包含的git仓库在.repo/manifest.xml文件指定，这是一个符号链接，指向 .repo/manifests/default.xml
+2、某个仓库被删除，repo sync会报错，用--force-sync恢复:
+repo sync --force-sync frameworks/SystemUI
+3、遍历
+repo forall -c "指令"  :在所有git仓库目录下执行指令,可以省略双引号，比如:
+repo forall -c git reset --hard
+但是不支持repo forall -c git checkout -- .
+4、repo status
+显示repo管理的所有仓库的状态，比如哪些在其它branch上，哪些文件有改动等。因为android的repo很大，所以此命令非常耗时
+5、repo sync -dcq
+.repo/manifests/default.xml中的default标签revision属性指定了分支，但是Repo不会在本地创建分支。sync结束后，Repo只是检出commit，创建一个detached head。
+因此无法push代码
+要创建及切换本地分支，用："repo start -all 分支名"
+-d/--detach参数:让工程回退到manifest指定的版本.例如，其中某个git仓库切换到dev分支。执行repo sync -d后，会回到原来的"detached head"状态。不加-d则不一定
+6、不小心用repo start xxx --all在本地仓库创建了分支,可以用repo abandon xxx删除
+7、用repo init -b xxxx将default revision改成其他分支，然后sync
+其它指令
+repo branches(查看分支。某分支只有特定git仓库才有，这些信息亦会列出)
+repo checkout(切换分支，git checkout 命令的封装，但不能带-b参数)
+repo diff
+repo init (下载repo并克隆manifest) -u:指定一个URL，其连接到一个maniest仓库 -b:选择一个maniest仓库中的一个特殊的分支
+repo prune [<project>…] 对git branch –d命令的封装，该命令用于扫面项目的各个分支，并删除已经合并的分支
+repo abandon <branchname> [<project>…](删除指定分支,git branch –D 命令的封装)
+repo version显示repo的版本号
+
+撤销整个工程的本地修改:
+repo forall -c 'git reset --hard HEAD;git clean -df;git rebase --abort'

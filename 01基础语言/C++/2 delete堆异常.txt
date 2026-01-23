@@ -1,0 +1,49 @@
+#include<stdio.h>
+
+class A
+{
+private:
+	int id;
+
+public:
+	A(){ id = 0;}
+	A(int i) : id(i) {}
+	void Say() { printf("id=%d\n", id); }
+
+};
+
+int main(){
+	A* pa = new A();
+	pa->Say();
+	delete pa;
+	return 0;
+
+}
+
+ vs运行报错： HEAP CORRUPTION DETECTED: after Normal block .............wrote to memory after end of heap buffer
+意思是，new申请的内存，操作溢出，在delete时就会出错。
+左看右看都没问题。后来发现，为了简单我直接在cpp中定义class A和它的实现。另外一个cpp文件中也有一个class A。一开始以为，没有include或者显式extern，其它文件中的同名class不会影响这个文件。其实class A{}就是类的声明。
+把名称改掉，或者加一个namespace即可解决。like this：
+
+#include<stdio.h>
+
+namespace test_new {
+class A
+{
+private:
+	int id;
+
+public:
+	A(int i) : id(i) {}
+	void Say() { printf("id=%d\n", id); }
+
+};
+
+}
+int main(){
+	test_new::A* pa = new test_new::A(5);
+	pa->Say();
+	delete pa;
+	return 0;
+
+}

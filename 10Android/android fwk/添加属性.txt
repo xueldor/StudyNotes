@@ -1,0 +1,28 @@
+1. 搜索 *.prop
+device/autochips/system/assi_64/system.prop
+
+2.搜索 *.mk,
+如./device/autochips/vendor/ac8025_hsae/device.mk 添加：
+PRODUCT_PROPERTY_OVERRIDES += persist.sys.timezone=Asia/Shanghai
+
+3. 修改默认语言
+PRODUCT_PROPERTY_OVERRIDES += ro.product.locale=zh-CN
+无效，persist.sys.locale也无效。
+原因是ro.product.locale是编译过程中后面被覆盖：
+build/make/tools/buildinfo.sh:52:  echo "ro.product.locale=$PRODUCT_DEFAULT_LOCALE"
+./build/make/core/sysprop.mk:253:	        PRODUCT_DEFAULT_LOCALE="$(call get-default-product-locale,$(PRODUCT_LOCALES))" \
+因此配置默认语言应该设置PRODUCT_LOCALES
+搜索，以下路径都有可能：
+./build/make/target/product/full_base.mk:56:PRODUCT_LOCALES := en_US
+./build/make/target/product/languages_default.mk:19:PRODUCT_LOCALES := \
+./device/autochips/vendor/ac8025_hsae/vnd_ac8025_hsae.mk:54:PRODUCT_LOCALES := en_US,zh_CN,zh_TW
+直觉上应该改vnd_ac8025_hsae.mk，但实验无效，最后languages_default.mk有效。
+
+
+get-default-product-locale的实现：
+define get-default-product-locale
+$(strip $(subst _,-, $(firstword $(1))))
+endef
+解释：firstword $(1)取参数中的 第一个单词（以空格为分隔符）
+subst _,-, ...将 firstword 结果中的 下划线 _ 替换为连字符 -，输入 en_US，输出 en-US
+strip ...去除结果两端的 多余空格

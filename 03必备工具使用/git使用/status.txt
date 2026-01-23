@@ -1,0 +1,5 @@
+列出每个变动文件
+git status -u
+
+所有被git忽略的文件
+find . -type f  | git check-ignore --stdin

@@ -1,0 +1,91 @@
+打印git根目录（无需手动一级级向上找 .git 目录）
+git rev-parse --show-toplevel
+
+理解概念：
+commit id、change-id、分支名、tag、工作区、暂存区、仓库、钩子（hook）、git和gerrit。本地、远程。
+
+git branch
+git branch -av    包含远程分支
+
+对于-- <file>, -- 表示明确后面的是文件，避免歧义。比如git checkout -- file，如果不加--，假如刚好有个分支叫file，git会把后面的当成分支名。
+
+
+
+// 显示本地修改未提交
+git status    // 对于新增目录，只显示目录
+git status -u    // 对于新增目录，显示目录下每个文件
+git status -- aaaaaa/   // --指定的文件或路径下的修改
+
+
+
+git reflog  //本地的操作记录
+git log
+git log --graph
+git log -- <file> //指定文件的历史记录
+git log -p -2 -- <file>  //每次提交的内容差异，-2 则表示显示最近的两次更新
+git log --word-diff -- <file>   //--word-diff 表示获取单词层面上的对比
+git log branch1 ^branch2  //branch1分支有，而branch2中没有的log
+git log branch1..branch2  //branch2中比branch1中多出的记录
+git log branch1...branch2   //branch1和branch2的log差异部分
+
+
+ git add .  // 所有变动，从工作区提交到暂存区
+ git add file  // file的变动，从工作区提交到暂存区
+git commit -m msg   // 从暂存区提交到当前分支(本地分支)
+
+git restore --staged <文件名>   // 暂存区撤回到工作区
+git restore --staged .      // 所有文件从暂存区撤回到工作区
+（Git 2.23之前的版本，使用git reset HEAD --mixed命令，但是git reset 模式比较复杂容易记混。比如误用:git reset --hard, 会直接删除工作区的修改, 无法恢复,后果很严重）
+
+
+git diff  //比较工作区与暂存区。 git add .后，工作区与暂存区一致，就看不到差异了。
+git diff HEAD [<path>...]   //比较工作区与最新本地版本库 same as: git diff <branch_name> [<path>...]
+git diff --cached  [<path>...]  //比较暂存区与最新本地版本库
+
+git diff commit-id  [<path>...]   //比较工作区与指定commit-id的差异
+git diff --cached [<commit-id>] [<path>...]  //比较暂存区与指定commit-id的差异
+git diff [<commit-id>] [<commit-id>]   //比较两个commit-id之间的差异,第一个id为old，第二个为new
+git diff HEAD^ HEAD最新版本相比上次有有些更新。HEAD^在前，HEAD在后
+总结一下：
+工作区与暂存区   git diff 
+工作区与版本库   git diff HEAD （或者是FETCH_HEAD 或具体id）
+暂存区与版本库   git diff --cached (相当于git diff --cached HEAD，可以把HEAD换成以前的某次提交id)
+branch甚至可以是远程分支，如：比如： git diff iov2.0_plus_qm remotes/origin/iov2.0_plus 
+commit-id不需要写全，只需要写前几个字符。前提是前几个字符已经能唯一标识。
+
+
+使用git diff打补丁：
+1. git diff > a.patch //patch的命名是随意的
+2. git apply --check a.patch //检验一下补丁能否应用
+3. git apply patch //应用补丁
+   git apply --reject patch  //将能打的补丁先打上，有冲突的会生成.rej文件,找到这些文件进行手动打补丁
+
+导出某人的全部patch，多个patch文件
+git format-patch -o patches --author="xuexiangyu" --root HEAD --reverse
+git am --3way patches/*.patch
+'git am --show-current-patch=diff' 命令查看失败的补丁
+
+
+git reset命令用来将 HEAD 指向其它地方，--hard、--soft、--mixed的区别在于是否影响 工作区和暂存区
+git reset --hard HEAD^ //hard的意思是 硬的、冷酷无情的 、猛烈地。意思就是工作区、暂存区统统重置为HEAD的前一个版本。(未track的文件不受影响)
+git reset --soft HEAD^ //soft,软弱的。意思是，HEAD回退到上一个版本，但是不改变工作区。暂存区原来的不动，同时由于版本切换带来的新差异放入暂存区。
+git reset --mixed HEAD^ //默认。折中。同样不改变工作区，但是暂存区会清空。也就是说，所有工作区和版本仓库的差异，都是没有“git add”的状态。
+直观: 
+HEAD reset到其它地方后，本地目录的文件必然就和HEAD有差异。
+--hard:  用HEAD覆盖工作区、暂存区，即强行抹除了差异。导致工作区的修改丢失。
+--soft： 不覆盖工作区、暂存区，即工作区、暂存区还是reset前的状态，于是diff可以看到暂存区和HEAD差异。相当于已经git add后看到的样子
+--mixed： 折中，不覆盖工作区，但覆盖暂存区。相当于还没有git add的状态。
+理解后就知道git reset --mixed 可以代替git restore --staged .
+
+
+git checkout 用来切换分支、撤销没有commit的修改。下面几个命令具体区别参考“常用指令.txt”
+git checkout -b newBranch
+git checkout branch
+git checkout commit-id //检出指定的commit-id为detached HEAD
+git checkout origin/dev //检出远程dev分支为detached HEAD
+
+
+git pull mydev 等价:
+git fetch origin mydev
+git merge origin/mydev 或 git merge FETCH_HEAD
+

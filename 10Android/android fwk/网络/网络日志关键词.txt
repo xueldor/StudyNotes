@@ -1,0 +1,8 @@
+logcat | grep -E "Netd|netd|IpClient|EthernetNetworkFactory|ConnectivityService_v2.0|EthernetTracker|DhcpClient"
+
+WifiService
+WifiConnectivityManager
+EthernetNetworkFactory
+ConnectivityService_v2.0
+
+

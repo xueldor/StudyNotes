@@ -1,0 +1,1 @@
+/usr/bin/c++     CMakeFiles/hello_binary.dir/src/main.cpp.o  -o hello_binary -Wl,-rpath,/media/xue/d/cmake/03-dynamic_library/out libhello_library.so 

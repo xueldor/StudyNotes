@@ -1,0 +1,4 @@
+mount --bind test1 test2
+umount test2
+
+mount -o rw,remount /system

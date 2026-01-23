@@ -1,0 +1,1 @@
+因为ubuntu预装的是 vim tiny, 我们需要安装vim full版本卸载vim-tiny：sudo apt remove vim-common安装vim full：sudo apt install vim

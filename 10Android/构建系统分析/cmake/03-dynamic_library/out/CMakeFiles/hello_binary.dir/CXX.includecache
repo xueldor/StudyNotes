@@ -1,0 +1,14 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+../include/shared/Hello.h
+
+/media/xue/d/cmake/03-dynamic_library/src/main.cpp
+shared/Hello.h
+/media/xue/d/cmake/03-dynamic_library/src/shared/Hello.h
+

@@ -1,0 +1,17 @@
+确保安装了expect： sudo apt install expect
+
+比如执行sudo ls -lh,回车后需要手动输入密码。
+现在将密码写在脚本中
+
+file test.sh-->
+#!/usr/bin/expect
+set timeout 5
+
+spawn sudo ls -lh
+expect "密码" {send "123456\r"}
+
+interact
+
+-------< file test.sh
+
+用于脚本中自动化登录

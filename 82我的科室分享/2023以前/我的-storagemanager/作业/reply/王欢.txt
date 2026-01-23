@@ -1,0 +1,126 @@
+问题解答如下，
+
+ 
+
+基于Android 11，回答以下问题：
+
+1. 对照ppt第11页，解释访问/sdcard，最终到/data/media/0的过程。
+
+
+①/sdcard 软连接到/storage/self/primary,再软连接到/storage/emulated/0
+
+②/storage/emulated/0通过 /dev/fuse 去访问/data/media/0
+
+
+2. 应用A在sdcard下创建文件，文件所有者和所属组是谁？A:应用A   B:media provider？  C: media_rw  D: shell
+
+
+A:应用A
+
+
+
+3. 开机后，/sdcard目录是什么时候开始可以访问？
+
+
+user unlock的时候
+
+
+4. 出于性能考虑，能否直接访问/data/media/0读取文件?(绕过fuse)
+
+不可以
+
+
+
+5. Android 11之后，WRITE_EXTERNAL_STORAGE、READ_EXTERNAL_STORAGE、MANAGE_EXTERNAL_STORAGE 的作用
+
+
+6. uevent是通过哪种机制发送：socket、管道、共享内存、消息队列、binder？
+
+
+通过socket机制。
+
+
+7. 基于sdcardfs, 介绍/mnt/runtime目录下default  full  read  write四个目录的作用。
+
+
+8. 判断对错：微信双开，两个账号互相感知不到对方存在（即数据是彼此不可见的）？
+
+
+9. 两个包名不同的应用，如何才能共享私有数据和keystore？
+
+
+使用相同的shareduserid
+
+
+10. 安卓为什么放弃fuse使用sdcardfs？到了安卓11，为什么又从sdcardfs回到fuse？
+
+
+Android 8 引入SDCardFS 替换FUSE,可以减少大量的I/O开销，消除双重缓存。
+
+
+然而在android 11上为了更好的权限控制，为了更好的支持 Scoped Storage Android 11 又用 FUSE替换了SDCardFS。
+
+
+
+11. 以ppt里演示的hellofs为例，对照ppt49页的fuse架构图，讲述命令“cat hello”,系统的执行过程。cat命令位于架构图哪个位置?
+
+   1. cat程序的系统调用将由内核的Fuse驱动处理
+
+
+   2. Fuse驱动通知userspace守护进程(sdcard)有关新请求的信息
+
+
+   3. userspace守护进程sdcard读取 /dev/fuse
+
+
+   4. sdcard解析命令并识别文件操作，如：open、read
+
+
+   5. sdcard调用实际的底层文件系统，如EXT4、F2FS
+
+
+   6. 真实文件系统在内核处理请求并返回userspace
+
+
+ 
+
+
+
+12. fuse daemon什么时候destroy？
+
+    拔出所有挂载设备时
+
+
+13. 磁盘分区表格式分为GPT和MBR。请自行了解他们的区别和优势。
+
+
+MBR 是 Master Boot Record 的缩写，是一种传统而常用的磁盘布局。
+
+
+优点：
+
+适配老旧设备。
+
+
+缺点：
+
+MBR中分区表的组织将磁盘的可寻址存储空间限制为2TB。并且只支持4个主分区，或者3个主分区和1个扩展分区的组合。如果要创建更多分区，则需要将其中一个主分区设为“扩展分区”，然后在扩展分区内创建更多逻辑分区
+
+
+GPT 是 Globally Unique Identifier Partition Table 的缩写，是一种与 UEFI 相关的新磁盘布局。
+
+
+优点：
+
+支持2TB以上的硬盘 以及4个以上的主分区
+
+
+缺点：
+
+老旧设备不支持
+
+
+
+14. （开放题）思考前两天的科室例会上分享的问题。拔U盘时，vold会遍历/proc/pid/fd,找出占用U盘的进程，然后发送signal将进程杀死。如何合理的设计避免进程被杀？
+
+     监听unmount广播提前将U盘卸载

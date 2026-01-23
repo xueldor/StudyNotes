@@ -1,0 +1,21 @@
+场景：
+项目的assets目录有一个apk，apk里面有若干so，这些so都是32位的。代码里通过插件技术加载这些so。
+报错：failed: dlopen failed： “xxxxx/xxxxx.so”  is 32-bit instead of 64-bit
+
+意思是这个so是32位的，而不是64位的。
+ps -e|grep xxx查看此进程的ppid，发现父进程是zygote64，所以会以64位的方式加载。
+
+解决：
+1. 新建jni目录，里面新建一个armeabi-v7a目录，目录里随便放一个32位的so。确保这个jni目录里面没有其它64位的so。
+2. build.gradle里面指定此jni目录：
+    sourceSets {
+        main {
+            //指定so的目录为libs。默认是src/main/jniLibs。
+            jniLibs.srcDirs = ['libs']
+        }
+    }
+3. build apk, 然后反编译查看一下，确保这个so打包进去了。
+4. 然后run apk，这时就是32位模式了。
+
+源码环境下用mk编译：
+据说需要在Android.mk里面添加LOCAL_MULTILIB := 32

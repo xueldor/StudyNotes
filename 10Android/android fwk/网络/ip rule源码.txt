@@ -1,0 +1,71 @@
+system/netd/server/RouteController.h
+
+33  const uint32_t RULE_PRIORITY_VPN_OVERRIDE_SYSTEM     = 10000;
+34  const uint32_t RULE_PRIORITY_VPN_OVERRIDE_OIF        = 11000;
+35  const uint32_t RULE_PRIORITY_VPN_OUTPUT_TO_LOCAL     = 12000;
+36  const uint32_t RULE_PRIORITY_SECURE_VPN              = 13000;
+37  const uint32_t RULE_PRIORITY_PROHIBIT_NON_VPN        = 14000;
+38  // Rules used when applications explicitly select a network that they have permission to use only
+39  // because they are in the list of UID ranges for that network.
+40  //
+41  // Sockets from these UIDs will not match RULE_PRIORITY_EXPLICIT_NETWORK rules because they will
+42  // not have the necessary permission bits in the fwmark. We cannot just give any socket on any of
+43  // these networks the permission bits, because if the UID that created the socket loses access to
+44  // the network, then the socket must not match any rule that selects that network.
+45  const uint32_t RULE_PRIORITY_UID_EXPLICIT_NETWORK    = 15000;
+46  const uint32_t RULE_PRIORITY_EXPLICIT_NETWORK        = 16000;
+47  const uint32_t RULE_PRIORITY_OUTPUT_INTERFACE        = 17000;
+48  const uint32_t RULE_PRIORITY_LEGACY_SYSTEM           = 18000;
+49  const uint32_t RULE_PRIORITY_LEGACY_NETWORK          = 19000;
+50  const uint32_t RULE_PRIORITY_LOCAL_NETWORK           = 20000;
+51  const uint32_t RULE_PRIORITY_TETHERING               = 21000;
+52  // Implicit rules for sockets that connected on a given network because the network was the default
+53  // network for the UID.
+54  const uint32_t RULE_PRIORITY_UID_IMPLICIT_NETWORK    = 22000;
+55  const uint32_t RULE_PRIORITY_IMPLICIT_NETWORK        = 23000;
+56  const uint32_t RULE_PRIORITY_BYPASSABLE_VPN          = 24000;
+57  // reserved for RULE_PRIORITY_UID_VPN_FALLTHROUGH    = 25000;
+58  const uint32_t RULE_PRIORITY_VPN_FALLTHROUGH         = 26000;
+59  const uint32_t RULE_PRIORITY_UID_DEFAULT_NETWORK     = 27000;
+60  // Rule used when framework wants to disable default network from specified applications. There will
+61  // be a small interval the same uid range exists in both UID_DEFAULT_UNREACHABLE and
+62  // UID_DEFAULT_NETWORK when framework is switching user preferences.
+63  //
+64  // framework --> netd
+65  // step 1: set uid to unreachable network
+66  // step 2: remove uid from OEM-paid network list
+67  // or
+68  // step 1: add uid to OEM-paid network list
+69  // step 2: remove uid from unreachable network
+70  //
+71  // The priority is lower than UID_DEFAULT_NETWORK. Otherwise, the app will be told by
+72  // ConnectivityService that it has a network in step 1 of the second case. But if it tries to use
+73  // the network, it will not work. That will potentially cause a user-visible error.
+74  const uint32_t RULE_PRIORITY_UID_DEFAULT_UNREACHABLE = 28000;
+75  const uint32_t RULE_PRIORITY_DEFAULT_NETWORK         = 29000;
+76  const uint32_t RULE_PRIORITY_UNREACHABLE             = 32000;
+
+
+
+
+
+
+546  [[nodiscard]] static int modifyExplicitNetworkRule(unsigned netId, uint32_t table,
+547                                                     Permission permission, uid_t uidStart,
+548                                                     uid_t uidEnd, uint32_t subPriority, bool add) {
+549      Fwmark fwmark;
+550      Fwmark mask;
+551  
+552      fwmark.netId = netId;
+553      mask.netId = FWMARK_NET_ID_MASK;
+554  
+555      fwmark.explicitlySelected = true;
+556      mask.explicitlySelected = true;
+557  
+558      fwmark.permission = permission;
+559      mask.permission = permission;
+560  
+561      return modifyIpRule(add ? RTM_NEWRULE : RTM_DELRULE,
+562                          RULE_PRIORITY_EXPLICIT_NETWORK + subPriority, table, fwmark.intValue,
+563                          mask.intValue, IIF_LOOPBACK, OIF_NONE, uidStart, uidEnd);
+564  }

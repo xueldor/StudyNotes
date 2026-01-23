@@ -1,0 +1,18 @@
+问题：在使用aidl进行跨进程通信的时候，通过bindService()绑定远程service，但一直返回false
+
+原因：Google在API30以后加强了包可见性限制，如果需要跨进程访问某个应用，需要在AndroidManifest中声明要访问的应用。详情参考https://developer.android.google.cn/guide/topics/manifest/queries-element
+
+解决方案：
+第一种方案：
+修改client targetSdk版本到30以下。
+第二种方案：
+targetSdk版本在30以上，在AndroidManifest中，按照Google要求注册需要使用的包名,注意是加在 client里。
+
+
+    <queries>
+        <!--如果想要与其他的应用进行AIDL通信的话，需要在这里注册包名的信息-->
+        <package android:name="com.hsae.testcustomapi" />
+    </queries>
+
+另：一加手机测试，需要保持亮屏，锁屏后bindService也是始终返回false。
+另外，应用详情-耗电管理-权限隐私，里面有个允许应用自自动、允许应用关联启动，从文字看应该有关系，但是目前没试验。

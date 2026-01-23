@@ -1,0 +1,2 @@
+创建目录/usr/share/fonts/wps-office/
+将wps_symbol_fonts.zip解压，里面的所有ttf文件复制到目录。

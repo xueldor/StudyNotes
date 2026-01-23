@@ -1,0 +1,25 @@
+PKIService因特殊原因，不能在系统源码中整编代码，因此直接提交apk，然后通过mk打上签名以及集成到系统中：
+````Android.mk内容如下````
+LOCAL_PATH := $(call my-dir)
+include $(CLEAR_VARS)
+
+LOCAL_MODULE := PKIService
+LOCAL_SRC_FILES := $(LOCAL_MODULE).apk
+LOCAL_MODULE_CLASS := APPS
+LOCAL_MODULE_TAGS := optional
+LOCAL_MODULE_SUFFIX := $(COMMON_ANDROID_PACKAGE_SUFFIX)
+LOCAL_CERTIFICATE := platform
+LOCAL_MULTILIB := 32
+
+LOCAL_PREBUILT_JNI_LIBS:= \
+lib/armeabi/libcrypto_ex.so \
+lib/armeabi/libcrypto_stub.so \
+lib/armeabi/liblocSDK7a.so \
+lib/armeabi/libPKCS7.so \
+lib/armeabi/libSKF.so \
+lib/armeabi/libSKFEngine.so \
+lib/armeabi/libSKFFileStore.so \
+lib/armeabi/libssl_ex.so 
+
+include $(BUILD_PREBUILT)
+````END````

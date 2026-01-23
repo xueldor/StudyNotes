@@ -1,0 +1,4 @@
+/media/xue/d/cmake/03-dynamic_library/out/CMakeFiles/rebuild_cache.dir
+/media/xue/d/cmake/03-dynamic_library/out/CMakeFiles/edit_cache.dir
+/media/xue/d/cmake/03-dynamic_library/out/CMakeFiles/hello_library.dir
+/media/xue/d/cmake/03-dynamic_library/out/CMakeFiles/hello_binary.dir

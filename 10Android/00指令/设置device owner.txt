@@ -1,0 +1,27 @@
+命令：dpm set-device-owner package/.DeviceAdminReceiver_yours
+报错：java.lang.IllegalStateException: Not allowed to set the device owner because there are already some accounts on the device
+分析：
+1、当然，设置为设备拥有者，要求先删除用户和账户。但是从设置里看，用户和账户都已经删除。
+2、adb shell输入:
+HWKNT:/data/system $ pm list users
+ Users:
+        UserInfo{0:机主:13} running
+这也是正常的
+3、dumpsys account,输出：
+User UserInfo{0:机主:13}:
+  Accounts: 3
+    Account {name= XXXXXXXXX, type=com.eg.android.AlipayGphone.perf}
+    Account {name= XXXXXXXXX, type=com.ss.android.article.lite}
+    Account {name= XXXXXXXXX, type=com.ucmobile.lite}
+............
+可以看到当前user下有三个应用创建了账户，不知道为什么，第一个支付宝的账户，在设置里面看不到。
+另外两个，虽然设置里面已经删除了，但是还在依然会阻止命令执行。原因不清楚。
+
+解决：
+卸载三个应用，或者将应用冻结
+pm hide com.eg.android.AlipayGphone
+或pm disable com.eg.android.AlipayGphone
+或pm disable-user com.eg.android.AlipayGphone
+因为有些手机会禁用一些命令，所以都试一下，一般总有一个能用
+然后再执行命令。OK
+最后再将应用冻结解除。pm enable packageName或pm unhide packageName
