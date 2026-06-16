@@ -1,0 +1,61 @@
+missing dependencies: libQSEEComAPI
+确信libQSEEComAPI存在：
+# vendor/qcom/proprietary/prebuilt_HY11/target/product/msmnile_au/Android.mk
+include $(CLEAR_VARS)
+LOCAL_MODULE        := libQSEEComAPI
+LOCAL_MODULE_CLASS  := SHARED_LIBRARIES
+LOCAL_SHARED_LIBRARIES :=  libc libcutils libutils liblog libion libdmabufheap libc++ libm libdl
+LOCAL_MODULE_SUFFIX := .so
+LOCAL_STRIP_MODULE  := false
+LOCAL_MULTILIB      := 64
+LOCAL_MODULE_OWNER  := qcom
+LOCAL_MODULE_TAGS   := optional
+LOCAL_SRC_FILES     := ../../.././target/product/msmnile_au/vendor/lib64/libQSEEComAPI.so
+LOCAL_MODULE_PATH   := $(PRODUCT_OUT)/$(TARGET_COPY_OUT_VENDOR)/lib64
+LOCAL_PROPRIETARY_MODULE := true
+include $(BUILD_PREBUILT)
+
+原因是，Android.mk能看到Android.bp里定义的模块，但是反过来，Android.bp通常看不到mk里的模块。
+需要需要再加一个bp，预编译libQSEEComAPI.so：
+cc_prebuilt_library_shared{
+    name : "libQSEEComAPI_bp",
+    strip:{
+         none: true,
+    },
+    multilib:{
+        lib32:{
+           srcs : ["./vendor/lib/libQSEEComAPI.so"],
+        },
+        lib64:{
+           srcs : ["./vendor/lib64/libQSEEComAPI.so"],
+        },
+    },
+    shared_libs: [
+        "libc",
+        "libcutils",
+        "libutils",
+        "liblog",
+        "libion",
+        "libdmabufheap",
+        "libc++",
+        "libm",
+        "libdl",
+    ],
+    owner: "qcom",
+    proprietary : true,
+    soc_specific : true,
+}
+
+
+不可见的原因：
+Android.mk 属于 Make（老的 Make-based 构建系统）
+Android.bp 属于 Soong（新的构建系统）
+在 Android 构建中：
+Soong（bp）可以感知一部分 Make（mk）模块
+但这种感知是有限且受约束的
+* mk 模块必须是标准类型（如 cc_library, cc_binary 等）
+* 被 Soong 的转换层识别
+* 没有使用复杂的 Make 宏/动态逻辑
+
+信息来源： https://www.programmersought.com/article/995810742077/
+“At the same time, Android.mk can reference the modules in Android.bp, and the android.bp cannot reference the modules in Android.mk.”

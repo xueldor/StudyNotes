@@ -42,9 +42,8 @@ function read_dir(){
 function decrypt_file(){
     src=$1
 	postfix=${src##*.}  #文件后缀
-	# 文件较多时，为了提高速度，可以把下面一行echo注释掉
-	echo -e "decrypt file $src"
-	
+	#echo -e "decrypt file $src"
+
 	found=false
 	for item in "${arr[@]}"; do
 		if [[ "$item" == "$postfix" ]]; then
@@ -52,14 +51,13 @@ function decrypt_file(){
 			break
 		fi
 	done
-	if $found;then
-	    mv "$src" "${src}.${random}.java"
-		# 打开一个powershell。这一步导致解密速度慢。
-		powershell mv \""${src}.${random}.java"\" \""${src}"\"
-	else
-	    mv "$src" "${src}.${random}.java"
-		# 有时会解密失败，失败的文件手动执行这个命令即可
-		mv "${src}.${random}.java" "$src"
+	if $found;then # 对于java c cpp .h .py这类文件
+	    mv "$src" "${src}.${random}.xls"
+		mv2 "${src}.${random}.xls" "${src}"  #cp mv mv2
+	# else # 如需解密非代码文件，把else放开，速度会非常慢
+	    # mv "$src" "${src}.${random}.h"
+		# sleep 5
+		# mv "${src}.${random}.h" "$src"
 	fi
 }
 
@@ -67,13 +65,9 @@ if [ $# == 0 ];then
     echo "将目标文件或目录拖到decrypt.sh上面,用gitbash执行..."
 	exit 1
 elif (( $#>1 ));then
-    echo "暂时只支持单个文件或目录"
+    echo "错误命令行参数"
 	exit 1
 fi
-
-echo "请务必先备份好原文件，再执行这个脚本"
-echo "需要把此脚本放到待解密文件的同目录"
-read -n 1 -p "Press any key to continue..."
 
 current_dir=$(pwd)
 absolute_path=$(realpath "$1")
@@ -82,16 +76,6 @@ parent_dir=$(dirname "$absolute_path")
 name=$(basename "$1")
 echo 路径:$absolute_path 
 
-echo '是否需要我帮你备份一下源文件(y/n)？'
-read backup
-if [ "$backup" = "y" ];then
-	tar -cvf "${absolute_path}.tar" "$1"
-else
-	echo -e "即将开始，祝你好运!!!\n"
-fi
-
-# 由于可能会调用powershell，路径的格式和linux shell不一样，比如shell是/h/aaaaaa,而powershell是H:\aaaaaa
-# 为了避免处理路径格式问题，规定需要把脚本放到待解密的文件同目录，并采用相对路径
 if [ -f "$absolute_path" ];then
     #解密文件
 	decrypt_file "$relative_path"
@@ -100,3 +84,4 @@ elif [ -d "$absolute_path" ];then
 	read_dir "$relative_path"
 fi
 
+read -n 1 -p "Press any key to continue..."

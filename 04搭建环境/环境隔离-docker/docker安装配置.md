@@ -50,6 +50,8 @@ docker images
 
 # 查看有哪些容器
 docker ps -a
+# 查看指定容器占用空间
+docker ps -a --filter name=xue_p32s --size
 
 # 看看data-root现在占用多大
 sudo du -sh /mnt/docker #docker目录只有root能访问
@@ -94,7 +96,9 @@ docker run --help
 
 # 使用 ubuntu 镜像启动一个容器
 docker run -it ubuntu:18.04 /bin/bash
-记住要加 -it，否则没有交互式终端
+1)记住要加 -it，否则没有交互式终端
+2)末尾的/bin/bash会在每次docker start时执行，可以改成自己的mybash.sh脚本，达到类似“开机自启”的效果
+3）区分“每次docker start时执行”和“每次docker exec时执行”,可以加到.bashrc里达到后者效果。
 
 然后执行：
 docker ps -a
@@ -201,7 +205,7 @@ locale-gen zh_CN.UTF-8
 
 ## 将容器的当前状态保存为一个新的 Docker 镜像
 
-```
+```shell
 docker commit -m="updated tools" -a="xue" dev_3ya 3ya:V1.0
 
 $ docker images
@@ -210,6 +214,47 @@ REPOSITORY   TAG       IMAGE ID       CREATED         SIZE
 
 docker run -it 3ya:V1.0
 
+# 减小提交体积
+//1、先删除/tmp目录 rm -rf /tmp
+//2、apt clean; apt autoremove
+//3、 rm -rf /var/lib/apt/lists/*
+这步很重要，因为/var/lib/apt/lists/目录可能会非常大，有时超过1G。重新apt update一下即可重新拉取。
+//4、 删除~/.cache等类似不必要文件
+
+# 合并所有层
+//1、docker commit不是提交完整的文件系统，会看到依赖其它镜像
+//2、当你commit后，删除原来的镜像，其实只是变成了悬空镜像，不会删除。因为新的镜像依赖它
+~/workspace$ docker images -a
+ubuntu20vnc   V1.0      2a645567a2a7   9 days ago      574MB
+<none>        <none>    3b5b2cc10fd7   10 days ago     574MB #<-----悬空镜像
+
+~/workspace$ docker image inspect --format='{{.RepoTags}} {{.Parent}}' 2a645567a2a7
+[ubuntu20vnc:V1.0] sha256:3b5b2cc10fd7ad4780885fc9b01c57b03750dcdb64a6e37621e5448c58ca18ed
+<------ ubuntu20vnc依赖3b5b2cc10fd7，故悬空镜像不会清理。
+
+// 如果希望得到一个单独的镜像，去掉依赖、去掉层次
+//1、可以用docker export
+docker export container_id -o export.tar
+# 另外，docker save 是保存镜像到文件，不会让镜像独立于基础镜像，它保持原有的分层结构, 完整保留元数据。
+//2、docker23以下可以使用 --squash 选项
+# 提交并压缩所有层为单层
+docker commit --squash 容器ID my_squashed:latest
+//3、Docker 23.0+ 版本：彻底删除了 docker commit --squash
+# 如果能接触到容器的 Dockerfile，最标准的方法是通过docker build --squash 构建单层镜像
+DOCKER_BUILDKIT=1 docker build --squash -t qcom_8155:V2 .
+# 需要在 Docker daemon 开启实验性功能，见下方说明
+sudo vim /etc/docker/daemon.json
+# 添加或修改如下内容：
+{
+    "experimental": true
+}
+//4、使用第三方工具 docker-squash
+pip install docker-squash
+// 然后将~/.local/bin/docker-squash添加系统PATH
+docker-squash -t qcom_8155:V2-squashed qcom_8155:V2
+
+// 合并镜像层后，删除原镜像，然后悬空镜像会自动清理。如果docker images -a还有悬空镜像，可以执行
+docker image prune
 ```
 
 - **-a :**提交的镜像作者。
@@ -234,6 +279,14 @@ docker load -i D:\docker-images\springbootapp2-latest.tar
 4. **两种方法不可混用**
 
 ## 中文乱码问题
+
+基础镜像通常只包含最小化的语言环境，系统缺少 `en_US.UTF-8` 语言环境。
+
+```
+apt update
+apt-get install -y locales
+locale-gen en_US.UTF-8
+```
 
 默认情况下，下载的ubuntu18.04镜像，是不支持中文路径的，显示为乱码；文件内容也不能是中文，无法正常显示; 编译时，python默认语言已经是utf-8,但还是报编码错误。。。等等各种与编码有关的错误。
 
@@ -312,10 +365,34 @@ LC_MONETARY="POSIX"
 3. 启动时或进入bash时候，设置字符集
 
    ```shell
-   docker run -i -t --env LANG=C.UTF-8 --env LANGUAG=C.UTF-8 --env LC_ALL=C.UTF-8 ubuntu /bin/bash
+   docker run -i -t --env LANG=C.UTF-8 --env LANGUAGE=C.UTF-8 --env LC_ALL=C.UTF-8 ubuntu /bin/bash
    ```
 
    这个方法也是推荐的，不需要在容器里折腾了。如果忘了在docker run时指定uft8,后续也可以在docker exec进入容器是指定。但是每次exec命令都要加，就比较烦了，那就不如用方法2了。
+
+如果到了这一步还是中文显示方框，那就是缺少字体文件：
+
+```
+apt install -y fontconfig fonts-wqy-zenhei
+
+最常用 4 套中文字体（随便装一个就好）
+1. 文泉驿正黑（最推荐，最清晰）
+
+apt install -y fonts-wqy-zenhei
+2. 文泉驿微米黑（简洁）
+apt install -y fonts-wqy-microhei
+
+3. 开源宋体（类似 Windows 宋体）
+apt install -y fonts-arphic-ukai
+
+4. 开源黑体（类似 Windows 黑体）
+apt install -y fonts-arphic-gkai00mp
+
+安装完刷新字体缓存
+fc-cache -fv
+```
+
+
 
 ## 时区问题
 
@@ -338,7 +415,11 @@ Asia/Shanghai
 
 ## 用vscode看代码
 
-由于不好在docker里面直接启动vscode，
+由于不好在docker里面直接启动vscode的界面，
+
+优选： 安装Dev Containers插件。见“02开发环境\ide\vscode remotessh+docker.mdvscode remotessh+docker.md”
+
+备选：
 
 1. ifconfig查看docker里面的ip，然后安装ssh服务，在外面用vscode+remote插件访问
 2. 或者，创建容器的时候，-v参数，宿主的路径和容器里的路径使用一样的。直接在外面用vscode打开。
@@ -484,14 +565,34 @@ docker exec -it -u root your_container /bin/bash
 useradd -d "/home/xue" -m -u 1000 -s "/bin/bash" xue
 ```
 
+## 限制CPU
 
+```
+# 创建容器时
+docker run --cpuset-cpus="0-3" your-image-name
+
+# 已经创建的容器， docker start 启动时限制CPU 使用
+docker update --cpuset-cpus="0,1" my-container
+docker start my-container
+
+#注意下面这个命令不能清空核心绑定，也许是一个bug；--cpus=0.0同理无效
+docker update --cpuset-cpus="" ollama
+
+# 限制 CPU 最大 800%，系统自动调度，而不是指定CPU
+docker update --cpus=8 ollama
+
+docker run --cpu-shares=512 your-image-name
+
+#查看当前设置
+docker inspect ollama | grep "CpusetCpus"
+```
 
 ## 常用的run指令参考
 
 最后，汇总前面的知识。我们常用的run指令，完整版参考如下：
 
 ```shell
-docker run -itd --user $(id -u):$(id -g) --name dev_3ya --hostname dev_3ya -p 2222:22 -v /home/xue/3ya:/home/xue/3ya --env LANG=C.UTF-8 --env LANGUAG=C.UTF-8 --env LC_ALL=C.UTF-8 ubuntu:18.04
+docker run -itd --user $(id -u):$(id -g) --name dev_3ya --hostname dev_3ya -p 2222:22 -v /home/xue/3ya:/home/xue/3ya --env LANG=C.UTF-8 --env LANGUAGE=C.UTF-8 --env LC_ALL=C.UTF-8 ubuntu:18.04
 ```
 
 项目中每次使用时，直接从这拷贝，改改名字和路径。

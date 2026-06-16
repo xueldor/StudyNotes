@@ -1,0 +1,19 @@
+权限问题见“Linux下的adb.txt”。
+
+串口连接后，对应设备是/dev/ttyUSB0。有个问题是，末尾的0经常变化，系统是从0往上计数的，所以有时插上后变成/dev/ttyUSB1、/dev/ttyUSB2...导致串口工具每次需要打开设置属性-修改串口设备路径。
+方法：
+lsusb找到这个设备的信息：
+xue@xue-Uranus-Series:~$ lsusb
+Bus 001 Device 004: ID 0403:6001 Future Technology Devices International, Ltd FT232 Serial (UART) IC
+看到0403:6001两个id。
+然后编辑/etc/udev/rules.d/50-usb-serial.rules或者70-ttyusb.rules都可以，添加一行：
+xue@xue-Uranus-Series:/etc/udev/rules.d$ cat 70-ttyusb.rules 
+KERNEL=="ttyUSB[0-9]*",ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6001",MODE="0666",SYMLINK+="tty_serial_yellow"
+KERNEL=="ttyUSB[0-9]*",MODE="0666"
+
+然后执行
+service udev reload
+service udev restart
+让它生效。
+这样会创建 tty_serial_yellow 链接指向/dev/ttyUSB2，不管每次如何变化，tty_serial总是指向它。串口工具配置 tty_serial_yellow 即可。SYMLINK名字随便起。
+

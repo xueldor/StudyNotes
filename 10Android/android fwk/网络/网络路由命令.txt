@@ -19,6 +19,7 @@ console:/ # ip ru
 29000:  from all fwmark 0x0/0xffff iif lo lookup eth1 
 32000:  from all unreachable
 前面的数字代表优先级，main表的优先级应该最高，权重9000在最上面
+ip rule add from all lookup main pref 9000 <-----添加main表rule优先级9000。当eth1和wlan0同时连接，ping eth1走的wlan0，检查是否缺少这条。
 
 #调整优先级
 console:/ #ip rule
