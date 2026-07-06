@@ -15,7 +15,7 @@
 从安卓源码里将这些依赖库路径“挖”出来，指定给cmake即可。下面几个示例覆盖：
 
 * 通过脚本android_cmake_env.sh设置，先执行source ../android_cmake_env.sh, 再执行cmake
-
+  
   这是比较传统的方法，编译没有问题，但是如果用IDE打开项目，如何让IDE先执行脚本再解析cmake文件，是个问题，有些IDE可以配。
 
 * 创建工具链文件“toolchain.cmake”的方法。可下载NDK，用NDK里提供的cmake。
@@ -56,10 +56,6 @@ make
 make install
 ```
 
-
-
-
-
 几个示例均基于SOONG_GEN_CMAKEFILES生成的 CMakeLists.txt，演示几种不同方法。
 
 ## 示例一
@@ -71,7 +67,7 @@ make install
 基于securityta10的hal服务。
 
 1. 把CMakeLists.txt复制到hal服务源码目录，打开，在末尾追加target_link_libraries。需要追加的库可以从Android.bp获知，并补充c、dl、c++这些C++程序的基础库。
-
+   
    ```
    add_executable(vendor.iauto.hardware.securitychip-1.0-service ${SOURCE_FILES})
    set_target_properties(vendor.iauto.hardware.securitychip-1.0-service
@@ -84,14 +80,14 @@ make install
        c dl c++ base hidlbase log cutils utils hidltransport hardware crypto QSEEComAPI ion :vendor.iauto.hardware.securitychip@1.0.so
    )
    ```
-
+   
    * hal程序的文件名应该是vendor.iauto.hardware.securitychip@1.0-service，但是“@”在cmake里有特殊的含义，不支持名称里含有“@”符号。
    * Android.bp里依赖的libbase.so, CMakeLists.txt里应写成base,去掉前面的lib。
    * vendor.iauto.hardware.securitychip@1.0.so这个库，原本前面就没有lib，所以只能用指定名字的方式。
    * 额外添加libc libdl libc++以及crtbegin_dynamic、crtend_android静态库，必要时还要加上libm。原因是我会在LDFLAGS指定“-nostdlib”,故默认不加载，需要我手动添加链接。这种方式精确控制得当，可大幅减小可执行文件体积。如果不指定“-nostdlib”，不管模块实际是否用到，链接器都把这些基础库加进来。
 
 2. 此时虽然指定了依赖库，但是链接器不知道到哪儿找，需要脚本里给出搜索路径，另外还需脚本指定LDFLAGS：
-
+   
    ```
    //新建一个“android_cmake_env.sh”文件
    export aosp_root="/home/xuexiangyu/workspace/24mm_t2/apps/LINUX/android"
@@ -107,27 +103,27 @@ make install
    ```
 
 3. 上面我只指定了4个路径，并且没有指定sysroot：
-
+   
    > //不加-L,依赖的静态库
-   >
+   > 
    > out/soong/.intermediates/bionic/libc/crtbegin_dynamic/android_vendor.32_arm64_armv8-a/crtbegin_dynamic.o
-   >
+   > 
    > //加-L，到这些目录下找so
-   >
+   > 
    > out/target/product/msmnile_au/system/apex/com.android.runtime/lib64/bionic
-   >
+   > 
    > out/target/product/msmnile_au/system/lib64
-   >
+   > 
    > out/target/product/msmnile_au/vendor/lib64
-
+   
    product/msmnile_au/system/lib64里文件是编译快完成的最后阶段，拷贝过去的。真实mm编译的时候，引用的是out/soong/.intermediates路径里的so。一个一个的搜索这些路径比较麻烦，所以方便起见，整编过后，直接用target/product/msmnile_au/system/lib64就行了。
-
+   
    另外有些库还可以到prebuilts/ndk/下找。有些平台把prebuilts/ndk阉割掉了，只能到out下面去找，总能找到的。
 
 4. **（重要）**交叉编译安卓时，不能用系统默认的 GNU ld（ld.bfd），必须改用 LLVM 的 lld 链接器，所以“-fuse-ld=lld”必不可少，少则不能编译。“-Wl,-dynamic-linker,/system/bin/linker64”最好也加上，防止能构建，push进去不能运行。
 
 5. cpp编译成.o文件的过程，我们不需要关心，自动生成的CMakeLists.txt已经包含了。如果你非要自己写，需要设置一堆交叉编译工具链。例如：
-
+   
    ```
    #参考
    export clang_toolchain_dir="${aosp_root}/prebuilts/clang/host/linux-x86/clang-r416183b1"
@@ -141,7 +137,7 @@ make install
    ```
 
 6. 最后，基于androd_cmake_env.sh和CMakeLists.txt，构建目标
-
+   
    ```
    mkdir build
    cd build
@@ -149,11 +145,10 @@ make install
    cmake .. -DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY
    make
    #-----》 vendor.iauto.hardware.securitychip-1.0-service文件就在build目录下，可以push到车机
-   
    ```
-
+   
    为什么要加“-DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY”呢，因为我们的配置是不完整的，比如，没有指定sysroot。CMake 在 `project()` 命令执行时会启用语言（如 C/C++），并立即开始对工具链进行一系列测试（如检测编译器 ABI 信息）。交叉编译不指定sysroot的话，测试肯定不能通过，一堆配置，没必要，不影响编译，所以“-DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY”跳过这一步。
-
+   
    ```
    # 不加“-DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY"
    -- Check for working C compiler: /usr/bin/cc
@@ -164,7 +159,7 @@ make install
        "/usr/bin/cc"
    
      is not able to compile a simple test program.
-     
+   
    同时注意到compiler仍然是/usr/bin/cc。有两个方法：
    1、把CMAKE_C_COMPILER/CMAKE_CXX_COMPILER放到project前面；
    2、脚本里指定CC、CXX变量
@@ -260,10 +255,10 @@ echo "  ninja"
 
 1、通过LDFLAGS，指定：
 
-	* 链接器 ldd
-	* 头文件路径
-	* 静态库路径
-	* 动态库路径
+    * 链接器 ldd
+    * 头文件路径
+    * 静态库路径
+    * 动态库路径
 
 2、CMakeLists.txt追加target_link_libraries，指定依赖库
 
@@ -317,10 +312,7 @@ export crtend_lib_dir="${aosp_root}/prebuilts/ndk/r21/platforms/android-29/arch-
 export LIBRARY_PATH="${crtbegin_lib_dir}:${crtend_lib_dir}:${gcc_libgcc_lib_dir}:${gpte_vendor_lib_path}"
 
 export PATH="${aosp_root}/out/host/linux-x86/bin:${crtbegin_lib_dir}:${crtend_lib_dir}:${aosp_root}/prebuilts/ndk/r21/platforms/android-29/arch-arm64:${PATH}"
-
 ```
-
-
 
 ## 示例二
 
@@ -333,11 +325,11 @@ cc_test {
     name: "securitychip_pkcs11_ut",
     vendor: true,
     cppflags: [
-		//...省略
+        //...省略
     ],
     srcs: [
         "test/pkcs11_test.cpp",
-		//...省略
+        //...省略
     ],
     header_libs: [
         "device_kernel_headers",
@@ -401,7 +393,6 @@ target_link_directories(securitychip_pkcs11_ut PRIVATE
 target_link_libraries(securitychip_pkcs11_ut
     c m dl c++ base hidltransport hardware QSEEComAPI ion
 )
-
 ```
 
 ## 示例三
@@ -457,7 +448,6 @@ target_link_libraries(vendor.iauto.hardware.securitychip-1.0-service
     :vendor.iauto.hardware.securitychip@1.0.so
     :vendor.hsae.hardware.ta100@1.0.so
 )
-
 ```
 
 cmake命令可省略-DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY
@@ -601,16 +591,16 @@ build_onwindows_to_arm64在windows上执行。也是在windows上下载NDK和cma
                 "CMAKE_ANDROID_ARCH_ABI": "arm64-v8a",
                 "CMAKE_SYSTEM_VERSION": "30",
                 "CMAKE_ANDROID_NDK": "${ANDROID_NDK}",
-                
+
                 // 传统，手动指定TOOLCHAIN file, ANDROID_ABI等是NDK里定义的变量，不依赖cmake版本
                 "CMAKE_TOOLCHAIN_FILE": "${ANDROID_NDK}/build/cmake/android.toolchain.cmake",
                 "ANDROID_ABI": "arm64-v8a",
                 "ANDROID_PLATFORM": "android-30",
                 "ANDROID_NDK": "${ANDROID_NDK}",
-                
+
                 // 链接可执行文件的参数。CMAKE_SHARED_LINKER_FLAGS则用于动态库
                 "CMAKE_EXE_LINKER_FLAGS": "-fuse-ld=lld"
-                
+
                 // 非必须
                 "CMAKE_TRY_COMPILE_TARGET_TYPE": "STATIC_LIBRARY",
                 "CMAKE_FIND_ROOT_PATH_MODE_PROGRAM": "NEVER",
@@ -697,7 +687,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -nostdlibinc")
 add_subdirectory(../qsee_api ${CMAKE_CURRENT_BINARY_DIR}/qsee_api)
 add_subdirectory(../libhsckteec ${CMAKE_CURRENT_BINARY_DIR}/libhsckteec)
 add_subdirectory(../hal/default ${CMAKE_CURRENT_BINARY_DIR}/hal_default)
-
 ```
 
 add_subdirectory只搜索加进来的目录的CMakeLists.txt文件，不会遍历子目录。
@@ -746,7 +735,6 @@ target_link_directories(hsaeQteeIpc PRIVATE
 target_link_libraries(hsaeQteeIpc
     QSEEComAPI ion
 )
-
 ```
 
 #### libcryptoauth:
@@ -761,14 +749,14 @@ link_directories(
 )
 
 set (SRC
-	src/pkcs11_api.c
-	src/ck_debug.c
-	src/ck_helpers.c
-	src/ck_invoke_ta.c
-	src/pkcs11_processing.c
-	src/pkcs11_token.c
-	src/serializer.c
-	src/serialize_ck.c
+    src/pkcs11_api.c
+    src/ck_debug.c
+    src/ck_helpers.c
+    src/ck_invoke_ta.c
+    src/pkcs11_processing.c
+    src/pkcs11_token.c
+    src/serializer.c
+    src/serialize_ck.c
 )
 # libcryptoauth.so
 add_library (cryptoauth SHARED ${SRC})
@@ -795,7 +783,7 @@ include_directories(
     "${ANDROID_ROOT}/external/libcxx/include"
 )
 target_link_libraries (cryptoauth PUBLIC
-	log ion hsaeQteeIpc
+    log ion hsaeQteeIpc
 )
 
 # 单元测试程序
@@ -815,7 +803,7 @@ target_include_directories(securitychip_pkcs11_ut SYSTEM PRIVATE # 三方头文�
     "${ANDROID_ROOT}/external/googletest/googlemock/include"
 )
 target_link_libraries (securitychip_pkcs11_ut PRIVATE
-	log ion hsaeQteeIpc c++
+    log ion hsaeQteeIpc c++
 )
 
 # test_integration测试程序
@@ -835,9 +823,8 @@ target_include_directories(pkcs11_client_test PRIVATE
 )
 
 target_link_libraries (pkcs11_client_test PRIVATE
-	log cutils base utils crypto_ttrs p11 c++
+    log cutils base utils crypto_ttrs p11 c++
 )
-
 ```
 
 #### securitychip hal
@@ -941,7 +928,7 @@ target_include_directories(securitychip_hal_ut PRIVATE
     "${ANDROID_ROOT}/external/googletest/googlemock/include"
 )
 target_link_libraries (securitychip_hal_ut PRIVATE
-	c++ base hidlbase log cutils utils 
+    c++ base hidlbase log cutils utils 
     hidltransport hardware crypto QSEEComAPI ion hsaeQteeIpc
     :vendor.iauto.hardware.securitychip@1.0.so
     :vendor.hsae.hardware.ta100@1.0.so
@@ -971,7 +958,7 @@ target_include_directories(securitychip_hal_client_test PRIVATE
 )
 
 target_link_libraries (securitychip_hal_client_test PRIVATE
-	log cutils base utils c++ hidltransport hardware hidlbase
+    log cutils base utils c++ hidltransport hardware hidlbase
     :vendor.iauto.hardware.securitychip@1.0.so
     :vendor.hsae.hardware.ta100@1.0.so
 )
@@ -980,33 +967,31 @@ target_link_libraries (securitychip_hal_client_test PRIVATE
 tips:
 
 > 1、关于SYSTEM 
->
+> 
 > target_include_directories(test PRIVATE
 >     external/googletest/include
 > )
->
+> 
 > 生成命令：-Iexternal/googletest/include  。（大写的i，不是L）
->
+> 
 > 而
->
+> 
 > target_include_directories(test SYSTEM PRIVATE
 >     external/googletest/include
 > )
->
-> 生成命令：-isystem external/googletest/include
->
-> `-I` → gtest 被当“自己代码” → warning 全开
->
-> `-isystem` → gtest 被当“外部库” → warning 被压制，include search priority 更低
->
 > 
->
+> 生成命令：-isystem external/googletest/include
+> 
+> `-I` → gtest 被当“自己代码” → warning 全开
+> 
+> `-isystem` → gtest 被当“外部库” → warning 被压制，include search priority 更低
+> 
 > 2、许多功能有多种实现方式，尽量用常规的。
->
+> 
 > 优先用target_compile_options而不是
->
+> 
 > set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -xxxx")
->
+> 
 > 优先target_link_directories而不是全局的link_directories
 
 ### 保持和mm一致
@@ -1065,7 +1050,7 @@ CMake里的构建目标，IDE界面上都有，直接通过点点就能生成目
 3. 打开cmd，执行lldb,看能不能进入lldb的控制台。如果不能，那说明环境没配好。vscode自然也不可能正确调试。
 
 4. vscode, 在“.vscode”目录创建：“launch.json”。根据界面引导自动创建的，不能满足我们，所以自己创建，或者在已有的基础上改。内容如下：
-
+   
    ```
    {
        "version": "0.2.0",
@@ -1105,14 +1090,14 @@ CMake里的构建目标，IDE界面上都有，直接通过点点就能生成目
        ]
    }
    ```
-
+   
    这里分别演示了launch模式和attach模式。
-
+   
    * launch: 启动目标程序并调试，适用需要在程序入口(如main函数)打断点。
    * attach：attach到已经在运行的程序上。比较适合安卓hal服务。
 
 5. 如果CMakeLists.txt里没有指定相关参数，那么默认cmake可能构建的是Release版本，里面不带debug信息。所以需要：
-
+   
    ```
    "cacheVariables": {
        ...
@@ -1122,21 +1107,20 @@ CMake里的构建目标，IDE界面上都有，直接通过点点就能生成目
        "CMAKE_BUILD_TYPE": "Debug"
    }
    ```
-
+   
    这里，我们编译debug版本，程序文件本身已经包含里调试符号，所以launch.json里不需要配置符号表文件位置，直接“target create xxxxx”即可。至于调试符号分离的情况下，lldb命令怎么写，自行百度。
 
-6. 另外，可以写一些脚本或利用VSCode的task，用来在debug前自动检测环境（比如adb devices识别设备）以及将程序push到机器。
-
+6. 
    > 其实launch模式本来就会自动将securitychip_pkcs11_ut推到/data/local/tmp/securitychip_pkcs11_ut。但是第一次执行时，target create /data/local/tmp/securitychip_pkcs11_ut这行，因为没这个文件会报错。那么我们不要依赖它，写个task自己去push就行了。
-
+   
    在“.vscode”目录创建：“tasks.json”,内容：
-
+   
    ```
    {
        "version": "2.0.0",
        "tasks": [
            {
-               "label": "push-lldb-server",
+               "label": "push-lldb-server-windows",
                "type": "shell",
                "command": "adb",  // 将lldb-server推送到设备上
                "args": [
@@ -1159,14 +1143,48 @@ CMake里的构建目标，IDE界面上都有，直接通过点点就能生成目
                "problemMatcher": []
            },
            {
-               "label": "start-lldb-server",
+               "label": "start-lldb-server-windows",
                "type": "shell",  // 启动lldb server，转发断开
                "command": "adb forward tcp:1234 tcp:1234 && adb root && adb shell \"/data/local/tmp/lldb-server platform --listen *:1234 --server > /dev/null 2>&1 &\"",
-               "dependsOn": ["push-lldb-server"],
+               "dependsOn": ["push-lldb-server-windows"],
                "options": {
                    "shell": {
                        "executable": "cmd.exe",
                        "args": ["/d", "/c"]
+                   }
+               }
+           },
+           {
+               "label": "push-lldb-server-linux",
+               "type": "shell",
+               "command": "adb",
+               "args": [
+                   "push",
+                   "/workspace/xuexiangyu/Android/Sdk/ndk/30.0.14904198/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/21/lib/linux/aarch64/lldb-server",
+                   "/data/local/tmp/lldb-server",
+                   "&&",
+                   "adb",
+                   "shell",
+                   "chmod",
+                   "+x",
+                   "/data/local/tmp/lldb-server"
+               ],"options": {
+                   "shell": {
+                       "executable": "/bin/bash",
+                        "args": ["-c"]
+                   }
+               },
+               "problemMatcher": []
+           },
+           {
+               "label": "start-lldb-server-linux",
+               "type": "shell",  // 启动lldb server，转发断开
+               "command": "adb forward tcp:1234 tcp:1234 && adb root && adb shell \"/data/local/tmp/lldb-server platform --listen *:1234 --server > /dev/null 2>&1 &\"",
+               "dependsOn": ["push-lldb-server-linux"],
+               "options": {
+                   "shell": {
+                       "executable": "/bin/bash",
+                       "args": ["-c"]
                    }
                }
            },
@@ -1179,27 +1197,36 @@ CMake里的构建目标，IDE界面上都有，直接通过点点就能生成目
                ]
            },
            {
+               "label": "push-securitychip-hal-service",
+               "type": "cmake",               // 使用 CMake 任务类型
+               "command": "build",            // 执行构建命令
+               "targets": [                   // 指定要构建的目标，即 CMakeLists.txt 中add_custom_target定义的名字
+                   "push-securitychip-hal-service"
+               ]
+           },
+           {
                "label": "securitychip_pkcs11_ut_prepared",
                "dependsOrder": "sequence", //顺序执行，默认是并行执行
-               "dependsOn": ["push-lldb-server", "start-lldb-server", "push-securitychip_pkcs11_ut"],
+               "dependsOn": ["push-lldb-server-linux", "start-lldb-server-linux", "push-securitychip_pkcs11_ut"],
            },
            {
                "label": "securitychip_hal_service_prepared",
                "dependsOrder": "sequence", //顺序执行，默认是并行执行
-               "dependsOn": ["push-lldb-server", "start-lldb-server"],
+               "dependsOn": ["push-lldb-server-linux", "start-lldb-server-linux", "push-securitychip-hal-service"],
            }
        ]
    }
    ```
-
+   
+   你会发现tasks里写复杂的shell比较难，可以放到单独的sh文件里，task去调sh脚本文件，这样比较方便。或者用cmake自定义target也比vscode task方便。
    这个tasks做了几件事：
-
+   
    1、将ndk里的lldb-server推到车机里。因为比较老的安卓版本用的是gdbserver，没有lldb-server,故需要手动准备。这个脚本不完善地方在于，每次都会执行一次push。实际只要push一次，保证文件存在就行。但无伤大雅。如果脚本里先去判断文件存在的话，逻辑太复杂，反而容易出问题。
-
+   
    2、启动lldb-server监听端口1234。以及adb端口转发：adb forward tcp:1234 tcp:1234。同样只要执行一次。每次执行反正也没影响。
-
+   
    3、将带调试的问题securitychip_pkcs11_ut，推送到车机。这里我没有选择在tasks里实现，而是在cmake里加了一个：
-
+   
    ```
    // CMakeLists.txt
    # push securitychip_pkcs11_ut
@@ -1210,9 +1237,9 @@ CMake里的构建目标，IDE界面上都有，直接通过点点就能生成目
        COMMENT "Push securitychip_pkcs11_ut to Android device"
    )
    ```
-
+   
    然后tasks.json里：
-
+   
    ```
    {
        "label": "push-securitychip_pkcs11_ut",
@@ -1223,7 +1250,7 @@ CMake里的构建目标，IDE界面上都有，直接通过点点就能生成目
        ]
    }
    ```
-
+   
    只要装了cmake插件，就支持type cmake。对比一下我上面的推送lldb-server的代码，就知道cmake里实现COMMAND毕竟比json里去写更加方便。而且可以通过`DEPENDS securitychip_pkcs11_ut`，保证debug前先构建最新的二进制。
 
 #### 遇到的问题
@@ -1231,24 +1258,24 @@ CMake里的构建目标，IDE界面上都有，直接通过点点就能生成目
 * AI让我在initCommands里在加一行"process attach -n vendor.iauto.hardware.securitychip@1.0-service"，实测不能加。
 
 * 如果机器里待调试的文件，不是把本地编译出的，比如可能是在服务器上编译的。那么，符号表里的源文件路径，就会和本地源代码路径不一致。需要指定sourceMap
-
+  
   ```
   "sourceMap": {
       // 远程路径 -> 本地路径映射
   },
   ```
-
+  
   我这个项目是cmake本地编的，不需要配sourceMap。
 
 * 这个警告是因为依赖的系统库没有符号表。我们只调试自己的代码，无视这个警告即可。
-
+  
   ```
   warning: (aarch64) C:\Users\xuexiangyu\.lldb\module_cache\remote-android\.cache\F23D23E9-0DF3-EFE8-A2EC-F3F447FFFE11\libcgrouprc.so No LZMA support found for reading .gnu_debugdata section
   warning: (aarch64) C:\Users\xuexiangyu\.lldb\module_cache\remote-android\.cache\DE954B65-7FC5-0EC8-7205-88C65F6426C0\libnetd_client.so No LZMA support found for reading .gnu_debugdata section
   ```
 
 * 一直等待某个task完成，时间长了后弹出提示，说任务还在执行是否继续debug。这是因为task里指定里background：true。后台任务即使完成了也不知道。
-
+  
   `adb shell "/data/local/tmp/lldb-server platform --listen *:1234 --server &"`虽然后台进程启动了,但 `adb` 会保持连接直到所有**后台进程的标准输出/错误**被关闭,所以第一次执行会阻塞。必须加重定向输出`adb shell "/data/local/tmp/lldb-server platform --listen *:1234 --server > /dev/null 2>&1 &"`或者加nohup:`adb shell "nohup /data/local/tmp/lldb-server platform --listen *:1234 --server &"`
 
 * "platform settings -w /data/local/tmp"必须指定工作目录，否则提示readonly权限不足。且在platform connect语句后面。
@@ -1258,14 +1285,14 @@ CMake里的构建目标，IDE界面上都有，直接通过点点就能生成目
 * 没有考虑结束lldb-server。无伤大雅，能用就行。可手动kill。
 
 * 一些和python有关的警告。大多是环境里有其它python。检查环境变量确保用ndk里的python即可。也可以在json里指定：
-
+  
   ```
   "stopOnEntry": true,
   "env": {
       "PYTHONPATH": "D:\\xxx\\xxx\\Lib;D:\\xxxx\\xxxx\\DLLs"
   }
   ```
-
+  
   由AI提供，未验证。
 
 ### 问题
@@ -1275,39 +1302,39 @@ CMake里的构建目标，IDE界面上都有，直接通过点点就能生成目
 * sshfs映射的磁盘，ninja处理带windows盘符的路径(如 S:/xxxx/aosp/xxx/file1.c)有问题,报文件不存在。比较奇怪的是samba映射的本地磁盘就没这个问题。直接用`\\192.168.66.252\xxxx\aosp\xxxx`也支持，甚至把反斜杠换成正斜杠也是OK的。
 
 * samba映射：cmake过程中 “The CXX compiler identification is unknown”，然后执行ninja命令的过程中报错。把项目代码下载到本地则构建成功。将clang目录添加PATH也是一样。比较诡异，猜测大概率是以下原因之一：
-
+  
   1）网络盘权限或同步有问题；
-
+  
   2）网络延迟可能导致 CMake 失败；
-
+  
   3）网络盘不是NTFS文件系统，不支持符号链接及其它文件系统提供的特性；
-
+  
   4）**网络路径兼容性**：CMake 对网络路径或 UNC 路径的支持可能不完整
-
+  
   解决这个问题比较简单，指定binaryDir为本地磁盘路径即可。让cmake生成物不要写到网络盘上。
-
+  
   但这时奇诡的事情再次发生了，如果我指定：`"binaryDir": "D:/workspace/output"`，会触发一个新问题：output目录下的生成物缺少CMakeCache.txt文件，ninja命令一执行就报错。
-
+  
   如果我指定：`"binaryDir": "D:/workspace/build"`，则顺利编译通过。难道output和build这两个名字还有区别吗。
 
 * 编译巨慢。分两个阶段：
-
+  
   1）cmake命令，生成中间文件、cache文件和build.ninja文件。是大量的小文件，这种非常受到网络延迟的影响。
-
+  
   ​      解决方法：指定binaryDir为本地磁盘路径。避免频繁写网络盘。节省了十几分钟。
-
+  
   2）执行ninja命令，真正编译代码。
-
+  
   ​      binaryDir只解决了cmake命令阶段的速度问题。而执行ninja命令真正编译时，大量的include文件和链接库依然要建立网络请求。没太好的方法，让AI写个python脚本，解析CMakeLists.txt中的所有网络盘路径，把所有include目录、链接库所有目录都下载到本地。如果没有AI介入，这会消耗你很多时间，不推荐。每次，当依赖别人的库有更新时，都要重新下载。
-
+  
   （脚本附在文末）
 
 * 将整个项目代码下载到本地，依赖的库、头文件使用网络盘，也可以只把CMakeLists.txt、CMakePresets.json两个下载到windows上。没问题但没有意义，也不能提升编译速度。且可能导致有些头文件因include两次而报错。
-
+  
   > tips: `#pragma once`依赖的是**文件路径**来判断是否重复。同一个头文件通过**不同的路径**被包含，编译器会认为它们是不同的文件。比如下载到本地后，本地有一份，远程目录也有一份，通过编译器参数同时被include了。或者同一个文件，通过路径引用一次，通过符号链接、网络驱动映射引用一次，那么路径不一样，`#pragma once`不能识别是相同头文件。
-  >
+  > 
   > 传统的添加头文件保护宏方式没这个问题：
-  >
+  > 
   > ```
   > 尽量用：
   > #ifndef DEDICATED_MEMORY_H
@@ -1327,8 +1354,6 @@ CMake里的构建目标，IDE界面上都有，直接通过点点就能生成目
 4、系统存在多个CMake时，确保用的是ANDROID SDK里的cmake。
 
 5、用NDK编译的坏处是，NDK里的clang版本和AOSP里的不一致，版本差异较大时可能存在源码环境mm能编过，用ndk的clang不能编过的情况。可以通过在CMakeLists.txt里重新设定CMAKE_C_COMPILER解决。
-
-
 
 ## 自动生成
 
@@ -1358,40 +1383,40 @@ def extract_android_root_paths(cmake_file):
     paths = []
     with open(cmake_file, 'r', encoding='utf-8', errors='ignore') as f:
         content = f.read()
-    
+
     # 匹配 ${ANDROID_ROOT}/xxx 的模式
     pattern = r'\$\{ANDROID_ROOT\}/([^\s"\'\\]+)'
     matches = re.findall(pattern, content)
-    
+
     for match in matches:
         full_path = os.path.join(ANDROID_ROOT, match)
         paths.append(full_path)
-    
+
     return paths
 
 def copy_files_to_target(source_paths, target_root):
     """将源路径复制到目标目录，保留目录结构"""
     copied_count = 0
     skipped_count = 0
-    
+
     for source_path in source_paths:
         # 将路径转换为Windows格式
         source_path = source_path.replace('/', '\\')
-        
+
         if not os.path.exists(source_path):
             print(f"跳过不存在的路径: {source_path}")
             skipped_count += 1
             continue
-        
+
         # 计算相对路径（相对于ANDROID_ROOT）
         relative_path = os.path.relpath(source_path, ANDROID_ROOT.replace('/', '\\'))
         target_path = os.path.join(target_root, relative_path)
         target_dir = os.path.dirname(target_path)
-        
+
         # 确保目标目录存在
         if not os.path.exists(target_dir):
             os.makedirs(target_dir)
-        
+
         # 复制文件或目录
         if os.path.isfile(source_path):
             shutil.copy2(source_path, target_path)
@@ -1403,7 +1428,7 @@ def copy_files_to_target(source_paths, target_root):
             shutil.copytree(source_path, target_path)
             print(f"复制目录: {source_path} -> {target_path}")
             copied_count += 1
-    
+
     return copied_count, skipped_count
 
 # 将项目依赖的文件从网络映射盘复制到windows本地，以提高编译速度。
@@ -1411,7 +1436,7 @@ def main():
     print("=" * 60)
     print("从CMakeLists.txt提取并复制ANDROID_ROOT路径")
     print("=" * 60)
-    
+
     # 收集所有路径
     all_paths = []
     for cmake_file in CMAKE_FILES:
@@ -1419,15 +1444,15 @@ def main():
         paths = extract_android_root_paths(cmake_file)
         all_paths.extend(paths)
         print(f"  找到 {len(paths)} 个路径")
-    
+
     # 去重
     all_paths = list(set(all_paths))
     print(f"\n去重后共 {len(all_paths)} 个唯一路径")
-    
+
     # 复制文件
     print("\n开始复制文件...")
     copied, skipped = copy_files_to_target(all_paths, TARGET_ROOT)
-    
+
     print("\n" + "=" * 60)
     print(f"复制完成!")
     print(f"成功复制: {copied} 个")
@@ -1437,10 +1462,7 @@ def main():
 
 if __name__ == "__main__":
     main()
-
 ```
-
-
 
 2、如果希望写一个脚本自动生成cmake，最好用python。因为shell解析bp文件是非常困难的，而python有一个库可以解析：
 
@@ -1488,4 +1510,3 @@ libs += ["c", "m", "dl", "c++"] # bp的基础上补充libc、libm、libdl等库
 ```
 
 问题是，有时我们会提取出一个`cc_defaults`，cc_binary引用cc_defaults。推测android-bp或许无法得到cc_defaults里的shared_libs。因此最终还用人工核查一下。
-

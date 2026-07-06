@@ -11,12 +11,12 @@
 
 # 对比：
 
-| 远程方案           | 图像渲染位置         | 本地负载           | 网络带宽要求           | 适配性                     |
-| ------------------ | -------------------- | ------------------ | ---------------------- | -------------------------- |
-| Docker+VNC         | 服务器 Docker 容器内 | 极低（仅解码显示） | 中（压缩后传输）       | ✅ 最佳                     |
-| X11 转发（ssh -Y） | 本地 Windows/macOS   | 高（本地渲染）     | 高（传输原始绘图指令） | ❌ 外网卡顿、Windows 适配差 |
-| RDP（xrdp+Docker） | 服务器 Docker 容器内 | 极低               | 中（RDP 编码）         | ⚠️ 容器内配置复杂、依赖重   |
-| NoMachine+Docker   | 服务器 Docker 容器内 | 极低               | 低（自研高速编码）     | ⚠️ 免费版有限制、容器化重   |
+| 远程方案             | 图像渲染位置           | 本地负载      | 网络带宽要求      | 适配性                |
+| ---------------- | ---------------- | --------- | ----------- | ------------------ |
+| Docker+VNC       | 服务器 Docker 容器内   | 极低（仅解码显示） | 中（压缩后传输）    | ✅ 最佳               |
+| X11 转发（ssh -Y）   | 本地 Windows/macOS | 高（本地渲染）   | 高（传输原始绘图指令） | ❌ 外网卡顿、Windows 适配差 |
+| RDP（xrdp+Docker） | 服务器 Docker 容器内   | 极低        | 中（RDP 编码）   | ⚠️ 容器内配置复杂、依赖重     |
+| NoMachine+Docker | 服务器 Docker 容器内   | 极低        | 低（自研高速编码）   | ⚠️ 免费版有限制、容器化重     |
 
  X11 转发看似只传轻量的「绘图指令」，但实际带宽占用远高于 VNC/RDP。
 
@@ -24,13 +24,13 @@
 * 这些指令需要 **「客户端 - 服务端」频繁双向交互 **（指令下发 + 确认回执），哪怕单条指令很小，**高频次的网络握手、延迟累积**，会让实际带宽占用大幅上升
 * 对于**现代软件**，其界面包含**大量矢量图形、字体渲染、多层窗口、动态特效**，对应的**X11 绘图指令总量会呈指数级增长**，甚至会**超过 VNC 压缩后的像素流大小**。**动态高频刷新**的：代码高亮、鼠标悬浮提示、窗口滚动、侧边栏折叠 / 展开、项目索引树刷新…… 每一个微小操作，都会触发**成百上千条细碎的 X11 绘图指令**
 
-| 指标                | X11 转发（ssh -Y）              | VNC（Tight 编码）         |
-| ------------------- | ------------------------------- | ------------------------- |
-| 单操作指令 / 帧大小 | 单滚动→几十 KB 的细碎指令       | 单滚动→几 KB 的增量像素流 |
-| 网络交互次数        | 单操作→上百次双向交互           | 单操作→1 次单向推送       |
-| 实际带宽占用        | 20-50Mbps                       | 1-5Mbps                   |
-| 操作延迟            | 200-500ms（卡顿明显）           | 50-100ms（无感知）        |
-| 外网适配性          | 完全无法使用（丢包 = 卡死后台） | 流畅使用（压缩抗丢包）    |
+| 指标          | X11 转发（ssh -Y）    | VNC（Tight 编码）   |
+| ----------- | ----------------- | --------------- |
+| 单操作指令 / 帧大小 | 单滚动→几十 KB 的细碎指令   | 单滚动→几 KB 的增量像素流 |
+| 网络交互次数      | 单操作→上百次双向交互       | 单操作→1 次单向推送     |
+| 实际带宽占用      | 20-50Mbps         | 1-5Mbps         |
+| 操作延迟        | 200-500ms（卡顿明显）   | 50-100ms（无感知）   |
+| 外网适配性       | 完全无法使用（丢包 = 卡死后台） | 流畅使用（压缩抗丢包）     |
 
 # 方案选择：
 
@@ -91,11 +91,23 @@ vncpasswd
 5、启动
 
 ```
-# 希望容器启动时自启的话，不要放到~/.bashrc里，而是放到/usr/local/bin/start.sh，docker run时指定ENTRYPOINT 脚本
+# 创建脚本/usr/local/bin/start.sh
+#!/usr/bin/env bash
+rm -f /tmp/.X1-lock /tmp/.X11-unix/X1
 export USER=xuexiangyu
 vncserver :1 -localhost no -geometry 1920x1080 -depth 24
-#停止：
+
+#停止：脚本/usr/local/bin/stop.sh
 vncserver  -kill :1
+
+
+# docker run时指定ENTRYPOINT 脚本
+# 加-fg参数，否则脚本结束立即推出。
+vncserver -fg :1 -localhost no -geometry 1920x1080 -depth 24
+还有一些方法比如脚本最后一行加tail -f /dev/null防止推出。理论可能没试过。
+
+#然后创建容器指定ENTRYPOINT 脚本为start.sh
+docker run -itd --user $(id -u):$(id -g) --name=vnc --hostname=vnc --network host vnc_image:V1 /usr/local/bin/start.sh
 ```
 
 端口是，5900+display id。由于这里“vncserver :1”，displayId是1，所以上面转发端口是5900+1=5901。如果指令是`vncserver :0 -geometry 1920x1080 -depth 24`,那么在第一部创建容器时，转发端口就应该改成5900：
@@ -103,6 +115,14 @@ vncserver  -kill :1
 ```
 docker run -p 5901:5900 xxxxx
 ```
+
+或者，网络采用用host模式
+
+```shell
+docker run -itd --user $(id -u):$(id -g) --name=vnc --hostname=vnc  --network host vnc_image:V1 /bin/bash
+```
+
+
 
 6、客户端
 
@@ -173,8 +193,6 @@ patch:
 cp /usr/share/applications/fcitx.desktop /etc/xdg/autostart/
 ```
 
-
-
 # 常见问题
 
 > Warning: xxxx:1 is taken because of /tmp/.X1-lock
@@ -190,26 +208,26 @@ cp /usr/share/applications/fcitx.desktop /etc/xdg/autostart/
 可以在dockerhub搜索一些别人做好的，省去自己配置环境。
 
 * https://hub.docker.com/r/infrastlabs/docker-headless
-
+  
   基于ubuntu20, 支持XRDP/NOVNC。可以mstsc+xrdp+tigervnc多屏。支持音频（xrdp+pulseaudio/noVNC+broadcast）
-
+  
   作者还提供了一个镜像是集成了搜狗输入法的。镜像大小360M。
-
+  
   ```bash
   docker pull infrastlabs/docker-headless:sogou
   #docker pull infrastlabs/docker-headless:ubuntu-24.04
   ```
 
 * https://hub.docker.com/r/dorowu/ubuntu-desktop-lxde-vnc/
-
+  
   这个镜像好多年不更新了。focal表示ubuntu 20.04
-
+  
   ```bash
   docker pull dorowu/ubuntu-desktop-lxde-vnc:focal
   ```
 
 * https://hub.docker.com/r/dewgenenny/docker-headless-vnc-container
-
+  
   Debian 11 with `Xfce4` UI session,VNC和noVnc。还集成了火狐和Chromium浏览器。虽然ubuntu20是基于Debian 11，但是稳妥起见还是尽量直接用基于ubuntu构建的。
 
 # 信息
@@ -238,21 +256,21 @@ tigervnc-standalone-server和tigervnc-scraping-server的区别是：
 
 **TightVNC和TigerVNC**：
 
-| **VNC 实现** | TightVNC                                   | TigerVNC                                                     |
-| ------------ | ------------------------------------------ | ------------------------------------------------------------ |
-| 对比         | (较老的实现，默认无加密，会话为虚拟桌面)   | (更新的实现，性能更好，支持 TLS 加密)                        |
-| 安装指令     | apt install  tightvncserver                | apt install tigervnc-standalone-server                       |
+| **VNC 实现** | TightVNC                                   | TigerVNC                                                                                                              |
+| ---------- | ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------- |
+| 对比         | (较老的实现，默认无加密，会话为虚拟桌面)                      | (更新的实现，性能更好，支持 TLS 加密)                                                                                                |
+| 安装指令       | apt install  tightvncserver                | apt install tigervnc-standalone-server                                                                                |
 | 启动         | vncserver :0 -geometry 1920x1080 -depth 24 | vncserver :0 -localhost no -geometry 1920x1080 -depth 24<br />TigerVNC 为了安全，默认只允许本机连接，启动时添加 `-localhost no` 参数，才能正常远程 |
 
 **XFCE** 和**GNOME** ：对于远程桌面，强烈推荐 XFCE。
 
-| 对比维度            | **XFCE (轻量级首选)**                                        | **GNOME (功能型选手)**                                       |
-| :------------------ | :----------------------------------------------------------- | :----------------------------------------------------------- |
-| **设计理念**        | 轻量、快速、低资源消耗，追求极致效率                         | 美观、现代、交互体验丰富，功能完整                           |
-| **内存占用 (空闲)** | **约 200 - 400 MB**，对云服务器非常友好                      | **约 600 MB - 1.2 GB**，在 2GB 内存的机器上会比较吃力        |
-| **远程流畅度**      | **响应迅速，操作几乎没有延迟**，体验接近本地                 | 图形渲染开销大，在远程连接中**容易感觉卡顿、不跟手**         |
-| **配置难度**        | **配置简单，开箱即用**，与 VNC 兼容性极佳                    | **配置复杂**，尤其在无显卡的 headless 服务器上，常需要模拟显示器 (EDID) 才能启动 |
-| **适用场景**        | **低配服务器、开发板、注重流畅度的日常远程开发**             | 高配机器、本地使用、或特别需要 GNOME 特有生态的场合          |
+| 对比维度              | **XFCE (轻量级首选)**                                                                                   | **GNOME (功能型选手)**                                                                                                                                   |
+|:----------------- |:-------------------------------------------------------------------------------------------------- |:--------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **设计理念**          | 轻量、快速、低资源消耗，追求极致效率                                                                                 | 美观、现代、交互体验丰富，功能完整                                                                                                                                   |
+| **内存占用 (空闲)**     | **约 200 - 400 MB**，对云服务器非常友好                                                                       | **约 600 MB - 1.2 GB**，在 2GB 内存的机器上会比较吃力                                                                                                             |
+| **远程流畅度**         | **响应迅速，操作几乎没有延迟**，体验接近本地                                                                           | 图形渲染开销大，在远程连接中**容易感觉卡顿、不跟手**                                                                                                                        |
+| **配置难度**          | **配置简单，开箱即用**，与 VNC 兼容性极佳                                                                          | **配置复杂**，尤其在无显卡的 headless 服务器上，常需要模拟显示器 (EDID) 才能启动                                                                                                 |
+| **适用场景**          | **低配服务器、开发板、注重流畅度的日常远程开发**                                                                         | 高配机器、本地使用、或特别需要 GNOME 特有生态的场合                                                                                                                       |
 | ~/.vnc/xstartup内容 | `#!/bin/sh`<br/>`unset SESSION_MANAGER`<br/>`unset DBUS_SESSION_BUS_ADDRESS`<br/>`exec startxfce4` | `#!/bin/sh`<br/>`export GNOME_SHELL_SESSION_MODE=ubuntu`<br/>`export XDG_CURRENT_DESKTOP=ubuntu:GNOME`<br/>`exec /etc/X11/Xsession ubuntu-xsession` |
 
 除了Xfce，LXQt、lXde也是很轻量的桌面，比较适合docker。LXDE 比 Xfce 更轻量。LXQt是 LXDE 的继任者，因为它基于 Qt 库，意味着资源占用相对 LXDE 稍高，接近 Xfce。

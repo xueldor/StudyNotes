@@ -34,8 +34,6 @@ vi /etc/docker/daemon.json
 # 重启PC
 ```
 
-
-
 ## 验证：
 
 ```shell
@@ -44,7 +42,7 @@ docker info #如果docker服务起不来，这个指令会报错。
 
 # 查看上面修改的data-root是否生效
  docker info | grep "Docker Root Dir"
- 
+
 # 查看当前有哪些镜像
 docker images
 
@@ -63,8 +61,6 @@ sudo service docker status
 docker version
 ```
 
-
-
 ## 镜像的操作指令：
 
 ```shell
@@ -81,8 +77,6 @@ docker rmi ubuntu:18.04
 # 从零开始来创建一个新的镜像
 使用命令 docker build。因为我们完全可以从仓库pull镜像，然后在基础上修改。所有这个技能暂时不需要掌握。
 ```
-
-
 
 ## 容器的操作指令：
 
@@ -159,7 +153,6 @@ Error response from daemon: container b2af805e32df49a524c172cd2d38fa23e7a2bc27cf
 # 删除容器
 docker rm -f 1e560fca3906
 docker rm -f 381520f56638 51a69fcfcee0 be935278e4e6 b01c70cd1bcf 3f8e982a44d5 # 一次性删除多个
-
 ```
 
 ## 查看容器的配置文件
@@ -271,7 +264,7 @@ docker save -o D:\docker-images\springbootapp2-latest.tar lyhero11/springbootapp
 docker load -i D:\docker-images\springbootapp2-latest.tar
 ```
 
-###  docker save和docker export的区别：
+### docker save和docker export的区别：
 
 1. docker save保存的是镜像（image），docker export保存的是容器（container）；
 2. docker load用来载入镜像包，docker import用来载入容器包，但两者都会恢复为镜像；
@@ -310,9 +303,8 @@ LC_MONETARY="POSIX"
 
 设置一下`LANG、LANGUAGE、LC_ALL`这三个就行了。LANG默认设置，`LC_*`没设值的时候就拿LANG；LANGUAGE是程序语言设置；LC_ALL强制设置所有`LC_*`
 
-
-1.  配置Dockerfile镜像时，永久修改，在 Dockerfile 中添加
-
+1. 配置Dockerfile镜像时，永久修改，在 Dockerfile 中添加
+   
    ```
    ENV LANG C.UTF-8
    ENV LANGUAGE C.UTF-8
@@ -320,7 +312,7 @@ LC_MONETARY="POSIX"
    ```
 
 2. 方法1可能有些困难，因为我们业余用户不想去配置Dockerfile。那么下载的镜像，容器已经运行起来了，我们可以在容器内修改：
-
+   
    ```
    #安装中文字符集和设置中文字符支持。 应该不是必要的，但也没什么坏处
    apt install language-pack-zh-hans
@@ -360,14 +352,12 @@ LC_MONETARY="POSIX"
    LC_ALL=C.UTF-8
    ```
 
-   
-
 3. 启动时或进入bash时候，设置字符集
-
+   
    ```shell
    docker run -i -t --env LANG=C.UTF-8 --env LANGUAGE=C.UTF-8 --env LC_ALL=C.UTF-8 ubuntu /bin/bash
    ```
-
+   
    这个方法也是推荐的，不需要在容器里折腾了。如果忘了在docker run时指定uft8,后续也可以在docker exec进入容器是指定。但是每次exec命令都要加，就比较烦了，那就不如用方法2了。
 
 如果到了这一步还是中文显示方框，那就是缺少字体文件：
@@ -392,8 +382,6 @@ apt install -y fonts-arphic-gkai00mp
 fc-cache -fv
 ```
 
-
-
 ## 时区问题
 
 docker里的时区可能是0，希望设置成东八区。
@@ -408,10 +396,25 @@ docker cp /etc/timezone imagename:/etc/timezone
 
 cat /etc/timezone 
 Asia/Shanghai
-
 ```
 
+## sudo免密设置
 
+重点是ubuntu26.04的镜像存在用rust重写的sudo，需切会传统版本。
+
+```shell
+apt install sudo
+# 查看
+update-alternatives --display sudo
+# 切 /usr/bin/sudo.ws
+update-alternatives --config sudo
+# 免密
+root@aosp:/etc/sudoers.d# cat nopass- 
+xuexiangyu ALL=(ALL:ALL) NOPASSWD: ALL
+
+#或直接
+echo "xuexiangyu ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+```
 
 ## 用vscode看代码
 
@@ -478,11 +481,11 @@ ssh xue@192.168.22.128 # 连到宿主的ssh
 当然也可以研究一下上面的配网桥的方法。
 
 > docker容器里配置ssh，登录到root。需要：
->
+> 
 > vim /etc/ssh/sshd_config
->
+> 
 > PermitRootLogin yes
->
+> 
 > UsePAM no
 
 ### 映射无效的情况
@@ -504,8 +507,6 @@ ss -tulpn | grep 10000
 有输出但 LOCAL ADDRESS 是 127.0.0.1：如LISTEN 0 128 127.0.0.1:10000 → 仅容器内回环可访问，宿主机无法转发；
 有输出且 LOCAL ADDRESS 是 0.0.0.0：如LISTEN 0 128 0.0.0.0:10000 → 监听地址正常，需排查宿主机 / 防火墙。
 ```
-
-
 
 ## docker容器内启动GUI
 
@@ -532,8 +533,6 @@ docker stop <container_id>
 docker commit <container_id> my_new_image
 docker run -p <host_port>:<container_port> my_new_image
 ```
-
-
 
 ## 和宿主用同样的用户
 
@@ -596,8 +595,6 @@ docker run -itd --user $(id -u):$(id -g) --name dev_3ya --hostname dev_3ya -p 22
 ```
 
 项目中每次使用时，直接从这拷贝，改改名字和路径。
-
-
 
 ## 指令大全
 

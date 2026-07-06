@@ -1,36 +1,46 @@
 {
     "projects" : [
         {
-            "name" : "ZNA_H60A",
-            "description" : "郑州日产",
-            "repo_init" : "repo init -u ssh://xuexiangyu@192.168.64.47:29418/hsae/atc_8025/platform/manifest -b  ZNA_H60A  --repo-url=ssh://xuexiangyu@192.168.64.47:29418/git-repo --depth=1",
-            "repo_sync" : "repo sync -dcq",
-            "branch" : "ZNA_H60A",
-            "cared_dir" : "source/" 
+            "name" : "android-17.0.0_r1",
+            "description" : "android-17.0.0_r1",
+            "root_dir" : "/workspace/xuexiangyu/workspace/aosp17/android-17.0.0_r1",
+            "cared_dir" : [
+                "art/"
+                ,"bionic/"
+                ,"bootable/"
+                ,"build/"
+                ,"external/"
+                ,"frameworks/"
+                ,"hardware/"
+                ,"libcore/"
+                ,"libnativehelper/"
+                ,"packages/"
+                ,"system/"
+            ],
+            "ignoreFile" : [
+                "f:*.db","f:*.zip","f:*.apk","f:*.so","f:*.o","f:*.a","f:*.bin","f:*.aar","f:*.jar","f:*.class","d:out"
+                ,"d:sdk"  ,"d:.cts","d:test" ,"d:testing" ,"d:tests" ,"d:toolchain" ,"d:tools" ,"d:.git" ,"d:.repo"
+            ]
         },
         {
-            "name" : "626_8155",
-            "description" : "LK1A_CDC",
-            "repo_init" : "repo init -u ssh://xuexiangyu@192.168.64.47:29418/Android/QCOM_SA8155_6155/platform/manifest -b 626_8155 -m default.xml --repo-url=ssh://xuexiangyu@192.168.64.47:29418/git-repo --depth=1",
-            "repo_sync" : "repo sync -dcq",
-            "branch" : "626_8155",
-            "cared_dir" : "lagvm/LINUX/android" 
-        },
-	{
-            "name" : "iov2.0_plus_qm_MC_CY24",
-            "description" : "iov2.0_plus_qm_MC_CY24",
-            "repo_init" : "ls",
-            "repo_sync" : "ls",
-            "branch" : "iov2.0_plus_qm_MC_CY24",
-            "cared_dir" : "./"
+            "name" : "24MM_T2_dev",
+            "description" : "24MM_T2_dev",
+            "root_dir" : "/workspace/xuexiangyu/workspace/24mm_t2",
+            "repo_init" : "repo init -u ssh://xuexiangyu@192.168.64.47:29418/Android/QCOM_SA8155_6155/platform/manifest -b  24MM_T2_dev  --repo-url=ssh://xuexiangyu@192.168.64.47:29418/git-repo --depth=1",
+            "repo_sync" : "repo sync -dcq -j12",
+            "cared_dir" : [
+                "apps/LINUX/android/bionic",
+                "apps/LINUX/android/bootable",
+                "apps/LINUX/android/system",
+                "apps/LINUX/android/frameworks",
+                "apps/LINUX/android/hardware",
+                "apps/LINUX/android/vendor",
+                "tz_8155"
+            ],
+            "ignoreFile" : [
+                "f:*.db","f:*.zip","f:*.apk","f:*.so","f:*.o","f:*.a","f:*.bin","f:*.aar","f:*.jar","f:*.class","d:out"
+                ,"d:sdk"  ,"d:.cts","d:test" ,"d:testing" ,"d:tests" ,"d:toolchain" ,"d:tools" ,"d:.git" ,"d:.repo"
+            ]
         }
-    ],
-    "globalConfig" : {
-        "ignoreFile" : [
-            "f:*.db","f:*.zip","f:*.apk","f:*.so","f:*.bin","d:out","d:build"  ,"d:cts"  ,"d:dalvik"  ,"d:developers"  ,"d:development"
-            ,"d:device"  ,"d:pdk"  ,"d:platform_testing"  ,"d:sdk"  ,"d:test"  ,"d:testing"  ,"d:tests" 
-            ,"d:toolchain"  ,"d:tools"  ,"d:.git"  ,"d:.repo"
-        ]
-    }
-
+    ]
 }
