@@ -1043,7 +1043,11 @@ CMake里的构建目标，IDE界面上都有，直接通过点点就能生成目
 
 下面介绍如何用VSCode进行debug。由于gdb调试，以前已经写了不少这方面的笔记，而且谷歌正在放弃gdb拥抱llvm,所以这里就介绍用lldb。
 
+在这之前，务必先阅读《lldb调试入门》这个笔记，了解一下原理，否则launch.json如果报错你不知道怎么分析。
+
 1. 安装插件：CodeLLDB。另外一个插件“C/C++ Debug”应该也可以，不过我这里就用CodeLLDB，将“C/C++ Debug”禁用。
+
+1. 从NDK获取arm64架构的lldb-server。lldb client理论上不一定用NDK里的，但既然我们已经下载了NDK,那就统一一下。
 
 2. 为了能找到lldb工具，将“ndk\30.0.14904198\toolchains\llvm\prebuilt\windows-x86_64\bin”添加到系统PATH。另外，系统里如果其它软件装了乱七八糟的python，也可能造成一定污染，但是总的来说影响不大。
 
@@ -1060,16 +1064,22 @@ CMake里的构建目标，IDE界面上都有，直接通过点点就能生成目
                "type": "lldb",
                "request": "launch",
                "program": "${workspaceFolder}/doc/build/libhsckteec/securitychip_pkcs11_ut",
-               "preLaunchTask": "securitychip_pkcs11_ut_prepared", //debug前先执行这个task
+               "preLaunchTask": "securitychip_pkcs11_ut_prepared",
                "initCommands": [
-                   "platform select remote-android",
-                   "platform connect connect://localhost:1234",
+                   "shell adb root",
+                   // "shell adb shell killall -9 lldb-server",   // 执行过后，后续可注释掉
+                   // "shell adb shell \"nohup /data/local/tmp/lldb-server platform --server --listen *:1234 --gdbserver-port 10000 > /dev/null 2>&1 &\"",
+                   // "log enable gdb-remote packets",  // 按需开启
+                   // "log enable lldb platform",
+                   "shell adb forward tcp:1234 tcp:1234",
+                   "shell adb forward tcp:10000 tcp:10000",
+                   "platform select remote-linux",
+                   "platform connect connect://192.168.22.36:1234",
                    "platform settings -w /data/local/tmp" , // 必须指定工作目录，否则提示readonly权限不足
-                   "target create /data/local/tmp/securitychip_pkcs11_ut",
-                   "process launch"
+                   "target create ${workspaceFolder}/doc/build/libhsckteec/securitychip_pkcs11_ut"  // 如果用mm编译，指定为 out/target/product/msmnile_au/symbols/下的securitychip_hal_ut
                ],
-               "args": [
-                   "--gtest_filter=PKCS11NeedSessionTest.ObjectTest_a001_label"
+               "args": [ // 待执行的程序的命令行参数
+                   "--gtest_filter=PKCS11NeedSessionTest.ObjectTest_a013_get_attributes"
                ],
                "stopOnEntry": false
            },
@@ -1080,10 +1090,15 @@ CMake里的构建目标，IDE界面上都有，直接通过点点就能生成目
                "program": "${workspaceFolder}/doc/build/hal_default/vendor.iauto.hardware.securitychip@1.0-service",
                "preLaunchTask": "securitychip_hal_service_prepared",
                "initCommands": [
-                   "platform select remote-android",
-                   "platform connect connect://localhost:1234",
+                   "shell adb root",
+                   "shell adb shell killall -9 lldb-server",
+                   "shell adb shell \"/data/local/tmp/lldb-server platform --listen *:1234 --server --gdbserver-port 10000 > /dev/null 2>&1 &\"",
+                   "shell adb forward tcp:1234 tcp:1234",
+                   "shell adb forward tcp:10000 tcp:10000",
+                   "platform select remote-linux",
+                   "platform connect connect://192.168.22.36:1234",
                    "platform settings -w /data/local/tmp",
-                   "target create /vendor/bin/hw/vendor.iauto.hardware.securitychip@1.0-service"
+                   "target create ${workspaceFolder}/doc/build/hal_default/vendor.iauto.hardware.securitychip@1.0-service"
                ],
                "stopOnEntry": false
            }
@@ -1095,7 +1110,72 @@ CMake里的构建目标，IDE界面上都有，直接通过点点就能生成目
    
    * launch: 启动目标程序并调试，适用需要在程序入口(如main函数)打断点。
    * attach：attach到已经在运行的程序上。比较适合安卓hal服务。
-
+   
+   进一步，指定--sysroot和target.exec-search-paths后，消除大部分警告，只有一些实在找不到symbol版so的依赖库才会产生warning。
+   
+   ```
+   {
+       "version": "0.2.0",
+       "configurations": [
+           {
+               "name": "Debug securitychip_pkcs11_ut on device",
+               "type": "lldb",
+               "request": "launch",
+               "program": "${workspaceFolder}/doc/build/libhsckteec/securitychip_pkcs11_ut",
+               "preLaunchTask": "securitychip_pkcs11_ut_prepared",
+               "initCommands": [
+                   "shell adb root",
+                   "shell adb shell killall -9 lldb-server",   // 执行过后，后续可注释掉
+                   "shell adb shell \"nohup /data/local/tmp/lldb-server platform --server --listen *:1234 --gdbserver-port 10000 > /dev/null 2>&1 &\"",
+                   // "log enable gdb-remote packets",  // 按需开启
+                   // "log enable lldb platform",
+                   "shell adb forward tcp:1234 tcp:1234",   // 和`lldb-server platform --listen *:1234 --server --gdbserver-port 10000`对应
+                   "shell adb forward tcp:10000 tcp:10000",
+                   "platform select remote-linux --sysroot  /xxxx/android/out/target/product/msmnile_au/symbols",
+                   "platform connect connect://192.168.22.36:1234",
+                   "settings set target.exec-search-paths /xxxx/android/out/target/product/msmnile_au/symbols/system/lib64",
+                   "settings append target.exec-search-paths /xxxx/android/out/target/product/msmnile_au/symbols/vendor/lib64",
+                   "platform settings -w /data/local/tmp" , // 必须指定工作目录，否则提示readonly权限不足
+                   "target create ${workspaceFolder}/doc/build/libhsckteec/securitychip_pkcs11_ut"  //或 out/target/product/msmnile_au/symbols/xxx
+               ],
+               "args": [ // 待执行程序的命令行参数
+                   "--gtest_filter=PKCS11NeedSessionTest.ObjectTest_a013_get_attributes"
+               ],
+               "stopOnEntry": false
+           },
+           {
+               "name": "Debug vendor.iauto.hardware.securitychip@1.0-service on device",
+               "type": "lldb",
+               "request": "attach",
+               "program": "${workspaceFolder}/doc/build/hal_default/vendor.iauto.hardware.securitychip@1.0-service",
+               "preLaunchTask": "securitychip_hal_service_prepared",
+               "initCommands": [
+                   "shell adb root",
+                   "shell adb shell killall -9 lldb-server",
+                   "shell adb shell /data/local/tmp/lldb-server platform --listen *:1234 --server --gdbserver-port 10000 > /dev/null 2>&1 &",
+                   "shell adb forward tcp:1234 tcp:1234",
+                   "shell adb forward tcp:10000 tcp:10000",
+                   "platform select remote-linux --sysroot  /workspace/xuexiangyu/workspace/24mm_t2/apps/LINUX/android/out/target/product/msmnile_au/symbols",
+                   "platform connect connect://192.168.22.36:1234",
+                   "settings set target.exec-search-paths /workspace/xuexiangyu/workspace/24mm_t2/apps/LINUX/android/out/target/product/msmnile_au/symbols/system/lib64",
+                   "settings append target.exec-search-paths /workspace/xuexiangyu/workspace/24mm_t2/apps/LINUX/android/out/target/product/msmnile_au/symbols/vendor/lib64",
+                   "platform settings -w /data/local/tmp",
+                   "target create ${workspaceFolder}/doc/build/hal_default/vendor.iauto.hardware.securitychip@1.0-service"
+               ],
+               "stopOnEntry": false
+           }
+       ]
+   }
+   ```
+   
+   最终只有这一个警告:
+   
+   ```
+   warning: (aarch64) /workspace/xuexiangyu/.lldb/module_cache/remote-linux/.cache/07B640E9-B1C1-2641-5981-47BFDB919669/libQSEEComAPI.so No LZMA support found for reading .gnu_debugdata section
+   ```
+   
+   libQSEEComAPI.so由高通提供预编译的文件，实在是没有带符号版本。这个不影响调试。
+   
 5. 如果CMakeLists.txt里没有指定相关参数，那么默认cmake可能构建的是Release版本，里面不带debug信息。所以需要：
    
    ```
@@ -1110,81 +1190,79 @@ CMake里的构建目标，IDE界面上都有，直接通过点点就能生成目
    
    这里，我们编译debug版本，程序文件本身已经包含里调试符号，所以launch.json里不需要配置符号表文件位置，直接“target create xxxxx”即可。至于调试符号分离的情况下，lldb命令怎么写，自行百度。
 
-6. 
-   > 其实launch模式本来就会自动将securitychip_pkcs11_ut推到/data/local/tmp/securitychip_pkcs11_ut。但是第一次执行时，target create /data/local/tmp/securitychip_pkcs11_ut这行，因为没这个文件会报错。那么我们不要依赖它，写个task自己去push就行了。
-   
-   在“.vscode”目录创建：“tasks.json”,内容：
+6. 在“.vscode”目录创建：“tasks.json”,内容：
    
    ```
    {
        "version": "2.0.0",
        "tasks": [
            {
-               "label": "push-lldb-server-windows",
-               "type": "shell",
-               "command": "adb",  // 将lldb-server推送到设备上
-               "args": [
-                   "push",
-                   "D:/Android/android-sdk/ndk/30.0.14904198/toolchains/llvm/prebuilt/windows-x86_64/lib/clang/21/lib/linux/aarch64/lldb-server",
-                   "/data/local/tmp/lldb-server",
-                   "&&",
-                   "adb",
-                   "shell",
-                   "chmod",
-                   "+x",
-                   "/data/local/tmp/lldb-server"
-               ],
-               "options": {
-                   "shell": {
-                       "executable": "cmd.exe", // 默认powershell，指定使用cmd
-                       "args": ["/d", "/c"]
-                   }
+               "label": "push-lldb-server",
+               "windows": {
+                   "type": "shell",
+                   "command": "adb",  // 将lldb-server推送到设备上
+                   "args": [
+                       "push",
+                       "D:/Android/android-sdk/ndk/30.0.14904198/toolchains/llvm/prebuilt/windows-x86_64/lib/clang/21/lib/linux/aarch64/lldb-server",
+                       "/data/local/tmp/lldb-server",
+                       "&&",
+                       "adb",
+                       "shell",
+                       "chmod",
+                       "+x",
+                       "/data/local/tmp/lldb-server"
+                   ],
+                   "options": {
+                       "shell": {
+                           "executable": "cmd.exe", // 默认powershell，指定使用cmd
+                           "args": ["/d", "/c"]
+                       }
+                   },
+                   "problemMatcher": []
                },
-               "problemMatcher": []
-           },
-           {
-               "label": "start-lldb-server-windows",
-               "type": "shell",  // 启动lldb server，转发断开
-               "command": "adb forward tcp:1234 tcp:1234 && adb root && adb shell \"/data/local/tmp/lldb-server platform --listen *:1234 --server > /dev/null 2>&1 &\"",
-               "dependsOn": ["push-lldb-server-windows"],
-               "options": {
-                   "shell": {
-                       "executable": "cmd.exe",
-                       "args": ["/d", "/c"]
-                   }
+               "linux": {
+                   "type": "shell",
+                   "command": "adb",
+                   "args": [
+                       "push",
+                       "/workspace/xuexiangyu/Android/Sdk/ndk/30.0.14904198/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/21/lib/linux/aarch64/lldb-server",
+                       "/data/local/tmp/lldb-server",
+                       "&&",
+                       "adb",
+                       "shell",
+                       "chmod",
+                       "+x",
+                       "/data/local/tmp/lldb-server"
+                   ],"options": {
+                       "shell": {
+                           "executable": "/bin/bash",
+                           "args": ["-c"]
+                       }
+                   },
+                   "problemMatcher": []
                }
            },
            {
-               "label": "push-lldb-server-linux",
-               "type": "shell",
-               "command": "adb",
-               "args": [
-                   "push",
-                   "/workspace/xuexiangyu/Android/Sdk/ndk/30.0.14904198/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/21/lib/linux/aarch64/lldb-server",
-                   "/data/local/tmp/lldb-server",
-                   "&&",
-                   "adb",
-                   "shell",
-                   "chmod",
-                   "+x",
-                   "/data/local/tmp/lldb-server"
-               ],"options": {
-                   "shell": {
-                       "executable": "/bin/bash",
-                        "args": ["-c"]
+               "label": "start-lldb-server",
+               "dependsOn": ["push-lldb-server"],
+               "windows": {
+                   "type": "shell",
+                   "command": "adb root && adb shell killall -9 lldb-server && adb shell \"nohup /data/local/tmp/lldb-server platform --listen *:1234 --server --gdbserver-port 10000 > /dev/null 2>&1 &\"",
+                   "options": {
+                       "shell": {
+                           "executable": "cmd.exe",
+                           "args": ["/d", "/c"]
+                       }
                    }
                },
-               "problemMatcher": []
-           },
-           {
-               "label": "start-lldb-server-linux",
-               "type": "shell",  // 启动lldb server，转发断开
-               "command": "adb forward tcp:1234 tcp:1234 && adb root && adb shell \"/data/local/tmp/lldb-server platform --listen *:1234 --server > /dev/null 2>&1 &\"",
-               "dependsOn": ["push-lldb-server-linux"],
-               "options": {
-                   "shell": {
-                       "executable": "/bin/bash",
-                       "args": ["-c"]
+               "linux": {
+                   "type": "shell",
+                   "command": "adb root && adb shell killall -9 lldb-server && adb shell \"/data/local/tmp/lldb-server platform --listen *:1234 --server --gdbserver-port 10000 > /dev/null 2>&1 &\"",
+                   "options": {
+                       "shell": {
+                           "executable": "/bin/bash",
+                           "args": ["-c"]
+                       }
                    }
                }
            },
@@ -1207,25 +1285,33 @@ CMake里的构建目标，IDE界面上都有，直接通过点点就能生成目
            {
                "label": "securitychip_pkcs11_ut_prepared",
                "dependsOrder": "sequence", //顺序执行，默认是并行执行
-               "dependsOn": ["push-lldb-server-linux", "start-lldb-server-linux", "push-securitychip_pkcs11_ut"],
+               "dependsOn": [
+                   "push-lldb-server"
+                   // , "start-lldb-server" // start lldb-server已放到launch.json里，这里注释掉
+                   //, "push-securitychip_pkcs11_ut"  // lldb会自动推送到设备上，无需手动push,注释掉
+               ], 
            },
            {
                "label": "securitychip_hal_service_prepared",
                "dependsOrder": "sequence", //顺序执行，默认是并行执行
-               "dependsOn": ["push-lldb-server-linux", "start-lldb-server-linux", "push-securitychip-hal-service"],
+               "dependsOn": ["push-lldb-server", /*"start-lldb-server",*/ "push-securitychip-hal-service"],
            }
        ]
    }
    ```
    
-   你会发现tasks里写复杂的shell比较难，可以放到单独的sh文件里，task去调sh脚本文件，这样比较方便。或者用cmake自定义target也比vscode task方便。
+   实现得并不完美，比如每次都会push-lldb-server，实际应该先判断有没有, 没有才push。但是你会发现tasks里写复杂的shell比较难，所以将就一下。可以放到单独的sh文件里，task去调sh脚本文件，这样比较方便。或者用cmake自定义target也比vscode task方便。
    这个tasks做了几件事：
    
-   1、将ndk里的lldb-server推到车机里。因为比较老的安卓版本用的是gdbserver，没有lldb-server,故需要手动准备。这个脚本不完善地方在于，每次都会执行一次push。实际只要push一次，保证文件存在就行。但无伤大雅。如果脚本里先去判断文件存在的话，逻辑太复杂，反而容易出问题。
+   1、将ndk里的lldb-server推到车机里。因为比较老的安卓版本用的是gdbserver，没有lldb-server,故需要手动准备。
    
-   2、启动lldb-server监听端口1234。以及adb端口转发：adb forward tcp:1234 tcp:1234。同样只要执行一次。每次执行反正也没影响。
+   2、启动lldb-server监听端口1234，并指定gdbserver-port 10000。adb端口转发：adb forward tcp:1234 tcp:1234和adb forward tcp:10000 tcp:10000 我们放到launch.json里，不在这里体现。同样只要执行一次。每次执行反正也没影响。
    
-   3、将带调试的问题securitychip_pkcs11_ut，推送到车机。这里我没有选择在tasks里实现，而是在cmake里加了一个：
+   把这部分移到launch.json里，更合理。但实践发现，ubuntu没问题，而windows上，launch.json里执行`"shell adb shell \"lldb-server platform --server ...\"`命令无效，安卓里未生成这个进程。所以我不得不保留了tasks.json里start-lldb-server, 而将launch.json的对应行注释。
+   
+   还有，当windows和linux上命令不一样的时候，也不得不移到tasks.json里。如果不考虑同时支持windows的话就随意了。
+   
+   3、将带调试符号的文件securitychip_pkcs11_ut，推送到车机。这里我没有选择在tasks里实现，而是在cmake里加了一个：
    
    ```
    // CMakeLists.txt
@@ -1252,48 +1338,83 @@ CMake里的构建目标，IDE界面上都有，直接通过点点就能生成目
    ```
    
    只要装了cmake插件，就支持type cmake。对比一下我上面的推送lldb-server的代码，就知道cmake里实现COMMAND毕竟比json里去写更加方便。而且可以通过`DEPENDS securitychip_pkcs11_ut`，保证debug前先构建最新的二进制。
+   
+   这部分按需保留。因为launch.json里指定target create，lldb实际上会自动同步到车机端。你如果target create指定的是车机端的路径，那还是需要push的。
+
+#### ssh远程连接时的调试
+
+在launch.json里，我用的remote-linux，而不是remote-android。就是为了能够在这种“安卓连接windows、windows通过ssh连接ubuntu、代码在ubuntu上”的情况下调试。原因在《lldb调试入门》里有详尽分析。
+
+如果不考虑这种代码和设备跨了多个电脑的调试，上面的配置可以简化。可以去掉adb forward, platform select改成remote-android。
+
+如果调试没成功，打开日志，试一下用命令行debug，有助于定位问题。IDE里点点点不一定能看出根源。
 
 #### 遇到的问题
 
-* AI让我在initCommands里在加一行"process attach -n vendor.iauto.hardware.securitychip@1.0-service"，实测不能加。
+* initCommands里在加一行"process attach -n vendor.iauto.hardware.securitychip@1.0-service"，实测不能加。这个指令是没问题的，命令行debug也需要执行。可能是插件已经帮你做了。launch类型也无需手动run或process launch。
 
 * 如果机器里待调试的文件，不是把本地编译出的，比如可能是在服务器上编译的。那么，符号表里的源文件路径，就会和本地源代码路径不一致。需要指定sourceMap
-  
+
   ```
   "sourceMap": {
       // 远程路径 -> 本地路径映射
   },
   ```
-  
+
   我这个项目是cmake本地编的，不需要配sourceMap。
 
+* 安卓make或mm编译出的，应该用android/out/target/product/msmnile_au/symbols路径下的文件，这个才是带调试信息的。target create指定这个文件
+
 * 这个警告是因为依赖的系统库没有符号表。我们只调试自己的代码，无视这个警告即可。
-  
+
   ```
   warning: (aarch64) C:\Users\xuexiangyu\.lldb\module_cache\remote-android\.cache\F23D23E9-0DF3-EFE8-A2EC-F3F447FFFE11\libcgrouprc.so No LZMA support found for reading .gnu_debugdata section
   warning: (aarch64) C:\Users\xuexiangyu\.lldb\module_cache\remote-android\.cache\DE954B65-7FC5-0EC8-7205-88C65F6426C0\libnetd_client.so No LZMA support found for reading .gnu_debugdata section
   ```
 
+  同时我也提供了解决这个问题launch.json,减少了client和server之间的数据传输，性能更佳。原理请参阅《lldb调试入门》。
+
 * 一直等待某个task完成，时间长了后弹出提示，说任务还在执行是否继续debug。这是因为task里指定里background：true。后台任务即使完成了也不知道。
-  
-  `adb shell "/data/local/tmp/lldb-server platform --listen *:1234 --server &"`虽然后台进程启动了,但 `adb` 会保持连接直到所有**后台进程的标准输出/错误**被关闭,所以第一次执行会阻塞。必须加重定向输出`adb shell "/data/local/tmp/lldb-server platform --listen *:1234 --server > /dev/null 2>&1 &"`或者加nohup:`adb shell "nohup /data/local/tmp/lldb-server platform --listen *:1234 --server &"`
+
+  `adb shell "/data/local/tmp/lldb-server platform --listen *:1234 --server  --gdbserver-port 10000 &"`虽然后台进程启动了,但 `adb` 会保持连接直到所有**后台进程的标准输出/错误**被关闭,所以第一次执行会阻塞。必须加重定向输出`adb shell "/data/local/tmp/lldb-server platform --listen *:1234 --server --gdbserver-port 10000 > /dev/null 2>&1 &"`或者加nohup:`adb shell "nohup /data/local/tmp/lldb-server platform --listen *:1234 --server --gdbserver-port 10000 &"`
 
 * "platform settings -w /data/local/tmp"必须指定工作目录，否则提示readonly权限不足。且在platform connect语句后面。
 
 * "launch"模式，启动的程序，命令行参数不能直接写在程序名后面，要通过args指定。
 
-* 没有考虑结束lldb-server。无伤大雅，能用就行。可手动kill。
+* 没有考虑结束lldb-server。无伤大雅，能用就行。可手动kill。但是有一种情况：别处手动执行过`lldb-server  platform --listen "*:1234" --server`, 那么会出现“error: spawn_process failed: executable doesn't exist: '/data/local/tmp/lldb-server (deleted)'”，因为task里重新push了。这导致lldb失败，因此我在push前先killall -9 lldb-server。
 
-* 一些和python有关的警告。大多是环境里有其它python。检查环境变量确保用ndk里的python即可。也可以在json里指定：
-  
+* 一些和python有关的警告。大多是环境里有其它python。检查环境变量确保用ndk里的python即可。
+
+  `export LD_LIBRARY_PATH=$HOME/Android/Sdk/ndk/30.0.14904198/toolchains/llvm/prebuilt/linux-x86_64/python3/lib:$LD_LIBRARY_PATH`
+
+  解决找不到依赖的python.3.11.so.xxxx库。
+
+  也可以在json里指定：
+
   ```
   "stopOnEntry": true,
   "env": {
       "PYTHONPATH": "D:\\xxx\\xxx\\Lib;D:\\xxxx\\xxxx\\DLLs"
   }
   ```
-  
+
   由AI提供，未验证。
+
+* 对于select remote-android，platform connect connect://localhost:1234，只有写localhost才成功，改成127.0.0.1或其它IP都失败，且报错信息奇怪。不懂，可能对remote-android这个platform, 代码层面限制死了。
+
+* 输出更多日志以便调试lldb指令：
+
+  ```
+  (lldb) log enable gdb-remote packets
+  (lldb) log enable lldb platform
+  ```
+
+* 保持lldb和lldbserver版本一致。统一用ndk里的，ubuntu不要用apt install安装低版本lldb, 而是apt install lldb-18。不过vscode里的CodeLLDB插件貌似也没用到ndk的lldb。
+
+* 字节的垃圾IDE TRAE总是会导致adb异常，adb kill-server都不能恢复。必须杀掉trae进程才行。不知道他们干了什么。
+
+* 起初，反复修改launch.json, 尝试。花了很长时间也没法改好。后来系统的学习了lldb的指令和原理后，很快就搞定了。所以说，磨刀不误砍柴工。
 
 ### 问题
 
