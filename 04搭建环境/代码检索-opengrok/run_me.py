@@ -14,14 +14,16 @@ opengrok_workspace = "/workspace/xuexiangyu/opengrok_workspace"
 sourceDir = "source"
 dataDir = "data"
 
-opengrokjar = "/workspace/xuexiangyu/softs/opengrok-1.13.7/lib/opengrok.jar"
-deployPath = "/opt/apache-tomcat-10.1.25/webapps"
-startTomcat = "/opt/apache-tomcat-10.1.25/bin/startup.sh"
-stopTomcat = "/opt/apache-tomcat-10.1.25/bin/shutdown.sh"
+opengrokjar = "/workspace/xuexiangyu/softs/opengrok-1.14.15/lib/opengrok.jar"
+sourcewar = "/workspace/xuexiangyu/softs/opengrok-1.14.15/lib/source.war"
+tomcatHome = "/opt/apache-tomcat-10.1.57"
+deployPath = tomcatHome + "/webapps"
+startTomcat = tomcatHome + "/bin/startup.sh"
+stopTomcat = tomcatHome + "/bin/shutdown.sh"
 
 configFile = "config.json"
 indexHtmlFromPath = "index.html"
-indexHtmlToPath = '/opt/apache-tomcat-10.1.25/webapps/ROOT/index.html'
+indexHtmlToPath = deployPath + "/ROOT/index.html"
 htmlInfoFile = ".html_info.json"  # HTML信息临时文件
 
 # HTML信息变量
@@ -29,6 +31,9 @@ html_project_links = ""      # 项目链接列表
 html_update_info = ""       # 更新时间信息
 html_include_files = "all"     # 包含文件列表
 html_ignore_files = ""      # 忽略文件列表
+
+# 认证Token配置
+auth_token = "123456"        # 默认认证token
 
 def save_html_info():
     """保存HTML信息到临时文件"""
@@ -41,6 +46,37 @@ def save_html_info():
     with open(htmlInfoFile, 'w', encoding='utf-8') as file:
         json.dump(html_data, file, ensure_ascii=False, indent=2)
     print(f"HTML info saved to {htmlInfoFile}")
+
+def add_auth_token_to_config(config_xml_path):
+    """在configuration.xml的</object>之前添加认证token配置"""
+    global auth_token
+    
+    if not os.path.exists(config_xml_path):
+        print(f"Warning: config file not found: {config_xml_path}")
+        return
+    
+    with open(config_xml_path, 'r') as file:
+        content = file.read()
+    
+    token_config = f"""  <void property="allowInsecureTokens">
+    <boolean>true</boolean>
+  </void>
+  <void property="authenticationTokens">
+      <void method="add">
+        <string>{auth_token}</string>
+      </void>
+  </void>
+  <void property="indexerAuthenticationToken">
+   <string>{auth_token}</string>
+  </void>
+"""
+    
+    content = content.replace(' </object>\n</java>', token_config + ' </object>\n</java>')
+    
+    with open(config_xml_path, 'w') as file:
+        file.write(content)
+    
+    print(f"Added auth token to {config_xml_path}")
 
 def load_html_info():
     """从临时文件加载HTML信息"""
@@ -318,8 +354,8 @@ def generate_index():
         # 索引路径
         theindexPath = os.path.join(opengrok_workspace, dataDir, name)
         print("rm: " + theindexPath)
-        # if os.path.exists(theindexPath):
-        #     shutil.rmtree(theindexPath)
+        if os.path.exists(theindexPath):
+            shutil.rmtree(theindexPath)
         
         # 构建命令
         command = "java -Xmx2096m "
@@ -332,7 +368,10 @@ def generate_index():
         command += ' ' + proj_command_expand
         
         print(command)
-        # runCommand(command)
+        runCommand(command)
+        
+        config_xml_path = os.path.join(opengrok_workspace, dataDir, name, 'configuration.xml')
+        add_auth_token_to_config(config_xml_path)
         
         # 更新HTML信息（项目链接）
         html_project_links += '<li><a href="/' + name + '/">' + name + '</a></li>'
@@ -389,7 +428,7 @@ def deploy_projects():
             print(f"WEB-INF/web.xml exists for {name}")
         else:
             # 解压war包
-            runCommand("unzip " + os.path.join(opengrok_workspace, "source.war") + " -d " + os.path.join(deployPath, name))
+            runCommand("unzip " + sourcewar + " -d " + os.path.join(deployPath, name))
         
         # 修改web.xml CONFIGURATION的值
         changed = False
@@ -494,3 +533,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+

@@ -1,24 +1,37 @@
 安装完ubuntu18.04后，无线和有线网络都不识别
-第一，先升级内核，否则后面无线网络，无论如何也搞不定
+第一，先升级内核，否则后面无线网络，无论如何也搞不定（注意升级内核是一个高风险操作，注意数据备份。）
 uname -r 查看内核版本是5.4，按以下步骤升级
+
 1. 手机热点-usb网络共享，用这种方法先临时上网
-2.使用 mainline 这个工具来更新内核（需要先将PPA仓库添加到列表中）
-sudo add-apt-repository ppa:cappelikan/ppa
-sudo apt update
-sudo apt install mainline
-3. 安装完成后进行查看
-sudo mainline --check
-看到最新内核是5.17（我操作时是5.17，以后当然还会更新）
-4. su
-# mainline --install-latest
+  2.使用 mainline 这个工具来更新内核（需要先将PPA仓库添加到列表中）
+  sudo add-apt-repository ppa:cappelikan/ppa
+  sudo apt update
+  sudo apt install mainline
+
+2. 安装完成后进行查看
+  sudo mainline --check
+  看到最新内核是5.17（我操作时是5.17，以后当然还会更新）
+
+3. 安装最新内核
+
+   ```
+   su
+   mainline --help
+   mainline list 
+   mainline install-latest  # 有些版本或许应写成 mainline --install-latest
+   mainline install x.x.x  # mainline list 查到的版本号
+   
+   也可以启动菜单里找到名为 “Mainline Kernels” 的图形界面程序来操作
+   ```
+
 之所以切换到root账户而不直接使用sudo命令，是因为内核下载可能非常慢，远远超过Ubuntu默认的15分钟切换时间，会导致安装过程由于权限不够而失败。我没有切到su，用sudo也成功了，可能是运气好。
 5. 安装完重启后，用uname -a确认下内核
-
 
 搞定wifi。升级内核是必须的。
 sudo dmesg | grep iwl
 看到一堆异常信息。不升级内核什么信息都没有，完全不识别，后面的步骤做了也没用。
 虽然Intel AX201这个网卡，官网写的linux内核>5.2,但我是5.4也没用，升级到5.17才好。
+
 1. sudo apt install linux-firmware
 2. 从https://git.kernel.org/pub/scm/linux/kernel/git/iwlwifi/linux-firmware.git下载linux-firmware, 执行sudo cp -r * /lib/firmware,原来的/lib/firmware目录里面缺许多东西。
 重启。

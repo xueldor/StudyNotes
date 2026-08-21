@@ -99,7 +99,9 @@ lldb-10   lldb-11   lldb-12   lldb-18   lldb-6.0  lldb-7    lldb-8    lldb-9
 意识到ubuntu20官方能够安装的最新版本是18，于是sudo apt install lldb-18
 ```
 
-（安卓NDK里的lldb是给安卓用的，用它调试会出现找不到lldb-server）
+如果本地有现成的安卓NDK，也可以直接用。但你要手动搜一下lldb和lldb-server的路径，并注意NDK提供了不同架构的lldb-server，你要选对，NDK里lldb和lldb-server在不同路径，所以会报找不到lldb-server，需正确配置环境。
+
+NDK本质还是给安卓用的，建议调试安卓用它，本地还是apt install的方式最稳妥。
 
 ## 进入lldb
 
@@ -898,9 +900,21 @@ windows从官网下载安装llvm
 
 ubuntu可以通过apt install安装。直接sudo apt install lldb可能会装一个版本较低的lldb。注意判断一下。你可能需要：`sudo apt install lldb-18`。数字换成ubuntu支持的最大版本。`sudo apt update; apt-cache search lldb | grep ^lldb`查询,或直接按tab键。
 
-调试安卓的话，通过android studio下载NDK。从NDK中找到lldb-server,push到安卓机器。
+调试安卓的话，通过android studio下载NDK。从NDK中找到lldb-server,push到安卓机器。NDK里提供了不同架构，通常安卓机器是arm64的，那么应该push这个：`./toolchains/llvm/prebuilt/linux-x86_64/lib/clang/21/lib/linux/aarch64/lldb-server`
 
-还要注意系统安装的python对lldb的污染。
+还要注意系统安装的不同版本python对lldb的污染。如果lldb和lldb-server都使用NDK里的话，如下配置应该没有问题：
+
+```
+export ANDROID_NDK_HOME=/path/xxxx
+export PYTHONPATH=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/python3
+export LD_LIBRARY_PATH=$PYTHONPATH/lib:$LD_LIBRARY_PATH
+export PATH=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/python3/bin:$PATH
+export PATH=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
+```
+
+因为lldb依赖python，实际上apt安装lldb时会自动安装必要的python包。如果你打算使用 LLDB 的 Python API 或编写自定义脚本，必须确保系统中 LLDB 所链接的 Python 版本与其运行时使用的 Python 解释器版本完全一致。
+
+不过不要太担心。python一般不会影响能不能调试，只影响部分功能、调试过程中的体验。例如显示 char16_t / char32_t 等宽字符类型时可能会出错、核心脚本功能失效、等等。但基础的调试应该都是可以的。
 
 # 参考
 
